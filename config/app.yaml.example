@@ -1,0 +1,27 @@
+app:
+  name: "maintainman"
+  listen: ":8787"
+  loglevel: "debug"
+  jwtkey: "gzmymzcw2022"
+  guest: true
+
+database:
+  driver: "mysql"
+  mysql:
+    host: "localhost"
+    port: "3306"
+    name: "maintainman"
+    params: "parseTime=true&loc=Local&charset=utf8mb4"
+    user: "root"
+    password: "123456"
+  sqlite:
+    path: "maintainman.db"
+
+cache: # second
+  expire: 86400
+  purge: 600
+
+admin: # only apply at first initialization
+  name: "admin"
+  display_name: "maintainman default admin"
+  password: "123456"

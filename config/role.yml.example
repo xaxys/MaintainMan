@@ -1,0 +1,61 @@
+# Only buttom-up inheritance is valid (latter roles are superior)
+role:
+  - name: banned
+    display_name: "封停用户"
+    permissions:
+    inheritance:
+  - name: guest
+    display_name: "访客"
+    guest: true
+    permissions:
+      - "user.register"
+      - "user.login"
+      - "announce.view"
+    inheritance:
+  - name: user
+    display_name: "普通用户"
+    default: true
+    permissions:
+      - "user.update"
+      - "user.renew"
+      - "order.create"
+      - "order.close"
+      - "order.update"
+      - "order.grade"
+      - "order.urgence"
+      - "order.comment.create"
+      - "order.comment.delete"
+    inheritance:
+      - guest
+  - name: maintainer
+    display_name: "维护工"
+    permissions:
+      - "order.reject"
+      - "order.report"
+      - "order.complete"
+      - "parts.consume"
+      - "parts.viewall"
+    inheritance:
+      - user
+  - name: super_maintainer
+    display_name: "维护工（可自行接单）"
+    permissions:
+      - "order.assign"
+      - "order.viewall"
+    inheritance:
+      - maintainer
+  - name: admin
+    display_name: "管理员"
+    permissions:
+      - "user.division"
+      - "announce.*"
+      - "order.*"
+      - "parts.*"
+    inheritance:
+      - maintainer
+  - name: super_admin
+    display_name: "超级管理员"
+    permissions:
+      - "*"
+    inheritance:
+      - admin
