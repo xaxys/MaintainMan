@@ -1,9 +1,11 @@
 app:
   name: "maintainman"
-  listen: ":8787"
+  listen: ":8080"
   loglevel: "debug"
-  jwtkey: "gzmymzcw2022"
-  guest: true
+
+token:
+  key: "xaxys_2022_all_rights_reserved"
+  exp: "30m"
 
 database:
   driver: "mysql"
@@ -13,7 +15,7 @@ database:
     name: "maintainman"
     params: "parseTime=true&loc=Local&charset=utf8mb4"
     user: "root"
-    password: "123456"
+    password: "000..."
   sqlite:
     path: "maintainman.db"
 
@@ -24,4 +26,5 @@ cache: # second
 admin: # only apply at first initialization
   name: "admin"
   display_name: "maintainman default admin"
-  password: "123456"
+  role_name: "super_admin"
+  password: "12345678"
