@@ -12,8 +12,9 @@ type User struct {
 	Phone       string    `gorm:"not null; size:191; index; comment:手机号"`
 	Email       string    `gorm:"not null; size:191; index; comment:邮箱"`
 	LoginIP     string    `gorm:"not null; size:40; default:0.0.0.0; comment:最后登录IP"`
-	LoginTime   time.Time `gorm:"not null; comment:最后登录时间"`
+	LoginTime   time.Time `gorm:"not null; default:0000-00-00 00:00:00; comment:最后登录时间"`
 	RealName    string    `gorm:"not null; size:191; comment:真实姓名"`
+	Orders      []*Order  `gorm:"foreignkey:UserID"`
 }
 
 type LoginJson struct {

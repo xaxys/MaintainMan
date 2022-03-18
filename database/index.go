@@ -55,6 +55,13 @@ func initMysql() *gorm.DB {
 func initTable() {
 	err := DB.AutoMigrate(
 		&model.User{},
+		&model.Announce{},
+		&model.Order{},
+		&model.Status{},
+		&model.Tag{},
+		&model.Comment{},
+		&model.Item{},
+		&model.ItemLog{},
 	)
 	if err != nil {
 		panic(fmt.Errorf("Unable to sync the struct to database: %+v", err))

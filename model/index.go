@@ -10,7 +10,7 @@ type BaseModel struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt sql.NullTime `gorm:"index"`
-	CreatedBy string       `gorm:"size:191"`
-	UpdatedBy string       `gorm:"size:191"`
-	DeletedBy string       `gorm:"size:191"`
+	CreatedBy string       `gorm:"size:50"`
+	UpdatedBy string       `gorm:"size:50"`
+	DeletedBy string       `gorm:"size:50"`
 }
