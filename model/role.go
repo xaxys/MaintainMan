@@ -23,7 +23,7 @@ type RoleJson struct {
 }
 
 type CreateRoleJson struct {
-	Name        string   `json:"name" validate:"required,gte=4,lte=50"`
+	Name        string   `json:"name" validate:"required,gte=2,lte=50"`
 	DisplayName string   `json:"display_name" validate:"required,lte=191"`
 	Permissions []string `json:"permissions"`
 	Inheritance []string `json:"inheritance"`
