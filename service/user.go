@@ -67,6 +67,9 @@ func CreateUser(aul *model.ModifyUserJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorVerification(err.(validator.ValidationErrors))
 	}
+	if util.EmailRegex.MatchString(aul.Name) || util.PhoneRegex.MatchString(aul.Name) {
+		return model.ErrorVerification(errors.New("用户名不能为邮箱或手机号"))
+	}
 	u, err := dao.CreateUser(aul)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -75,7 +78,6 @@ func CreateUser(aul *model.ModifyUserJson) *model.ApiJson {
 			return model.ErrorInsertDatabase(err)
 		}
 	}
-	u.Password = ""
 	return model.SuccessCreate(UserToJson(u), "创建成功")
 
 }
@@ -129,12 +131,30 @@ func GetAllUsers(aul *model.AllUserJson) *model.ApiJson {
 }
 
 func UserLogin(aul *model.LoginJson) *model.ApiJson {
+	var user *model.User
+	var err error
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorVerification(err)
 	}
-	user, err := dao.CheckLogin(aul.Name, aul.Password)
-	if err != nil {
-		return model.ErrorUnauthorized(fmt.Errorf("用户名或密码错误"))
+	if util.EmailRegex.MatchString(aul.Account) {
+		user, err = dao.GetUserByEmail(aul.Account)
+		if err != nil {
+			return model.ErrorNotFound(fmt.Errorf("邮箱不存在"))
+		}
+	} else if util.PhoneRegex.MatchString(aul.Account) {
+		user, err = dao.GetUserByPhone(aul.Account)
+		if err != nil {
+			return model.ErrorNotFound(fmt.Errorf("手机号不存在"))
+		}
+	} else {
+		user, err = dao.GetUserByName(aul.Account)
+		if err != nil {
+			return model.ErrorNotFound(fmt.Errorf("用户名不存在"))
+		}
+	}
+
+	if err := dao.CheckLogin(user, aul.Password); err != nil {
+		return model.ErrorUnauthorized(fmt.Errorf("密码错误"))
 	}
 	token, err := util.GetJwtString(user.ID, user.RoleName)
 	if err != nil {

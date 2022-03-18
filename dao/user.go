@@ -24,7 +24,29 @@ func GetUserByName(name string) (*User, error) {
 	user := &User{Name: name}
 
 	if err := database.DB.Where(user).First(user).Error; err != nil {
-		fmt.Printf("GetUserByUserNameErr: %v\n", err)
+		fmt.Printf("GetUserByNameErr: %v\n", err)
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func GetUserByEmail(email string) (*User, error) {
+	user := &User{Email: email}
+
+	if err := database.DB.Where(user).First(user).Error; err != nil {
+		fmt.Printf("GetUserByEmailErr: %v\n", err)
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func GetUserByPhone(phone string) (*User, error) {
+	user := &User{Phone: phone}
+
+	if err := database.DB.Where(user).First(user).Error; err != nil {
+		fmt.Printf("GetUserByPhoneErr: %v\n", err)
 		return nil, err
 	}
 
@@ -92,15 +114,11 @@ func UpdateUser(id uint, ujson *ModifyUserJson) (*User, error) {
 	return user, nil
 }
 
-func CheckLogin(name, password string) (*User, error) {
-	user, err := GetUserByName(name)
-	if err != nil {
-		return nil, err
-	}
+func CheckLogin(user *User, password string) error {
 	if ok := bcrypt.Match(password, user.Password); !ok {
-		return nil, fmt.Errorf("Wrong password")
+		return fmt.Errorf("Wrong password")
 	}
-	return user, nil
+	return nil
 }
 
 func JsonToUser(json *model.ModifyUserJson) (user *model.User) {

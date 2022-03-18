@@ -18,7 +18,7 @@ type User struct {
 }
 
 type LoginJson struct {
-	Name     string `json:"name" validate:"required,gte=2,lte=50"`
+	Account  string `json:"account" validate:"required,lte=191"`
 	Password string `json:"password" validate:"gte=8,lte=32"`
 }
 
