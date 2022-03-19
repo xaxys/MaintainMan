@@ -28,8 +28,8 @@ type ModifyUserJson struct {
 	DisplayName string `json:"display_name" validate:"required,lte=191"`
 	RoleName    string `json:"role_name" validate:"lte=50"`
 	DivisionID  uint   `json:"division_id"`
-	Phone       string `json:"phone" validate:"lte=191"`
-	Email       string `json:"email" validate:"lte=191"`
+	Phone       string `json:"phone" validate:"alphanum,lte=191"`
+	Email       string `json:"email" validate:"email,lte=191"`
 	RealName    string `json:"real_name" validate:"lte=191"`
 }
 
@@ -37,8 +37,8 @@ type AllUserJson struct {
 	Name        string `json:"name" validate:"gte=2,lte=50"`
 	DisplayName string `json:"display_name" validate:"gte=2,lte=50"`
 	OrderBy     string `json:"order_by"`
-	Limit       int    `json:"limit" validate:"number"`
-	Offset      int    `json:"offset" validate:"number"`
+	Limit       int    `json:"limit"`
+	Offset      int    `json:"offset"`
 }
 
 type UserJson struct {

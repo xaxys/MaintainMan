@@ -2,6 +2,8 @@ app:
   name: "maintainman"
   listen: ":8080"
   loglevel: "debug"
+  page_limit: 100
+  page_limit_default: 20
 
 token:
   key: "xaxys_2022_all_rights_reserved"

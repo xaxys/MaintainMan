@@ -61,33 +61,29 @@ func DeleteUserByID(id uint) error {
 	return nil
 }
 
-func GetAllUsers() ([]*User, error) {
-	return GetAllUsersWithParam("", "", "", 0, 0)
-}
-
-func GetAllUsersWithParam(name, displayName, orderBy string, offset, limit int) (users []*User, err error) {
+func GetAllUsersWithParam(aul *model.AllUserJson) (users []*User, err error) {
 	user := &User{
-		Name:        name,
-		DisplayName: displayName,
+		Name:        aul.Name,
+		DisplayName: aul.DisplayName,
 	}
-	if err = database.DB.Where(user).Find(&users).Error; err != nil {
+	if err = Filter(aul.OrderBy, aul.Offset, aul.Limit).Where(user).Find(&users).Error; err != nil {
 		fmt.Printf("GetAllUserErr: %v\n", err)
 	}
 	return
 }
 
-func CreateUser(ujson *ModifyUserJson) (*User, error) {
+func CreateUser(json *ModifyUserJson) (*User, error) {
 	salt, _ := bcrypt.Salt(10)
-	hash, _ := bcrypt.Hash(ujson.Password, salt)
-	ujson.Password = string(hash)
-	if ujson.DisplayName == "" {
-		ujson.DisplayName = ujson.Name
+	hash, _ := bcrypt.Hash(json.Password, salt)
+	json.Password = string(hash)
+	if json.DisplayName == "" {
+		json.DisplayName = json.Name
 	}
-	if ujson.RoleName == "" {
-		ujson.RoleName = GetDefaultRoleName()
+	if json.RoleName == "" {
+		json.RoleName = GetDefaultRoleName()
 	}
 
-	user := JsonToUser(ujson)
+	user := JsonToUser(json)
 
 	if err := database.DB.Create(user).Error; err != nil {
 		fmt.Printf("CreateUserErr: %v\n", err)
@@ -97,16 +93,16 @@ func CreateUser(ujson *ModifyUserJson) (*User, error) {
 	return user, nil
 }
 
-func UpdateUser(id uint, ujson *ModifyUserJson) (*User, error) {
-	user := JsonToUser(ujson)
+func UpdateUser(id uint, json *ModifyUserJson) (*User, error) {
+	user := JsonToUser(json)
 	user.ID = id
-	if ujson.Password != "" {
+	if json.Password != "" {
 		salt, _ := bcrypt.Salt(10)
-		hash, _ := bcrypt.Hash(ujson.Password, salt)
+		hash, _ := bcrypt.Hash(json.Password, salt)
 		user.Password = string(hash)
 	}
 
-	if err := database.DB.Model(&user).Updates(user).Error; err != nil {
+	if err := database.DB.Model(user).Updates(user).Error; err != nil {
 		fmt.Printf("UpdateUserErr: %v\n", err)
 		return nil, err
 	}

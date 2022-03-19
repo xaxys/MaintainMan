@@ -3,11 +3,11 @@ package service
 import (
 	"errors"
 	"fmt"
+	"maintainman/config"
 	"maintainman/dao"
 	"maintainman/model"
 	"maintainman/util"
 
-	"github.com/go-playground/validator"
 	"gorm.io/gorm"
 )
 
@@ -32,9 +32,9 @@ func GetUserInfoByID(id uint) *model.ApiJson {
 			return model.ErrorQueryDatabase(err)
 		}
 	}
-	ujson := UserToJson(user)
-	ujson.Role = dao.GetRole(user.RoleName)
-	return model.Success(ujson, "获取成功")
+	json := UserToJson(user)
+	json.Role = dao.GetRole(user.RoleName)
+	return model.Success(json, "获取成功")
 }
 
 func GetUserByName(name string) *model.ApiJson {
@@ -58,25 +58,22 @@ func GetUserInfoByName(name string) *model.ApiJson {
 			return model.ErrorQueryDatabase(err)
 		}
 	}
-	ujson := UserToJson(user)
-	ujson.Role = dao.GetRole(user.RoleName)
-	return model.Success(ujson, "获取成功")
+	json := UserToJson(user)
+	json.Role = dao.GetRole(user.RoleName)
+	return model.Success(json, "获取成功")
 }
 
 func CreateUser(aul *model.ModifyUserJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err.(validator.ValidationErrors))
+		return model.ErrorVerification(err)
 	}
 	if util.EmailRegex.MatchString(aul.Name) || util.PhoneRegex.MatchString(aul.Name) {
 		return model.ErrorVerification(errors.New("用户名不能为邮箱或手机号"))
 	}
 	u, err := dao.CreateUser(aul)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorInsertDatabase(err)
-		}
+		return model.ErrorInsertDatabase(err)
+
 	}
 	return model.SuccessCreate(UserToJson(u), "创建成功")
 
@@ -84,11 +81,15 @@ func CreateUser(aul *model.ModifyUserJson) *model.ApiJson {
 
 func UpdateUser(id uint, aul *model.ModifyUserJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err.(validator.ValidationErrors))
+		return model.ErrorVerification(err)
 	}
 	u, err := dao.UpdateUser(id, aul)
 	if err != nil {
-		return model.ErrorInsertDatabase(err)
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		} else {
+			return model.ErrorUpdateDatabase(err)
+		}
 	}
 	u.Password = ""
 	return model.SuccessUpdate(UserToJson(u), "更新成功")
@@ -109,13 +110,10 @@ func GetAllUsers(aul *model.AllUserJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorVerification(err)
 	}
-	if aul.Offset == 0 {
-		aul.Offset = 1
-	}
 	if aul.Limit == 0 {
-		aul.Limit = 20
+		aul.Limit = config.AppConfig.GetInt("page_limit_default")
 	}
-	users, err := dao.GetAllUsersWithParam(aul.Name, aul.DisplayName, aul.OrderBy, aul.Offset, aul.Limit)
+	users, err := dao.GetAllUsersWithParam(aul)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
@@ -123,11 +121,8 @@ func GetAllUsers(aul *model.AllUserJson) *model.ApiJson {
 			return model.ErrorQueryDatabase(err)
 		}
 	}
-	us := []*model.UserJson{}
-	for _, u := range users {
-		us = append(us, UserToJson(u))
-	}
-	return model.Success(us, "操作成功")
+	us := util.TransSlice(users, UserToJson)
+	return model.Success(us, "获取成功")
 }
 
 func UserLogin(aul *model.LoginJson) *model.ApiJson {

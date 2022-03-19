@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"maintainman/config"
 	"maintainman/model"
+	"maintainman/util"
 	"strings"
 	"sync"
 
@@ -114,7 +115,7 @@ func DeletePermission(role string, permission ...string) error {
 
 func deletePermission(role *RoleWithLock, permission ...string) {
 	role.Lock()
-	role.RawPermissions = remove(role.RawPermissions, permission...)
+	role.RawPermissions = util.Remove(role.RawPermissions, permission...)
 	role.Permissions.Delete(permission...)
 	role.Unlock()
 }
@@ -204,13 +205,13 @@ func DeleteInheritance(role string, inherit ...string) error {
 func deleteInheritance(role *RoleWithLock, inherit ...string) error {
 	role.Lock()
 	nonexist := []string{}
-	role.RawInheritance = remove(role.RawInheritance, inherit...)
+	role.RawInheritance = util.Remove(role.RawInheritance, inherit...)
 	for _, inhe := range inherit {
 		inheRole := RolePO.index[inhe]
 		if inheRole == nil {
 			nonexist = append(nonexist, inhe)
 		}
-		role.Inheritance = remove(role.Inheritance, inheRole.Role)
+		role.Inheritance = util.Remove(role.Inheritance, inheRole.Role)
 	}
 	role.Unlock()
 
@@ -373,7 +374,7 @@ func DeleteRole(name string) error {
 
 	roleLock.Lock()
 	r := RolePO.index[name]
-	RolePO.roles = removeByRef(RolePO.roles, r.RoleInfo)
+	RolePO.roles = util.RemoveByRef(RolePO.roles, r.RoleInfo)
 	delete(RolePO.index, name)
 	roleLock.Unlock()
 
@@ -386,18 +387,7 @@ func GetRole(name string) *model.RoleJson {
 	if err != nil {
 		return nil
 	}
-
-	r.RLock()
-	defer r.RUnlock()
-	role := &model.RoleJson{
-		Name:        r.Name,
-		DisplayName: r.DisplayName,
-		Inheritance: r.RawInheritance,
-	}
-	for _, perm := range r.RawPermissions {
-		role.Permissions = append(role.Permissions, GetPermission(perm))
-	}
-	return role
+	return RoleToJson(r)
 }
 
 func getDefaultRole() *RoleWithLock {
@@ -408,18 +398,7 @@ func getDefaultRole() *RoleWithLock {
 
 func GetDefaultRole() *model.RoleJson {
 	r := getDefaultRole()
-
-	r.RLock()
-	role := &model.RoleJson{
-		Name:        r.Name,
-		DisplayName: r.DisplayName,
-		Inheritance: r.RawInheritance,
-	}
-	for _, perm := range r.RawPermissions {
-		role.Permissions = append(role.Permissions, GetPermission(perm))
-	}
-	r.RUnlock()
-	return role
+	return RoleToJson(r)
 }
 
 func GetDefaultRoleName() string {
@@ -439,18 +418,7 @@ func GetGuestRole() *model.RoleJson {
 	if r == nil {
 		return nil
 	}
-
-	r.RLock()
-	role := &model.RoleJson{
-		Name:        r.Name,
-		DisplayName: r.DisplayName,
-		Inheritance: r.RawInheritance,
-	}
-	for _, perm := range r.RawPermissions {
-		role.Permissions = append(role.Permissions, GetPermission(perm))
-	}
-	r.RUnlock()
-	return role
+	return RoleToJson(r)
 }
 
 func GetGuestRoleName() string {
@@ -466,40 +434,20 @@ func GetGuestRoleName() string {
 func GetAllRoles() (roles []*model.RoleJson) {
 	roleLock.RLock()
 	for _, r := range RolePO.index {
-		r.Lock()
-		role := &model.RoleJson{
-			Name:        r.Name,
-			DisplayName: r.DisplayName,
-			Inheritance: r.RawInheritance,
-		}
-		for _, perm := range r.RawPermissions {
-			role.Permissions = append(role.Permissions, GetPermission(perm))
-		}
-		r.Unlock()
+		role := RoleToJson(r)
 		roles = append(roles, role)
 	}
 	roleLock.RUnlock()
 	return
 }
 
-func remove[T comparable](slice []T, elems ...T) []T {
-	for _, e := range elems {
-		for i, v := range slice {
-			if v == e {
-				return append(slice[:i], slice[i+1:]...)
-			}
-		}
+func RoleToJson(role *RoleWithLock) *model.RoleJson {
+	role.RLock()
+	defer role.RUnlock()
+	return &model.RoleJson{
+		Name:        role.Name,
+		DisplayName: role.DisplayName,
+		Inheritance: role.RawInheritance,
+		Permissions: util.TransSlice(role.RawPermissions, GetPermission),
 	}
-	return slice
-}
-
-func removeByRef[T any](slice []T, elems ...*T) []T {
-	for _, e := range elems {
-		for i := range slice {
-			if &slice[i] == e {
-				return append(slice[:i], slice[i+1:]...)
-			}
-		}
-	}
-	return slice
 }

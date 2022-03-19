@@ -61,6 +61,16 @@ func Route(app *iris.Application) {
 					perm.Get("/all", middleware.PermInterceptor("permission.viewall"), controller.GetAllPermissions)
 					perm.Get("/{name:string}", middleware.PermInterceptor("permission.viewall"), controller.GetPermissionByName)
 				})
+
+				account.PartyFunc("/announce", func(announce router.Party) {
+					announce.Get("/", middleware.PermInterceptor("announce.viewall"), controller.GetLatestAnnounces)
+					announce.Get("/latest/{offset:uint}", middleware.PermInterceptor("announce.viewall"), controller.GetLatestAnnounces)
+					announce.Get("/all", middleware.PermInterceptor("announce.viewall"), controller.GetAllAnnounces)
+					announce.Get("/{id:uint}", middleware.PermInterceptor("announce.viewall"), controller.GetAnnounceByID)
+					announce.Post("/", middleware.PermInterceptor("announce.create"), controller.CreateAnnounceByID)
+					announce.Put("/{id:uint}", middleware.PermInterceptor("announce.update"), controller.UpdateAnnounceByID)
+					announce.Delete("/{id:uint}", middleware.PermInterceptor("announce.delete"), controller.DeleteAnnounceByID)
+				})
 			})
 		})
 	})

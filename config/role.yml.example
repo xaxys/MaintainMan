@@ -10,7 +10,7 @@ role:
     permissions:
       - "user.register"
       - "user.login"
-      - "announce.view"
+      - "announce.viewall"
     inheritance:
   - name: user
     display_name: "普通用户"

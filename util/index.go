@@ -18,3 +18,32 @@ func ParseInt(b string, dft int) int {
 		return id
 	}
 }
+
+func Remove[T comparable](slice []T, elems ...T) []T {
+	for _, e := range elems {
+		for i, v := range slice {
+			if v == e {
+				return append(slice[:i], slice[i+1:]...)
+			}
+		}
+	}
+	return slice
+}
+
+func RemoveByRef[T any](slice []T, elems ...*T) []T {
+	for _, e := range elems {
+		for i := range slice {
+			if &slice[i] == e {
+				return append(slice[:i], slice[i+1:]...)
+			}
+		}
+	}
+	return slice
+}
+
+func TransSlice[T, U any](s []T, trans func(T) U) (us []U) {
+	for _, t := range s {
+		us = append(us, trans(t))
+	}
+	return
+}
