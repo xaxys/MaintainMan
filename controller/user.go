@@ -8,7 +8,7 @@ import (
 )
 
 func GetUser(ctx iris.Context) {
-	id := ctx.Values().Get("user_id").(uint)
+	id, _ := ctx.Values().GetUint("user_id")
 	response := service.GetUserInfoByID(id)
 	ctx.Values().Set("response", response)
 }
@@ -41,8 +41,8 @@ func UserLogin(ctx iris.Context) {
 }
 
 func UserRenew(ctx iris.Context) {
-	uid := ctx.Values().Get("user_id").(uint)
-	response := service.UserRenew(uid)
+	id, _ := ctx.Values().GetUint("user_id")
+	response := service.UserRenew(id)
 	ctx.Values().Set("response", response)
 }
 
@@ -64,7 +64,7 @@ func CreateUser(ctx iris.Context) {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	aul.OperatorID = ctx.Values().Get("user_id").(uint)
+	aul.OperatorID, _ = ctx.Values().GetUint("user_id")
 	response := service.CreateUser(aul)
 	ctx.Values().Set("response", response)
 }
@@ -77,7 +77,7 @@ func UpdateUser(ctx iris.Context) {
 	}
 	aul.RoleName = ""
 	aul.DivisionID = 0
-	id := ctx.Values().Get("user_id").(uint)
+	id, _ := ctx.Values().GetUint("user_id")
 	aul.OperatorID = id
 	response := service.UpdateUser(id, aul)
 	ctx.Values().Set("response", response)
@@ -89,7 +89,7 @@ func UpdateUserByID(ctx iris.Context) {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	aul.OperatorID = ctx.Values().Get("user_id").(uint)
+	aul.OperatorID, _ = ctx.Values().GetUint("user_id")
 	id, _ := ctx.Params().GetUint("id")
 	response := service.UpdateUser(id, aul)
 	ctx.Values().Set("response", response)

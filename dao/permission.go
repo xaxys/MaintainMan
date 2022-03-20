@@ -3,6 +3,7 @@ package dao
 import (
 	"maintainman/config"
 	"maintainman/model"
+	"strings"
 
 	"github.com/spf13/viper"
 )
@@ -20,17 +21,19 @@ func NewPermissionPersistence(config *viper.Viper) (s *PermissionPersistence) {
 		data: make(map[string]string),
 	}
 
-	var getPermission func(string)
-	getPermission = func(prefix string) {
-		for k, v := range config.GetStringMap(prefix) {
+	var getPermission func([]string)
+	getPermission = func(prefix []string) {
+		path := strings.Join(prefix, ".")
+		for k, v := range config.GetStringMap(path) {
+			perm := strings.Join(append(prefix[1:], k), ".")
 			if name, ok := v.(string); ok {
-				s.data[prefix+"."+k] = name
+				s.data[perm] = name
 			} else if _, ok := v.(map[string]interface{}); ok {
-				getPermission(prefix + "." + k)
+				getPermission(append(prefix, k))
 			}
 		}
 	}
-	getPermission("permission")
+	getPermission([]string{"permission"})
 	return
 }
 

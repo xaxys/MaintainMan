@@ -18,6 +18,8 @@ type Role struct {
 type RoleJson struct {
 	Name        string            `json:"name"`
 	DisplayName string            `json:"display_name"`
+	Default     bool              `json:"default"`
+	Guest       bool              `json:"guest"`
 	Permissions []*PermissionJson `json:"permissions,omitempty"`
 	Inheritance []string          `json:"inheritance,omitempty"`
 }

@@ -103,6 +103,16 @@ func DeleteAnnounce(id uint) error {
 	return nil
 }
 
+func HitAnnounce(id uint) error {
+	announce := &Announce{}
+	announce.ID = id
+	if err := database.DB.Model(announce).Update("hits", gorm.Expr("hits + ?", 1)).Error; err != nil {
+		fmt.Printf("HitAnnounceErr: %v\n", err)
+		return err
+	}
+	return nil
+}
+
 func JsonToAnnounce(json *ModifyAnnounceJson) (ret *Announce) {
 	ret = &Announce{
 		Title:   json.Title,

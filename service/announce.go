@@ -2,8 +2,10 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"maintainman/config"
 	"maintainman/dao"
+	"maintainman/database"
 	"maintainman/model"
 	"maintainman/util"
 	"time"
@@ -33,6 +35,38 @@ func GetAnnounceByTitle(title string) *model.ApiJson {
 		}
 	}
 	return model.Success(AnnounceToJson(announce), "获取成功")
+}
+
+func GetAllAnnounces(aul *model.AllAnnounceJson) *model.ApiJson {
+	if err := util.Validator.Struct(aul); err != nil {
+		return model.ErrorVerification(err)
+	}
+	if aul.Limit == 0 {
+		aul.Limit = config.AppConfig.GetInt("app.page_limit_default")
+	}
+	announces, err := dao.GetAllAnnouncesWithParam(aul)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		} else {
+			return model.ErrorQueryDatabase(err)
+		}
+	}
+	as := util.TransSlice(announces, AnnounceToJson)
+	return model.Success(as, "获取成功")
+}
+
+func GetLatestAnnounces(offset uint) *model.ApiJson {
+	now := time.Now().Unix()
+	aul := &model.AllAnnounceJson{
+		StartTime: now,
+		EndTime:   now,
+		Inclusive: false,
+		Limit:     config.AppConfig.GetInt("app.page_limit_default"),
+		Offset:    int(offset),
+		OrderBy:   "id",
+	}
+	return GetAllAnnounces(aul)
 }
 
 func CreateAnnounce(aul *model.ModifyAnnounceJson) *model.ApiJson {
@@ -74,36 +108,17 @@ func DeleteAnnounce(id uint) *model.ApiJson {
 	return model.SuccessUpdate(nil, "删除成功")
 }
 
-func GetAllAnnounces(aul *model.AllAnnounceJson) *model.ApiJson {
-	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err)
+func HitAnnounce(id, uid uint) *model.ApiJson {
+	key := fmt.Sprintf("%d:%d", id, uid)
+	if _, ok := database.Cache.Get(key); ok {
+		return model.Success(nil, "浏览过了")
 	}
-	if aul.Limit == 0 {
-		aul.Limit = config.AppConfig.GetInt("app.page_limit_default")
+	expire := time.Duration(config.AppConfig.GetInt("app.hit_expire_time")) * time.Second
+	database.Cache.Set(key, nil, expire)
+	if err := dao.HitAnnounce(id); err != nil {
+		return model.ErrorUpdateDatabase(err)
 	}
-	announces, err := dao.GetAllAnnouncesWithParam(aul)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
-		}
-	}
-	as := util.TransSlice(announces, AnnounceToJson)
-	return model.Success(as, "获取成功")
-}
-
-func GetLatestAnnounces(offset uint) *model.ApiJson {
-	now := time.Now().Unix()
-	aul := &model.AllAnnounceJson{
-		StartTime: now,
-		EndTime:   now,
-		Inclusive: false,
-		Limit:     config.AppConfig.GetInt("app.page_limit_default"),
-		Offset:    int(offset),
-		OrderBy:   "id",
-	}
-	return GetAllAnnounces(aul)
+	return model.SuccessUpdate(nil, "浏览成功")
 }
 
 func AnnounceToJson(announce *model.Announce) *model.AnnounceJson {
@@ -113,6 +128,7 @@ func AnnounceToJson(announce *model.Announce) *model.AnnounceJson {
 		Content:   announce.Content,
 		StartTime: announce.StartTime.Unix(),
 		EndTime:   announce.EndTime.Unix(),
+		Hits:      announce.Hits,
 		CreatedAt: announce.CreatedAt.Unix(),
 		UpdatedAt: announce.UpdatedAt.Unix(),
 	}

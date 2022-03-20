@@ -73,6 +73,7 @@ func NewRolePersistence(config *viper.Viper) (s *RolePersistence) {
 func saveRole() {
 	roleLock.Lock()
 	RolePO.data.Set("role", RolePO.roles)
+	go RolePO.data.WriteConfig()
 	roleLock.Unlock()
 }
 
@@ -447,6 +448,8 @@ func RoleToJson(role *RoleWithLock) *model.RoleJson {
 	return &model.RoleJson{
 		Name:        role.Name,
 		DisplayName: role.DisplayName,
+		Default:     role.Default,
+		Guest:       role.Guest,
 		Inheritance: role.RawInheritance,
 		Permissions: util.TransSlice(role.RawPermissions, GetPermission),
 	}
