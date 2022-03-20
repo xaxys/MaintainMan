@@ -5,14 +5,13 @@ import (
 	"maintainman/database"
 	"maintainman/logger"
 	"maintainman/model"
-	. "maintainman/model"
 	"time"
 
 	"github.com/jameskeane/bcrypt"
 )
 
-func GetUserByID(id uint) (*User, error) {
-	user := &User{}
+func GetUserByID(id uint) (*model.User, error) {
+	user := &model.User{}
 
 	if err := database.DB.First(user, id).Error; err != nil {
 		logger.Logger.Debugf("GetUserByIDErr: %v\n", err)
@@ -22,8 +21,8 @@ func GetUserByID(id uint) (*User, error) {
 	return user, nil
 }
 
-func GetUserByName(name string) (*User, error) {
-	user := &User{Name: name}
+func GetUserByName(name string) (*model.User, error) {
+	user := &model.User{Name: name}
 
 	if err := database.DB.Where(user).First(user).Error; err != nil {
 		logger.Logger.Debugf("GetUserByNameErr: %v\n", err)
@@ -33,8 +32,8 @@ func GetUserByName(name string) (*User, error) {
 	return user, nil
 }
 
-func GetUserByEmail(email string) (*User, error) {
-	user := &User{Email: email}
+func GetUserByEmail(email string) (*model.User, error) {
+	user := &model.User{Email: email}
 
 	if err := database.DB.Where(user).First(user).Error; err != nil {
 		logger.Logger.Debugf("GetUserByEmailErr: %v\n", err)
@@ -44,8 +43,8 @@ func GetUserByEmail(email string) (*User, error) {
 	return user, nil
 }
 
-func GetUserByPhone(phone string) (*User, error) {
-	user := &User{Phone: phone}
+func GetUserByPhone(phone string) (*model.User, error) {
+	user := &model.User{Phone: phone}
 
 	if err := database.DB.Where(user).First(user).Error; err != nil {
 		logger.Logger.Debugf("GetUserByPhoneErr: %v\n", err)
@@ -56,15 +55,15 @@ func GetUserByPhone(phone string) (*User, error) {
 }
 
 func DeleteUserByID(id uint) error {
-	if err := database.DB.Delete(&User{}, id).Error; err != nil {
+	if err := database.DB.Delete(&model.User{}, id).Error; err != nil {
 		logger.Logger.Debugf("DeleteUserByIdErr: %v\n", err)
 		return err
 	}
 	return nil
 }
 
-func GetAllUsersWithParam(aul *model.AllUserJson) (users []*User, err error) {
-	user := &User{
+func GetAllUsersWithParam(aul *model.AllUserJson) (users []*model.User, err error) {
+	user := &model.User{
 		Name:        aul.Name,
 		DisplayName: aul.DisplayName,
 	}
@@ -74,7 +73,7 @@ func GetAllUsersWithParam(aul *model.AllUserJson) (users []*User, err error) {
 	return
 }
 
-func CreateUser(json *ModifyUserJson) (*User, error) {
+func CreateUser(json *model.ModifyUserJson) (*model.User, error) {
 	salt, _ := bcrypt.Salt(10)
 	hash, _ := bcrypt.Hash(json.Password, salt)
 	json.Password = string(hash)
@@ -96,7 +95,7 @@ func CreateUser(json *ModifyUserJson) (*User, error) {
 	return user, nil
 }
 
-func UpdateUser(id uint, json *ModifyUserJson) (*User, error) {
+func UpdateUser(id uint, json *model.ModifyUserJson) (*model.User, error) {
 	user := JsonToUser(json)
 	user.ID = id
 	user.UpdatedBy = json.OperatorID
@@ -114,11 +113,11 @@ func UpdateUser(id uint, json *ModifyUserJson) (*User, error) {
 	return user, nil
 }
 
-func CheckLogin(user *User, password string) error {
+func CheckLogin(user *model.User, password string) error {
 	if ok := bcrypt.Match(password, user.Password); !ok {
 		return fmt.Errorf("Wrong password")
 	}
-	u := &User{
+	u := &model.User{
 		BaseModel: model.BaseModel{ID: user.ID},
 		LoginIP:   user.LoginIP,
 		LoginTime: time.Now(),
