@@ -59,7 +59,7 @@ func GetLatestAnnounces(offset uint) *model.ApiJson {
 		StartTime: now,
 		EndTime:   now,
 		Inclusive: false,
-		Offset:    int(offset),
+		Offset:    offset,
 		OrderBy:   "id",
 	}
 	return GetAllAnnounces(aul)

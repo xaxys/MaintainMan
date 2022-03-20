@@ -40,8 +40,8 @@ type AllUserJson struct {
 	Name        string `json:"name" validate:"gte=2,lte=50"`
 	DisplayName string `json:"display_name" validate:"gte=2,lte=50"`
 	OrderBy     string `json:"order_by"`
-	Limit       int    `json:"limit"`
-	Offset      int    `json:"offset"`
+	Limit       uint   `json:"limit"`
+	Offset      uint   `json:"offset"`
 }
 
 type UserJson struct {

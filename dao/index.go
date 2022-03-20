@@ -7,7 +7,9 @@ import (
 	"gorm.io/gorm"
 )
 
-func Filter(orderBy string, offset, limit int) (db *gorm.DB) {
+func Filter(orderBy string, uoffset, ulimit uint) (db *gorm.DB) {
+	offset := int(uoffset)
+	limit := int(ulimit)
 	db = database.DB
 	if len(orderBy) > 0 {
 		db = db.Order(orderBy + " desc")

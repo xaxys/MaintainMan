@@ -95,7 +95,7 @@ func UpdateUser(id uint, aul *model.ModifyUserJson) *model.ApiJson {
 }
 
 func DeleteUser(id uint) *model.ApiJson {
-	if err := dao.DeleteUserByID(id); err != nil {
+	if err := dao.DeleteUser(id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
 		} else {

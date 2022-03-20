@@ -27,8 +27,8 @@ type AllAnnounceJson struct {
 	EndTime   int64  `json:"end_time" validate:"gte=-1,lte=253370764799"`
 	Inclusive bool   `json:"inclusive"`
 	OrderBy   string `json:"order_by" validate:"oneof=id hits title start_time end_time create_at update_at create_by update_by"`
-	Limit     int    `json:"limit"`
-	Offset    int    `json:"offset"`
+	Limit     uint   `json:"limit"`
+	Offset    uint   `json:"offset"`
 }
 
 type AnnounceJson struct {
