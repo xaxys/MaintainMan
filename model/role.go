@@ -27,6 +27,7 @@ type CreateRoleJson struct {
 	DisplayName string   `json:"display_name" validate:"required,lte=191"`
 	Permissions []string `json:"permissions"`
 	Inheritance []string `json:"inheritance"`
+	OperatorID  uint     `json:"-"` // Filled by system
 }
 
 type UpdateRoleJson struct {
@@ -35,4 +36,5 @@ type UpdateRoleJson struct {
 	DelPermissions []string `json:"del_permissions"`
 	AddInheritance []string `json:"add_inheritance"`
 	DelInheritance []string `json:"del_inheritance"`
+	OperatorID     uint     `json:"-"` // Filled by system
 }

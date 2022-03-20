@@ -12,14 +12,16 @@ type User struct {
 	Phone       string    `gorm:"not null; size:191; index; comment:手机号"`
 	Email       string    `gorm:"not null; size:191; index; comment:邮箱"`
 	LoginIP     string    `gorm:"not null; size:40; default:0.0.0.0; comment:最后登录IP"`
-	LoginTime   time.Time `gorm:"not null; default:0000-00-00 00:00:00; comment:最后登录时间"`
+	LoginTime   time.Time `gorm:"not null; comment:最后登录时间"`
 	RealName    string    `gorm:"not null; size:191; comment:真实姓名"`
 	Orders      []*Order  `gorm:"foreignkey:UserID"`
 }
 
 type LoginJson struct {
-	Account  string `json:"account" validate:"required,lte=191"`
-	Password string `json:"password" validate:"gte=8,lte=32"`
+	Account   string    `json:"account" validate:"required,lte=191"`
+	Password  string    `json:"password" validate:"gte=8,lte=32"`
+	LoginIP   string    `json:"-"` // Filled by system
+	LoginTime time.Time `json:"-"` // Filled by system
 }
 
 type ModifyUserJson struct {
@@ -31,6 +33,7 @@ type ModifyUserJson struct {
 	Phone       string `json:"phone" validate:"alphanum,lte=191"`
 	Email       string `json:"email" validate:"email,lte=191"`
 	RealName    string `json:"real_name" validate:"lte=191"`
+	OperatorID  uint   `json:"-"` // Filled by system
 }
 
 type AllUserJson struct {
@@ -47,4 +50,8 @@ type UserJson struct {
 	DisplayName string    `json:"display_name"`
 	RoleName    string    `json:"user_role"`
 	Role        *RoleJson `json:"role,omitempty"`
+	Phone       string    `json:"phone"`
+	Email       string    `json:"email"`
+	RealName    string    `json:"real_name"`
+	LoginTime   int64     `json:"login_time"`
 }

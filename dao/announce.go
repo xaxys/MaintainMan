@@ -32,14 +32,6 @@ func GetAnnounceByTitle(title string) (*Announce, error) {
 	return announce, nil
 }
 
-func DeleteAnnounceByID(id uint) error {
-	if err := database.DB.Delete(&Announce{}, id).Error; err != nil {
-		fmt.Printf("DeleteAnnounceByIdErr: %v\n", err)
-		return err
-	}
-	return nil
-}
-
 func GetAllAnnouncesWithParam(aul *model.AllAnnounceJson) (announces []*Announce, err error) {
 	db := Filter(aul.OrderBy, aul.Offset, aul.Limit)
 	if aul.Title != "" {
@@ -80,6 +72,7 @@ func CreateAnnounce(json *ModifyAnnounceJson) (*Announce, error) {
 		now := time.Unix(253370764799, 0)
 		announce.EndTime = &now
 	}
+	announce.CreatedBy = json.OperatorID
 
 	if err := database.DB.Create(announce).Error; err != nil {
 		fmt.Printf("CreateAnnounceErr: %v\n", err)
@@ -92,6 +85,7 @@ func CreateAnnounce(json *ModifyAnnounceJson) (*Announce, error) {
 func UpdateAnnounce(id uint, json *ModifyAnnounceJson) (*Announce, error) {
 	announce := JsonToAnnounce(json)
 	announce.ID = id
+	announce.UpdatedBy = json.OperatorID
 
 	if err := database.DB.Model(announce).Updates(announce).Error; err != nil {
 		fmt.Printf("UpdateAnnounceErr: %v\n", err)

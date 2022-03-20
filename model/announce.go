@@ -14,10 +14,11 @@ type Announce struct {
 }
 
 type ModifyAnnounceJson struct {
-	Title     string `json:"title" validate:"lte=191"`
-	Content   string `json:"content"`
-	StartTime int64  `json:"start_time" validate:"gte=-1,lte=253370764799"`
-	EndTime   int64  `json:"end_time" validate:"eq=-1|gtfield=StartTime,lte=253370764799"`
+	Title      string `json:"title" validate:"lte=191"`
+	Content    string `json:"content"`
+	StartTime  int64  `json:"start_time" validate:"gte=-1,lte=253370764799"`
+	EndTime    int64  `json:"end_time" validate:"eq=-1|gtfield=StartTime,lte=253370764799"`
+	OperatorID uint   `json:"-"` // Filled by system
 }
 
 type AllAnnounceJson struct {
@@ -39,6 +40,4 @@ type AnnounceJson struct {
 	Hits      uint   `json:"hits"`
 	CreatedAt int64  `json:"created_at"`
 	UpdatedAt int64  `json:"updated_at"`
-	CreatedBy string `json:"created_by"`
-	UpdatedBy string `json:"updated_by"`
 }

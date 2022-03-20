@@ -5,6 +5,7 @@ import (
 	"maintainman/database"
 	"maintainman/model"
 	. "maintainman/model"
+	"time"
 
 	"github.com/jameskeane/bcrypt"
 )
@@ -84,6 +85,7 @@ func CreateUser(json *ModifyUserJson) (*User, error) {
 	}
 
 	user := JsonToUser(json)
+	user.CreatedBy = json.OperatorID
 
 	if err := database.DB.Create(user).Error; err != nil {
 		fmt.Printf("CreateUserErr: %v\n", err)
@@ -96,6 +98,7 @@ func CreateUser(json *ModifyUserJson) (*User, error) {
 func UpdateUser(id uint, json *ModifyUserJson) (*User, error) {
 	user := JsonToUser(json)
 	user.ID = id
+	user.UpdatedBy = json.OperatorID
 	if json.Password != "" {
 		salt, _ := bcrypt.Salt(10)
 		hash, _ := bcrypt.Hash(json.Password, salt)
@@ -113,6 +116,15 @@ func UpdateUser(id uint, json *ModifyUserJson) (*User, error) {
 func CheckLogin(user *User, password string) error {
 	if ok := bcrypt.Match(password, user.Password); !ok {
 		return fmt.Errorf("Wrong password")
+	}
+	u := &User{
+		BaseModel: model.BaseModel{ID: user.ID},
+		LoginIP:   user.LoginIP,
+		LoginTime: time.Now(),
+	}
+	if err := database.DB.Model(user).Updates(u).Error; err != nil {
+		fmt.Printf("UpdateUserErr: %v\n", err)
+		return err
 	}
 	return nil
 }

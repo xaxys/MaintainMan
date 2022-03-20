@@ -115,7 +115,5 @@ func AnnounceToJson(announce *model.Announce) *model.AnnounceJson {
 		EndTime:   announce.EndTime.Unix(),
 		CreatedAt: announce.CreatedAt.Unix(),
 		UpdatedAt: announce.UpdatedAt.Unix(),
-		CreatedBy: announce.CreatedBy,
-		UpdatedBy: announce.UpdatedBy,
 	}
 }

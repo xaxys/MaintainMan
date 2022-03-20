@@ -35,6 +35,7 @@ func CreateAnnounceByID(ctx iris.Context) {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
+	aul.OperatorID = ctx.Values().Get("user_id").(uint)
 	response := service.CreateAnnounce(aul)
 	ctx.Values().Set("response", response)
 }
@@ -45,6 +46,7 @@ func UpdateAnnounceByID(ctx iris.Context) {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
+	aul.OperatorID = ctx.Values().Get("user_id").(uint)
 	id := ctx.Values().Get("announce_id").(uint)
 	response := service.UpdateAnnounce(id, aul)
 	ctx.Values().Set("response", response)
