@@ -54,14 +54,6 @@ func GetUserByPhone(phone string) (*model.User, error) {
 	return user, nil
 }
 
-func DeleteUserByID(id uint) error {
-	if err := database.DB.Delete(&model.User{}, id).Error; err != nil {
-		logger.Logger.Debugf("DeleteUserByIdErr: %v\n", err)
-		return err
-	}
-	return nil
-}
-
 func GetAllUsersWithParam(aul *model.AllUserJson) (users []*model.User, err error) {
 	user := &model.User{
 		Name:        aul.Name,
@@ -111,6 +103,14 @@ func UpdateUser(id uint, json *model.ModifyUserJson) (*model.User, error) {
 	}
 
 	return user, nil
+}
+
+func DeleteUser(id uint) error {
+	if err := database.DB.Delete(&model.User{}, id).Error; err != nil {
+		logger.Logger.Debugf("DeleteUserByIdErr: %v\n", err)
+		return err
+	}
+	return nil
 }
 
 func CheckLogin(user *model.User, password string) error {
