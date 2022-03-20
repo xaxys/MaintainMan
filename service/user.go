@@ -3,7 +3,6 @@ package service
 import (
 	"errors"
 	"fmt"
-	"maintainman/config"
 	"maintainman/dao"
 	"maintainman/model"
 	"maintainman/util"
@@ -109,9 +108,6 @@ func DeleteUser(id uint) *model.ApiJson {
 func GetAllUsers(aul *model.AllUserJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorVerification(err)
-	}
-	if aul.Limit == 0 {
-		aul.Limit = config.AppConfig.GetInt("page_limit_default")
 	}
 	users, err := dao.GetAllUsersWithParam(aul)
 	if err != nil {

@@ -41,9 +41,6 @@ func GetAllAnnounces(aul *model.AllAnnounceJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorVerification(err)
 	}
-	if aul.Limit == 0 {
-		aul.Limit = config.AppConfig.GetInt("app.page_limit_default")
-	}
 	announces, err := dao.GetAllAnnouncesWithParam(aul)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -62,7 +59,6 @@ func GetLatestAnnounces(offset uint) *model.ApiJson {
 		StartTime: now,
 		EndTime:   now,
 		Inclusive: false,
-		Limit:     config.AppConfig.GetInt("app.page_limit_default"),
 		Offset:    int(offset),
 		OrderBy:   "id",
 	}

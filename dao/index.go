@@ -16,11 +16,12 @@ func Filter(orderBy string, offset, limit int) (db *gorm.DB) {
 		db = db.Offset(offset)
 	}
 	PageLimit := config.AppConfig.GetInt("app.page_limit")
-	if limit <= 0 || limit > PageLimit {
+	if limit > PageLimit {
 		limit = PageLimit
 	}
-	if limit > 0 {
-		db = db.Limit(limit)
+	if limit <= 0 {
+		limit = config.AppConfig.GetInt("app.page_limit_default")
 	}
+	db = db.Limit(limit)
 	return
 }

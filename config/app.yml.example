@@ -3,7 +3,8 @@ app:
   listen: ":8080"
   loglevel: "debug"
   page_limit: 100
-  page_limit_default: 20
+  page_limit_default: 50
+  hit_expire_time: 43200 # 12 hours
 
 token:
   key: "xaxys_2022_all_rights_reserved"
