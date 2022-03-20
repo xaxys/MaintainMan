@@ -12,5 +12,4 @@ type BaseModel struct {
 	DeletedAt sql.NullTime `gorm:"index"`
 	CreatedBy uint
 	UpdatedBy uint
-	DeletedBy uint
 }
