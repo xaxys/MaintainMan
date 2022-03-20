@@ -2,10 +2,10 @@ package role
 
 import (
 	"errors"
-	"fmt"
 
 	"maintainman/config"
 	"maintainman/dao"
+	"maintainman/logger"
 	. "maintainman/model"
 
 	"gorm.io/gorm"
@@ -25,7 +25,7 @@ func CreateSystemAdmin() {
 
 	if _, err := dao.GetUserByID(1); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			fmt.Println("Create default administrator account")
+			logger.Logger.Debug("Create default administrator account")
 			if _, err := dao.CreateUser(aul); err != nil {
 				panic("Failed to create default administrator")
 			}

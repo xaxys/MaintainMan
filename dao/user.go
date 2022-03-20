@@ -3,6 +3,7 @@ package dao
 import (
 	"fmt"
 	"maintainman/database"
+	"maintainman/logger"
 	"maintainman/model"
 	. "maintainman/model"
 	"time"
@@ -14,7 +15,7 @@ func GetUserByID(id uint) (*User, error) {
 	user := &User{}
 
 	if err := database.DB.First(user, id).Error; err != nil {
-		fmt.Printf("GetUserByIDErr: %v\n", err)
+		logger.Logger.Debugf("GetUserByIDErr: %v\n", err)
 		return nil, err
 	}
 
@@ -25,7 +26,7 @@ func GetUserByName(name string) (*User, error) {
 	user := &User{Name: name}
 
 	if err := database.DB.Where(user).First(user).Error; err != nil {
-		fmt.Printf("GetUserByNameErr: %v\n", err)
+		logger.Logger.Debugf("GetUserByNameErr: %v\n", err)
 		return nil, err
 	}
 
@@ -36,7 +37,7 @@ func GetUserByEmail(email string) (*User, error) {
 	user := &User{Email: email}
 
 	if err := database.DB.Where(user).First(user).Error; err != nil {
-		fmt.Printf("GetUserByEmailErr: %v\n", err)
+		logger.Logger.Debugf("GetUserByEmailErr: %v\n", err)
 		return nil, err
 	}
 
@@ -47,7 +48,7 @@ func GetUserByPhone(phone string) (*User, error) {
 	user := &User{Phone: phone}
 
 	if err := database.DB.Where(user).First(user).Error; err != nil {
-		fmt.Printf("GetUserByPhoneErr: %v\n", err)
+		logger.Logger.Debugf("GetUserByPhoneErr: %v\n", err)
 		return nil, err
 	}
 
@@ -56,7 +57,7 @@ func GetUserByPhone(phone string) (*User, error) {
 
 func DeleteUserByID(id uint) error {
 	if err := database.DB.Delete(&User{}, id).Error; err != nil {
-		fmt.Printf("DeleteUserByIdErr: %v\n", err)
+		logger.Logger.Debugf("DeleteUserByIdErr: %v\n", err)
 		return err
 	}
 	return nil
@@ -68,7 +69,7 @@ func GetAllUsersWithParam(aul *model.AllUserJson) (users []*User, err error) {
 		DisplayName: aul.DisplayName,
 	}
 	if err = Filter(aul.OrderBy, aul.Offset, aul.Limit).Where(user).Find(&users).Error; err != nil {
-		fmt.Printf("GetAllUserErr: %v\n", err)
+		logger.Logger.Debugf("GetAllUserErr: %v\n", err)
 	}
 	return
 }
@@ -88,7 +89,7 @@ func CreateUser(json *ModifyUserJson) (*User, error) {
 	user.CreatedBy = json.OperatorID
 
 	if err := database.DB.Create(user).Error; err != nil {
-		fmt.Printf("CreateUserErr: %v\n", err)
+		logger.Logger.Debugf("CreateUserErr: %v\n", err)
 		return nil, err
 	}
 
@@ -106,7 +107,7 @@ func UpdateUser(id uint, json *ModifyUserJson) (*User, error) {
 	}
 
 	if err := database.DB.Model(user).Updates(user).Error; err != nil {
-		fmt.Printf("UpdateUserErr: %v\n", err)
+		logger.Logger.Debugf("UpdateUserErr: %v\n", err)
 		return nil, err
 	}
 
@@ -123,7 +124,7 @@ func CheckLogin(user *User, password string) error {
 		LoginTime: time.Now(),
 	}
 	if err := database.DB.Model(user).Updates(u).Error; err != nil {
-		fmt.Printf("UpdateUserErr: %v\n", err)
+		logger.Logger.Debugf("UpdateUserErr: %v\n", err)
 		return err
 	}
 	return nil

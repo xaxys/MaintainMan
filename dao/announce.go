@@ -1,8 +1,8 @@
 package dao
 
 import (
-	"fmt"
 	"maintainman/database"
+	"maintainman/logger"
 	"maintainman/model"
 	. "maintainman/model"
 	"time"
@@ -14,7 +14,7 @@ func GetAnnounceByID(id uint) (*Announce, error) {
 	announce := &Announce{}
 
 	if err := database.DB.First(announce, id).Error; err != nil {
-		fmt.Printf("GetAnnounceByIDErr: %v\n", err)
+		logger.Logger.Debugf("GetAnnounceByIDErr: %v\n", err)
 		return nil, err
 	}
 
@@ -25,7 +25,7 @@ func GetAnnounceByTitle(title string) (*Announce, error) {
 	announce := &Announce{Title: title}
 
 	if err := database.DB.Where(announce).First(announce).Error; err != nil {
-		fmt.Printf("GetAnnounceByNameErr: %v\n", err)
+		logger.Logger.Debugf("GetAnnounceByNameErr: %v\n", err)
 		return nil, err
 	}
 
@@ -53,11 +53,8 @@ func GetAllAnnouncesWithParam(aul *model.AllAnnounceJson) (announces []*Announce
 			db = db.Where("end_time >= ?", time)
 		}
 	}
-	dry := db.Session(&gorm.Session{DryRun: true}).Find(&announces).Statement
-	fmt.Println(dry.SQL.String())
-	fmt.Println(dry.Vars)
 	if err = db.Find(&announces).Error; err != nil {
-		fmt.Printf("GetAllAnnounceErr: %v\n", err)
+		logger.Logger.Debugf("GetAllAnnounceErr: %v\n", err)
 	}
 	return
 }
@@ -75,7 +72,7 @@ func CreateAnnounce(json *ModifyAnnounceJson) (*Announce, error) {
 	announce.CreatedBy = json.OperatorID
 
 	if err := database.DB.Create(announce).Error; err != nil {
-		fmt.Printf("CreateAnnounceErr: %v\n", err)
+		logger.Logger.Debugf("CreateAnnounceErr: %v\n", err)
 		return nil, err
 	}
 
@@ -88,7 +85,7 @@ func UpdateAnnounce(id uint, json *ModifyAnnounceJson) (*Announce, error) {
 	announce.UpdatedBy = json.OperatorID
 
 	if err := database.DB.Model(announce).Updates(announce).Error; err != nil {
-		fmt.Printf("UpdateAnnounceErr: %v\n", err)
+		logger.Logger.Debugf("UpdateAnnounceErr: %v\n", err)
 		return nil, err
 	}
 
@@ -97,7 +94,7 @@ func UpdateAnnounce(id uint, json *ModifyAnnounceJson) (*Announce, error) {
 
 func DeleteAnnounce(id uint) error {
 	if err := database.DB.Delete(&Announce{}, id).Error; err != nil {
-		fmt.Printf("DeleteAnnounceErr: %v\n", err)
+		logger.Logger.Debugf("DeleteAnnounceErr: %v\n", err)
 		return err
 	}
 	return nil
@@ -107,7 +104,7 @@ func HitAnnounce(id uint) error {
 	announce := &Announce{}
 	announce.ID = id
 	if err := database.DB.Model(announce).Update("hits", gorm.Expr("hits + ?", 1)).Error; err != nil {
-		fmt.Printf("HitAnnounceErr: %v\n", err)
+		logger.Logger.Debugf("HitAnnounceErr: %v\n", err)
 		return err
 	}
 	return nil
