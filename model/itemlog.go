@@ -7,5 +7,4 @@ type ItemLog struct {
 	OrderID   uint   `gorm:"not null; comment:订单ID"`
 	Order     *Order `gorm:"foreignkey:OrderID;"`
 	ChangeNum int    `gorm:"not null; default:0; comment:增加/消耗数量 正:增加 负:减少"`
-	ItemCount uint   `gorm:"not null; default:0; comment:增加/消耗后物品数量"`
 }
