@@ -118,10 +118,10 @@ func CheckLogin(user *model.User, password string) error {
 		return fmt.Errorf("Wrong password")
 	}
 	u := &model.User{
-		BaseModel: model.BaseModel{ID: user.ID},
 		LoginIP:   user.LoginIP,
 		LoginTime: time.Now(),
 	}
+	u.ID = user.ID
 	if err := database.DB.Model(user).Updates(u).Error; err != nil {
 		logger.Logger.Debugf("UpdateUserErr: %v\n", err)
 		return err

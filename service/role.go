@@ -14,7 +14,7 @@ func GetRoleByName(name string) *model.ApiJson {
 
 func CreateRole(aul *model.CreateRoleJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err)
+		return model.ErrorValidation(err)
 	}
 	if dao.GetRole(aul.Name) != nil {
 		return model.ErrorInsertDatabase(fmt.Errorf("Role %s already exists", aul.Name))
@@ -33,7 +33,7 @@ func CreateRole(aul *model.CreateRoleJson) *model.ApiJson {
 
 func UpdateRole(name string, aul *model.UpdateRoleJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err)
+		return model.ErrorValidation(err)
 	}
 	if dao.GetRole(name) != nil {
 		return model.ErrorUpdateDatabase(fmt.Errorf("Role %s already exists", name))

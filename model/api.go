@@ -1,5 +1,7 @@
 package model
 
+import "maintainman/util"
+
 type ApiJson struct {
 	Code   int         `json:"code"`
 	Status bool        `json:"status"`
@@ -12,10 +14,7 @@ func ApiResponse(code int, status bool, objects interface{}, msg string) *ApiJso
 }
 
 func combineError(errs ...error) (errMsg []string) {
-	for _, err := range errs {
-		errMsg = append(errMsg, err.Error())
-	}
-	return
+	return util.TransSlice(errs, func(err error) string { return err.Error() })
 }
 
 // Success 成功
@@ -68,8 +67,8 @@ func ErrorIncompleteData(errs ...error) *ApiJson {
 	return ApiResponse(422, false, combineError(errs...), "数据不完整")
 }
 
-// ErrorVerification 数据检验失败
-func ErrorVerification(errs ...error) *ApiJson {
+// ErrorValidation 数据检验失败
+func ErrorValidation(errs ...error) *ApiJson {
 	return ApiResponse(422, false, combineError(errs...), "数据检验失败")
 }
 
@@ -81,6 +80,11 @@ func ErrorBuildJWT(errs ...error) *ApiJson {
 // ErrorUnauthorized 未认证登录
 func ErrorUnauthorized(errs ...error) *ApiJson {
 	return ApiResponse(401, false, combineError(errs...), "未认证登录")
+}
+
+// ErrorVerification 认证失败
+func ErrorVerification(errs ...error) *ApiJson {
+	return ApiResponse(403, false, combineError(errs...), "认证失败")
 }
 
 // ErrorNoPermissions 账号权限不足

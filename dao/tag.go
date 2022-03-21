@@ -5,6 +5,8 @@ import (
 	"maintainman/database"
 	"maintainman/logger"
 	"maintainman/model"
+
+	"gorm.io/gorm/clause"
 )
 
 func GetTagByID(id uint) (*model.Tag, error) {
@@ -46,8 +48,40 @@ func GetAllTagsBySort(sort string) (tags []*model.Tag, err error) {
 	tag := &model.Tag{
 		Sort: sort,
 	}
-	if err := database.DB.Where(tag).Find(&tags).Error; err != nil {
+	if err = database.DB.Where(tag).Find(&tags).Error; err != nil {
 		logger.Logger.Debugf("GetAllTagsBySortErr: %v\n", err)
 	}
 	return
+}
+
+func CreateTag(aul *model.ModifyTagJson) (tag *model.Tag, err error) {
+	tag = JsonToTag(aul)
+	if err = database.DB.Create(tag).Error; err != nil {
+		logger.Logger.Debugf("CreateTagErr: %v\n", err)
+	}
+	return
+}
+
+func UpdateTag(id uint, aul *model.ModifyTagJson) (tag *model.Tag, err error) {
+	tag = JsonToTag(aul)
+	tag.ID = id
+	if err = database.DB.Model(tag).Updates(tag).Error; err != nil {
+		logger.Logger.Debugf("UpdateTagErr: %v\n", err)
+	}
+	return
+}
+
+func DeleteTag(id uint) (err error) {
+	if err = database.DB.Select(clause.Associations).Delete(&model.Tag{}).Error; err != nil {
+		logger.Logger.Debugf("DeleteTagErr: %v\n", err)
+	}
+	return
+}
+
+func JsonToTag(aul *model.ModifyTagJson) *model.Tag {
+	return &model.Tag{
+		Name:  aul.Name,
+		Sort:  aul.Sort,
+		Level: aul.Level,
+	}
 }

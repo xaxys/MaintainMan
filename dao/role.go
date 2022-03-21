@@ -443,6 +443,9 @@ func GetAllRoles() (roles []*model.RoleJson) {
 }
 
 func RoleToJson(role *RoleWithLock) *model.RoleJson {
+	if role == nil {
+		return nil
+	}
 	role.RLock()
 	defer role.RUnlock()
 	return &model.RoleJson{

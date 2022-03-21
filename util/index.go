@@ -19,6 +19,22 @@ func ParseInt(b string, dft int) int {
 	}
 }
 
+func NotNil[T, U any](v *T, obj *U) *U {
+	if v == nil {
+		return nil
+	} else {
+		return obj
+	}
+}
+
+func Tenary[T any](cond bool, a, b T) T {
+	if cond {
+		return a
+	} else {
+		return b
+	}
+}
+
 func Remove[T comparable](slice []T, elems ...T) []T {
 	for _, e := range elems {
 		for i, v := range slice {

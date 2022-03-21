@@ -64,10 +64,10 @@ func GetUserInfoByName(name string) *model.ApiJson {
 
 func CreateUser(aul *model.ModifyUserJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err)
+		return model.ErrorValidation(err)
 	}
 	if util.EmailRegex.MatchString(aul.Name) || util.PhoneRegex.MatchString(aul.Name) {
-		return model.ErrorVerification(errors.New("用户名不能为邮箱或手机号"))
+		return model.ErrorValidation(errors.New("用户名不能为邮箱或手机号"))
 	}
 	u, err := dao.CreateUser(aul)
 	if err != nil {
@@ -80,7 +80,7 @@ func CreateUser(aul *model.ModifyUserJson) *model.ApiJson {
 
 func UpdateUser(id uint, aul *model.ModifyUserJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err)
+		return model.ErrorValidation(err)
 	}
 	u, err := dao.UpdateUser(id, aul)
 	if err != nil {
@@ -107,7 +107,7 @@ func DeleteUser(id uint) *model.ApiJson {
 
 func GetAllUsers(aul *model.AllUserJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err)
+		return model.ErrorValidation(err)
 	}
 	users, err := dao.GetAllUsersWithParam(aul)
 	if err != nil {
@@ -125,7 +125,7 @@ func UserLogin(aul *model.LoginJson) *model.ApiJson {
 	var user *model.User
 	var err error
 	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err)
+		return model.ErrorValidation(err)
 	}
 	if util.EmailRegex.MatchString(aul.Account) {
 		user, err = dao.GetUserByEmail(aul.Account)
@@ -145,7 +145,7 @@ func UserLogin(aul *model.LoginJson) *model.ApiJson {
 	}
 
 	if err := dao.CheckLogin(user, aul.Password); err != nil {
-		return model.ErrorUnauthorized(fmt.Errorf("密码错误"))
+		return model.ErrorVerification(fmt.Errorf("密码错误"))
 	}
 	token, err := util.GetJwtString(user.ID, user.RoleName)
 	if err != nil {
@@ -164,10 +164,10 @@ func UserRenew(uid uint) *model.ApiJson {
 }
 
 func UserToJson(user *model.User) *model.UserJson {
-	return &model.UserJson{
+	return util.NotNil(user, &model.UserJson{
 		ID:          user.ID,
 		Name:        user.Name,
 		DisplayName: user.DisplayName,
 		RoleName:    user.RoleName,
-	}
+	})
 }

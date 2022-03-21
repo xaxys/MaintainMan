@@ -4,6 +4,7 @@ import (
 	"maintainman/database"
 	"maintainman/logger"
 	"maintainman/model"
+	"maintainman/util"
 
 	"gorm.io/gorm"
 )
@@ -19,16 +20,17 @@ func GetOrderByID(id uint) (*model.Order, error) {
 	return order, nil
 }
 
-func GetOrderByUser(userID, status, offset uint) (*model.Order, error) {
+func GetOrderByUser(userID, status, offset uint) (orders []*model.Order, err error) {
 	order := &model.Order{
-		UserID: userID, Status: status}
+		UserID: userID,
+		Status: status,
+	}
 
-	if err := Filter("id", offset, 0).Where(order).First(order).Error; err != nil {
+	if err = Filter("id", offset, 0).Where(order).Find(&orders).Error; err != nil {
 		logger.Logger.Debugf("GetOrderByUserErr: %v\n", err)
 		return nil, err
 	}
-
-	return order, nil
+	return orders, nil
 }
 
 func GetAllOrdersWithParam(aul *model.AllOrderJson) (orders []*model.Order, err error) {
@@ -70,6 +72,11 @@ func CreateOrder(aul *model.ModifyOrderJson) (*model.Order, error) {
 			return err
 		}
 		if err := database.DB.Model(order).Association("Tags").Append(tags); err != nil {
+			return err
+		}
+		status := StatusWaiting(aul.OperatorID)
+		status.SequenceNum = 1
+		if err := database.DB.Model(order).Association("StatusList").Append(status); err != nil {
 			return err
 		}
 		return nil
@@ -137,7 +144,17 @@ func ChangeOrderStatus(id uint, status *model.Status) error {
 		if err := database.DB.Model(order).Updates(order).Error; err != nil {
 			return err
 		}
-		if err := database.DB.Model(order).Association("StatusList").Append(status); err != nil {
+		or := &model.Order{}
+		if err := database.DB.Preload("StatusList").Find(or, order.ID).Error; err != nil {
+			return err
+		}
+		statusList := or.StatusList
+		lastStatus := statusList[len(or.StatusList)-1]
+		lastStatus.UpdatedBy = status.CreatedBy
+		lastStatus.Current = false
+		status.SequenceNum = lastStatus.SequenceNum + 1
+		statusList = append(statusList, status)
+		if err := database.DB.Model(order).Association("StatusList").Replace(statusList); err != nil {
 			return err
 		}
 		return nil
@@ -151,11 +168,7 @@ func ChangeOrderStatus(id uint, status *model.Status) error {
 func ChangeOrderAllowComment(id uint, allow bool) error {
 	order := &model.Order{}
 	order.ID = id
-	if allow {
-		order.AllowComment = 1
-	} else {
-		order.AllowComment = 2
-	}
+	order.AllowComment = util.Tenary[uint](allow, 1, 2)
 
 	if err := database.DB.Model(order).Updates(order).Error; err != nil {
 		logger.Logger.Debugf("ChangeOrderAllowCommentErr: %v\n", err)
@@ -171,6 +184,21 @@ func AddOrderItemLog(id uint, itemLog *model.ItemLog) error {
 		logger.Logger.Debugf("AppendOrderItemLogErr: %v\n", err)
 		return err
 	}
+	return nil
+}
+
+func AppraiseOrder(id, appraisal uint) error {
+	order := &model.Order{}
+	order.ID = id
+	order.Appraisal = appraisal
+	order.UpdatedBy = order.UserID
+
+	if err := database.DB.Model(order).Updates(order).Error; err != nil {
+		logger.Logger.Debugf("AppraiseOrderErr: %v\n", err)
+		return err
+	}
+
+	ChangeOrderStatus(id, StatusAppraised(order.UserID))
 	return nil
 }
 

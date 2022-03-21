@@ -39,7 +39,7 @@ func GetAnnounceByTitle(title string) *model.ApiJson {
 
 func GetAllAnnounces(aul *model.AllAnnounceJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err)
+		return model.ErrorValidation(err)
 	}
 	announces, err := dao.GetAllAnnouncesWithParam(aul)
 	if err != nil {
@@ -68,7 +68,7 @@ func GetLatestAnnounces(offset uint) *model.ApiJson {
 func CreateAnnounce(aul *model.ModifyAnnounceJson) *model.ApiJson {
 	// TODO: Localize error info: https://blog.xizhibei.me/2019/06/16/an-introduction-to-golang-validator/
 	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err)
+		return model.ErrorValidation(err)
 	}
 	announce, err := dao.CreateAnnounce(aul)
 	if err != nil {
@@ -79,7 +79,7 @@ func CreateAnnounce(aul *model.ModifyAnnounceJson) *model.ApiJson {
 
 func UpdateAnnounce(id uint, aul *model.ModifyAnnounceJson) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
-		return model.ErrorVerification(err)
+		return model.ErrorValidation(err)
 	}
 	announce, err := dao.UpdateAnnounce(id, aul)
 	if err != nil {
@@ -118,7 +118,7 @@ func HitAnnounce(id, uid uint) *model.ApiJson {
 }
 
 func AnnounceToJson(announce *model.Announce) *model.AnnounceJson {
-	return &model.AnnounceJson{
+	return util.NotNil(announce, &model.AnnounceJson{
 		ID:        announce.ID,
 		Title:     announce.Title,
 		Content:   announce.Content,
@@ -127,5 +127,5 @@ func AnnounceToJson(announce *model.Announce) *model.AnnounceJson {
 		Hits:      announce.Hits,
 		CreatedAt: announce.CreatedAt.Unix(),
 		UpdatedAt: announce.UpdatedAt.Unix(),
-	}
+	})
 }
