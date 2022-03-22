@@ -76,6 +76,13 @@ func CreateOrder(aul *model.ModifyOrderJson) *model.ApiJson {
 }
 
 func UpdateOrder(id uint, aul *model.ModifyOrderJson) *model.ApiJson {
+	or, err := dao.GetOrderByID(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	if or.UserID != aul.OperatorID {
+		return model.ErrorUpdateDatabase(fmt.Errorf("操作人不是订单创建者"))
+	}
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
@@ -86,12 +93,24 @@ func UpdateOrder(id uint, aul *model.ModifyOrderJson) *model.ApiJson {
 	return model.SuccessUpdate(OrderToJson(order), "更新成功")
 }
 
-func DeleteOrder(id uint) *model.ApiJson {
-	if err := dao.DeleteOrder(id); err != nil {
-		return model.ErrorDeleteDatabase(err)
+func UpdateOrderByID(id uint, aul *model.ModifyOrderJson) *model.ApiJson {
+	if err := util.Validator.Struct(aul); err != nil {
+		return model.ErrorValidation(err)
 	}
-	return model.SuccessUpdate(nil, "删除成功")
+	order, err := dao.UpdateOrder(id, aul)
+	if err != nil {
+		return model.ErrorUpdateDatabase(err)
+	}
+	return model.SuccessUpdate(OrderToJson(order), "更新成功")
 }
+
+// TODO: 订单应不允许删除?
+// func DeleteOrder(id uint) *model.ApiJson {
+// 	if err := dao.DeleteOrder(id); err != nil {
+// 		return model.ErrorDeleteDatabase(err)
+// 	}
+// 	return model.SuccessUpdate(nil, "删除成功")
+// }
 
 func ReleaseOrder(id, operator uint) *model.ApiJson {
 	order, err := dao.GetOrderByID(id)
@@ -129,6 +148,24 @@ func AssignOrder(id, uid, operator uint) *model.ApiJson {
 	return model.SuccessUpdate(nil, "指派成功")
 }
 
+func SelfAssignOrder(id, operator uint) *model.ApiJson {
+	order, err := dao.GetOrderByID(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	if order.Status == model.StatusAssigned {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单已处于已接单状态"))
+	}
+	if order.Status != model.StatusWaiting {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单不处于待处理状态，不能自我指派"))
+	}
+	status := dao.StatusAssigned(operator, operator)
+	if err := dao.ChangeOrderStatus(id, status); err != nil {
+		return model.ErrorUpdateDatabase(err)
+	}
+	return model.SuccessUpdate(nil, "自我指派成功")
+}
+
 func CompleteOrder(id, operator uint) *model.ApiJson {
 	order, err := dao.GetOrderByID(id)
 	if err != nil {
@@ -139,6 +176,9 @@ func CompleteOrder(id, operator uint) *model.ApiJson {
 	}
 	if order.Status != model.StatusAssigned {
 		return model.ErrorUpdateDatabase(fmt.Errorf("订单不处于已指派状态，不能完成"))
+	}
+	if order.UserID != operator {
+		return model.ErrorUpdateDatabase(fmt.Errorf("操作人不是订单当前指派人"))
 	}
 	status := dao.StatusCompleted(operator)
 	if err := dao.ChangeOrderStatus(id, status); err != nil {
@@ -193,6 +233,9 @@ func AppraiseOrder(id, appraisal, operator uint) *model.ApiJson {
 	}
 	if order.Status != model.StatusCompleted {
 		return model.ErrorUpdateDatabase(fmt.Errorf("订单未完成，不能评价"))
+	}
+	if order.UserID != operator {
+		return model.ErrorUpdateDatabase(fmt.Errorf("您不是订单的创建者，不能评价"))
 	}
 	status := dao.StatusAppraised(operator)
 	if err := dao.ChangeOrderStatus(id, status); err != nil {

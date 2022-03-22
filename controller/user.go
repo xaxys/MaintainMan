@@ -20,12 +20,12 @@ func GetUserByID(ctx iris.Context) {
 }
 
 func GetAllUsers(ctx iris.Context) {
-	req := &model.AllUserJson{}
-	if err := ctx.ReadJSON(&req); err != nil {
+	aul := &model.AllUserJson{}
+	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	response := service.GetAllUsers(req)
+	response := service.GetAllUsers(aul)
 	ctx.Values().Set("response", response)
 }
 
