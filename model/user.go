@@ -24,6 +24,18 @@ type LoginJson struct {
 	LoginTime time.Time `json:"-"` // Filled by system
 }
 
+type WxLoginJson struct {
+	Code string `json:"code" validate:"required"`
+}
+
+type WxLoginResponseJson struct {
+	OpenID     string `json:"openid"`
+	SessionKey string `json:"session_key"`
+	UnionID    string `json:"unionid"`
+	ErrCode    int    `json:"errcode"`
+	ErrMsg     string `json:"errmsg"`
+}
+
 type ModifyUserJson struct {
 	Name        string `json:"name" validate:"required,gte=2,lte=50"`
 	Password    string `json:"password" validate:"required,gte=8,lte=32"`

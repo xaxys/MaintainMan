@@ -6,6 +6,10 @@ app:
   page_limit_default: 50
   hit_expire_time: 43200 # 12 hours
 
+wechat:
+  appid: ""
+  secret: ""
+
 token:
   key: "xaxys_2022_all_rights_reserved"
   exp: "30m"
@@ -18,7 +22,7 @@ database:
     name: "maintainman"
     params: "parseTime=true&loc=Local&charset=utf8mb4"
     user: "root"
-    password: "000..."
+    password: "123456"
   sqlite:
     path: "maintainman.db"
 

@@ -40,6 +40,16 @@ func UserLogin(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+func WxUserLogin(ctx iris.Context) {
+	aul := &model.WxLoginJson{}
+	if err := ctx.ReadJSON(&aul); err != nil {
+		ctx.Values().Set("response", model.ErrorInvalidData(err))
+		return
+	}
+	response := service.WxUserLogin(aul)
+	ctx.Values().Set("response", response)
+}
+
 func UserRenew(ctx iris.Context) {
 	id, _ := ctx.Values().GetUint("user_id")
 	response := service.UserRenew(id)

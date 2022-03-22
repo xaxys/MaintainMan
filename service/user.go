@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"maintainman/config"
 	"maintainman/dao"
 	"maintainman/model"
 	"maintainman/util"
@@ -119,6 +120,45 @@ func GetAllUsers(aul *model.AllUserJson) *model.ApiJson {
 	}
 	us := util.TransSlice(users, UserToJson)
 	return model.Success(us, "获取成功")
+}
+
+const wxURL = "https://api.weixin.qq.com/sns/jscode2session"
+
+func WxUserLogin(aul *model.WxLoginJson) *model.ApiJson {
+	params := map[string]string{
+		"appid":      config.AppConfig.GetString("wechat.appid"),
+		"secret":     config.AppConfig.GetString("wechat.secret"),
+		"js_code":    aul.Code,
+		"grant_type": "authorization_code",
+	}
+	wxres := &model.WxLoginResponseJson{}
+	if err := util.HttpRequest(wxURL, "GET", params, wxres); err != nil {
+		return model.ErrorVerification(err)
+	}
+	if wxres.ErrCode != 0 {
+		return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
+	}
+
+	user, err := dao.GetUserByName(wxres.OpenID)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorQueryDatabase(err)
+		}
+		aul := &model.ModifyUserJson{
+			Name:     wxres.OpenID,
+			Password: util.RandomString(32),
+		}
+		user, err = dao.CreateUser(aul)
+		if err != nil {
+			return model.ErrorInsertDatabase(err)
+		}
+	}
+
+	token, err := util.GetJwtString(user.ID, user.RoleName)
+	if err != nil {
+		return model.ErrorBuildJWT(err)
+	}
+	return model.Success(token, "登陆成功")
 }
 
 func UserLogin(aul *model.LoginJson) *model.ApiJson {

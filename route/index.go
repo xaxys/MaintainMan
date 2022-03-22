@@ -29,6 +29,7 @@ func Route(app *iris.Application) {
 			v1.SetExecutionRules(iris.ExecutionRules{Done: iris.ExecutionOptions{Force: true}})
 
 			v1.Post("/login", middleware.PermInterceptor("user.login"), controller.UserLogin)
+			v1.Post("/wxlogin", middleware.PermInterceptor("user.login"), controller.WxUserLogin)
 			v1.Post("/register", middleware.PermInterceptor("user.register"), controller.UserRegister)
 			v1.PartyFunc("/", func(account router.Party) {
 				account.Use(middleware.HeaderExtractor, middleware.TokenValidator, middleware.LoginInterceptor)
