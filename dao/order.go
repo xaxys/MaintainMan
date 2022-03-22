@@ -57,6 +57,16 @@ func GetAllOrdersWithParam(aul *model.AllOrderJson) (orders []*model.Order, err 
 	return
 }
 
+func GetOrderWithLastStatus(id uint) (*model.Order, error) {
+	order := &model.Order{}
+	order.ID = id
+	if err := database.DB.Preload("StatusList", "current = TRUE").Find(order).Error; err != nil {
+		logger.Logger.Debugf("GetOrderWithLastStatusErr: %v\n", err)
+		return nil, err
+	}
+	return order, nil
+}
+
 func CreateOrder(aul *model.ModifyOrderJson) (*model.Order, error) {
 	order := JsonToOrder(aul)
 	order.CreatedBy = aul.OperatorID

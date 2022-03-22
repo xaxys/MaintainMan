@@ -94,6 +94,16 @@ func DeleteOrder(id uint) *model.ApiJson {
 }
 
 func ReleaseOrder(id, operator uint) *model.ApiJson {
+	order, err := dao.GetOrderByID(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	if order.Status == model.StatusWaiting {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单已处于待处理状态"))
+	}
+	if util.In(order.Status, model.StatusAppraised, model.StatusCanceled) {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单已结束，不能再次维修"))
+	}
 	status := dao.StatusWaiting(operator)
 	if err := dao.ChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
@@ -102,6 +112,16 @@ func ReleaseOrder(id, operator uint) *model.ApiJson {
 }
 
 func AssignOrder(id, uid, operator uint) *model.ApiJson {
+	order, err := dao.GetOrderByID(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	if order.Status == model.StatusAssigned {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单已处于已接单状态"))
+	}
+	if order.Status != model.StatusWaiting {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单不处于待处理状态，不能指派"))
+	}
 	status := dao.StatusAssigned(uid, operator)
 	if err := dao.ChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
@@ -110,6 +130,16 @@ func AssignOrder(id, uid, operator uint) *model.ApiJson {
 }
 
 func CompleteOrder(id, operator uint) *model.ApiJson {
+	order, err := dao.GetOrderByID(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	if order.Status == model.StatusCompleted {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单已处于已完成状态"))
+	}
+	if order.Status != model.StatusAssigned {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单不处于已指派状态，不能完成"))
+	}
 	status := dao.StatusCompleted(operator)
 	if err := dao.ChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
@@ -118,6 +148,16 @@ func CompleteOrder(id, operator uint) *model.ApiJson {
 }
 
 func CancelOrder(id, operator uint) *model.ApiJson {
+	order, err := dao.GetOrderByID(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	if order.Status == model.StatusCanceled {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单已处于已取消状态"))
+	}
+	if util.In(order.Status, model.StatusCompleted, model.StatusAppraised) {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单已完成，不能取消"))
+	}
 	status := dao.StatusCanceled(operator)
 	if err := dao.ChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
@@ -126,6 +166,16 @@ func CancelOrder(id, operator uint) *model.ApiJson {
 }
 
 func RejectOrder(id, operator uint) *model.ApiJson {
+	order, err := dao.GetOrderByID(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	if order.Status == model.StatusRejected {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单已处于已拒绝状态"))
+	}
+	if order.Status != model.StatusWaiting {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单不处于待处理状态，不能拒绝"))
+	}
 	status := dao.StatusRejected(operator)
 	if err := dao.ChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
@@ -137,6 +187,9 @@ func AppraiseOrder(id, appraisal, operator uint) *model.ApiJson {
 	order, err := dao.GetOrderByID(id)
 	if err != nil {
 		return model.ErrorQueryDatabase(err)
+	}
+	if order.Status == model.StatusAppraised {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单已处于已评价状态"))
 	}
 	if order.Status != model.StatusCompleted {
 		return model.ErrorUpdateDatabase(fmt.Errorf("订单未完成，不能评价"))
@@ -152,6 +205,19 @@ func AppraiseOrder(id, appraisal, operator uint) *model.ApiJson {
 }
 
 func ReportOrder(id, operator uint) *model.ApiJson {
+	order, err := dao.GetOrderWithLastStatus(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	if order.Status == model.StatusReported {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单已处于已上报状态"))
+	}
+	if order.Status != model.StatusAssigned {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单未指派，不能上报"))
+	}
+	if order.StatusList[len(order.StatusList)-1].RepairerID != operator {
+		return model.ErrorUpdateDatabase(fmt.Errorf("操作人不是订单指派人，不能上报"))
+	}
 	status := dao.StatusReported(operator)
 	if err := dao.ChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
@@ -160,6 +226,16 @@ func ReportOrder(id, operator uint) *model.ApiJson {
 }
 
 func HoldOrder(id, operator uint) *model.ApiJson {
+	order, err := dao.GetOrderByID(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	if order.Status == model.StatusHold {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单已处于挂单状态"))
+	}
+	if !util.In(order.Status, model.StatusReported, model.StatusWaiting) {
+		return model.ErrorUpdateDatabase(fmt.Errorf("订单不处于待处理或已上报状态，不能挂单"))
+	}
 	status := dao.StatusHold(operator)
 	if err := dao.ChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)

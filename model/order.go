@@ -9,7 +9,7 @@ type Order struct {
 	Address      string     `gorm:"not null; comment:地址"`
 	ContactName  string     `gorm:"not null; size:191; comment:联系人"`
 	ContactPhone string     `gorm:"not null; size:191; comment:联系电话"`
-	Status       uint       `gorm:"not null; size:5; default:0; index:idx_order_user_status,priority:2; comment:状态 0:非法 1:待维修 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价"`
+	Status       uint       `gorm:"not null; size:5; default:0; index:idx_order_user_status,priority:2; comment:状态 0:非法 1:待处理 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价"`
 	StatusList   []*Status  `gorm:"foreignkey:OrderID"`
 	AllowComment uint       `gorm:"not null; size:2 default:1; comment:是否允许评论 1:允许 2:不允许"`
 	Comments     []*Comment `gorm:"foreignkey:OrderID"`

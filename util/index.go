@@ -35,6 +35,15 @@ func Tenary[T any](cond bool, a, b T) T {
 	}
 }
 
+func In[T comparable](key T, values ...T) bool {
+	for _, v := range values {
+		if key == v {
+			return true
+		}
+	}
+	return false
+}
+
 func Remove[T comparable](slice []T, elems ...T) []T {
 	for _, e := range elems {
 		for i, v := range slice {

@@ -36,7 +36,7 @@ func NewStatus(status, repairer uint, operator uint) *model.Status {
 	}
 }
 
-// StatusWaiting 待维修
+// StatusWaiting 待处理
 func StatusWaiting(operator uint) *model.Status {
 	return NewStatus(1, 0, operator)
 }
