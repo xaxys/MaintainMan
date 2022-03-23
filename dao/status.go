@@ -12,7 +12,7 @@ func GetOrderByRepairer(id uint, current bool, offset uint) (orders []*model.Ord
 	}
 	statuses := []*model.Status{}
 
-	if err = Filter("id", offset, 0).Preload("Order").Where(status).Find(&statuses).Error; err != nil {
+	if err = Filter("id desc", offset, 0).Preload("Order").Where(status).Find(&statuses).Error; err != nil {
 		logger.Logger.Debugf("GetOrderByRepairerErr: %v\n", err)
 		return
 	}

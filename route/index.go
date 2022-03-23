@@ -117,6 +117,14 @@ func Route(app *iris.Application) {
 					item.Post("/{id:uint}", middleware.PermInterceptor("item.update"), controller.AddItem)
 					item.Delete("/{id:uint}", middleware.PermInterceptor("item.delete"), controller.DeleteItemByID)
 				})
+
+				account.PartyFunc("/comment", func(comment router.Party) {
+					comment.Get("/{id:uint}", middleware.PermInterceptor("comment.viewall"), controller.GetCommentsByOrder)
+					comment.Post("/{id:uint}", middleware.PermInterceptor("comment.create"), controller.CreateComment)
+					comment.Delete("/{id:uint}", middleware.PermInterceptor("comment.delete"), controller.DeleteComment)
+					comment.Post("/all/{id:uint}", middleware.PermInterceptor("comment.createall"), controller.CreateCommentOverride)
+					comment.Delete("/all/{id:uint}", middleware.PermInterceptor("comment.deleteall"), controller.DeleteCommentByID)
+				})
 			})
 		})
 	})

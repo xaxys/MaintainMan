@@ -46,18 +46,19 @@ type AllOrderJson struct {
 }
 
 type OrderJson struct {
-	ID           uint       `json:"id"`
-	UserID       uint       `json:"user_id"`
-	User         *UserJson  `json:"user"`
-	Title        string     `json:"title"`
-	Content      string     `json:"content"`
-	Address      string     `json:"address"`
-	ContactName  string     `json:"contact_name"`
-	ContactPhone string     `json:"contact_phone"`
-	Status       uint       `json:"status"`
-	AllowComment uint       `json:"allow_comment"`
-	CreatedAt    int64      `json:"created_at"`
-	UpdatedAt    int64      `json:"updated_at"`
-	Appraisal    uint       `json:"appraise"`
-	Tags         []*TagJson `json:"tags"`
+	ID           uint           `json:"id"`
+	UserID       uint           `json:"user_id"`
+	User         *UserJson      `json:"user,omitempty"`
+	Title        string         `json:"title"`
+	Content      string         `json:"content"`
+	Address      string         `json:"address"`
+	ContactName  string         `json:"contact_name"`
+	ContactPhone string         `json:"contact_phone"`
+	Status       uint           `json:"status"`
+	AllowComment bool           `json:"allow_comment"`
+	CreatedAt    int64          `json:"created_at"`
+	UpdatedAt    int64          `json:"updated_at"`
+	Appraisal    uint           `json:"appraise"`
+	Tags         []*TagJson     `json:"tags,omitempty"`
+	Comments     []*CommentJson `json:"comments,omitempty"`
 }
