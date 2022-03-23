@@ -54,7 +54,7 @@ func ErrorDeleteDatabase(errs ...error) *ApiJson {
 
 // ErrorNotFound 未找到数据记录
 func ErrorNotFound(errs ...error) *ApiJson {
-	return ApiResponse(500, false, combineError(errs...), "未找到数据记录")
+	return ApiResponse(404, false, combineError(errs...), "未找到数据记录")
 }
 
 // ErrorInvalidData 数据解析失败
