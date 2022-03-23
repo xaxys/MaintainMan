@@ -81,6 +81,7 @@ func Route(app *iris.Application) {
 
 					order.PartyFunc("/repairer", func(repairer router.Party) {
 						order.Get("/", controller.GetRepairerOrders)
+						order.Post("/", middleware.PermInterceptor("item.consume"), controller.ConsumeItem)
 					})
 
 					order.Get("/all", middleware.PermInterceptor("order.viewall"), controller.GetAllOrders)
@@ -105,6 +106,16 @@ func Route(app *iris.Application) {
 					tag.Get("/sort/{name:string}", middleware.PermInterceptor("tag.viewall"), controller.GetAllTagsBySort)
 					tag.Post("/", middleware.PermInterceptor("tag.create"), controller.CreateTag)
 					tag.Delete("/{id:uint}", middleware.PermInterceptor("tag.delete"), controller.DeleteTagByID)
+				})
+
+				account.PartyFunc("/item", func(item router.Party) {
+					item.Get("/name/{name:string}", middleware.PermInterceptor("item.viewall"), controller.GetItemByName)
+					item.Get("/name/{name:string}/fuzzy", middleware.PermInterceptor("item.viewall"), controller.GetItemsByFuzzyName)
+					item.Get("/all", middleware.PermInterceptor("item.viewall"), controller.GetAllItems)
+					item.Get("/{id:uint}", middleware.PermInterceptor("item.viewall"), controller.GetItemByID)
+					item.Post("/", middleware.PermInterceptor("item.create"), controller.CreateItem)
+					item.Post("/{id:uint}", middleware.PermInterceptor("item.update"), controller.AddItem)
+					item.Delete("/{id:uint}", middleware.PermInterceptor("item.delete"), controller.DeleteItemByID)
 				})
 			})
 		})

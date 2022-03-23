@@ -43,7 +43,7 @@ func CreateTag(aul *model.CreateTagJson) *model.ApiJson {
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 	}
-	return model.Success(TagToJson(tag), "创建成功")
+	return model.SuccessCreate(TagToJson(tag), "创建成功")
 }
 
 // TODO: Add func UpdateTag ?
@@ -53,7 +53,7 @@ func DeleteTag(id uint) *model.ApiJson {
 	if err != nil {
 		return model.ErrorDeleteDatabase(err)
 	}
-	return model.Success(nil, "删除成功")
+	return model.SuccessUpdate(nil, "删除成功")
 }
 
 func TagToJson(tag *model.Tag) *model.TagJson {
