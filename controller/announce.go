@@ -3,6 +3,7 @@ package controller
 import (
 	"maintainman/model"
 	"maintainman/service"
+	"maintainman/util"
 
 	"github.com/kataras/iris/v12"
 )
@@ -24,8 +25,8 @@ func GetAllAnnounces(ctx iris.Context) {
 }
 
 func GetLatestAnnounces(ctx iris.Context) {
-	offset, _ := ctx.Params().GetUint("offset")
-	response := service.GetLatestAnnounces(offset)
+	offset, _ := ctx.URLParamInt("offset")
+	response := service.GetLatestAnnounces(util.ToUint(offset))
 	ctx.Values().Set("response", response)
 }
 

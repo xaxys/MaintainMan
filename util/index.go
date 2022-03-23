@@ -3,22 +3,12 @@ package util
 import (
 	"math/rand"
 	"regexp"
-	"strconv"
 )
 
 var (
 	EmailRegex = regexp.MustCompile(`^[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+$`)
 	PhoneRegex = regexp.MustCompile(`^[0-9]{3}[-\s\.]?[0-9]{4}([-\s\.]?[0-9]{4})?$`)
 )
-
-func ParseInt(b string, dft int) int {
-	id, err := strconv.Atoi(b)
-	if err != nil {
-		return dft
-	} else {
-		return id
-	}
-}
 
 const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
@@ -28,6 +18,14 @@ func RandomString(n int) string {
 		b[i] = letterBytes[rand.Int63()%int64(len(letterBytes))]
 	}
 	return string(b)
+}
+
+func ToUint[T int | int8 | int16 | int32 | int64](n T) uint {
+	if n < 0 {
+		return 0
+	} else {
+		return uint(n)
+	}
 }
 
 func NotNil[T, U any](v *T, obj *U) *U {

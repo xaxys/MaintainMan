@@ -3,23 +3,24 @@ package controller
 import (
 	"maintainman/model"
 	"maintainman/service"
+	"maintainman/util"
 
 	"github.com/kataras/iris/v12"
 )
 
 func GetUserOrders(ctx iris.Context) {
 	id, _ := ctx.Values().GetUint("user_id")
-	status, _ := ctx.Params().GetUint("status")
-	offset, _ := ctx.Params().GetUint("offset")
-	response := service.GetOrderByUser(id, status, offset)
+	status, _ := ctx.URLParamInt("status")
+	offset, _ := ctx.URLParamInt("offset")
+	response := service.GetOrderByUser(id, util.ToUint(status), util.ToUint(offset))
 	ctx.Values().Set("response", response)
 }
 
 func GetRepairerOrders(ctx iris.Context) {
 	id, _ := ctx.Values().GetUint("user_id")
-	current, _ := ctx.Params().GetBool("current")
-	offset, _ := ctx.Params().GetUint("offset")
-	response := service.GetOrderByRepairer(id, current, offset)
+	current, _ := ctx.URLParamBool("current")
+	offset, _ := ctx.URLParamInt("offset")
+	response := service.GetOrderByRepairer(id, current, util.ToUint(offset))
 	ctx.Values().Set("response", response)
 }
 
@@ -86,8 +87,8 @@ func ReleaseOrder(ctx iris.Context) {
 func AssignOrder(ctx iris.Context) {
 	id, _ := ctx.Params().GetUint("id")
 	uid, _ := ctx.Values().GetUint("user_id")
-	repairer, _ := ctx.Params().GetUint("repairer")
-	response := service.AssignOrder(id, uid, repairer)
+	repairer, _ := ctx.URLParamInt("repairer")
+	response := service.AssignOrder(id, uid, util.ToUint(repairer))
 	ctx.Values().Set("response", response)
 }
 
@@ -136,7 +137,7 @@ func HoldOrder(ctx iris.Context) {
 func AppraiseOrder(ctx iris.Context) {
 	id, _ := ctx.Params().GetUint("id")
 	uid, _ := ctx.Values().GetUint("user_id")
-	appraisal, _ := ctx.Params().GetUint("appraisal")
-	response := service.AppraiseOrder(id, appraisal, uid)
+	appraisal, _ := ctx.URLParamInt("appraisal")
+	response := service.AppraiseOrder(id, util.ToUint(appraisal), uid)
 	ctx.Values().Set("response", response)
 }

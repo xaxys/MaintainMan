@@ -40,10 +40,10 @@ type ModifyUserJson struct {
 	Name        string `json:"name" validate:"required,gte=2,lte=50"`
 	Password    string `json:"password" validate:"required,gte=8,lte=32"`
 	DisplayName string `json:"display_name" validate:"required,lte=191"`
-	RoleName    string `json:"role_name" validate:"lte=50"`
+	RoleName    string `json:"role_name" validate:"omitempty,gte=2,lte=50"`
 	DivisionID  uint   `json:"division_id"`
-	Phone       string `json:"phone" validate:"alphanum,lte=191"`
-	Email       string `json:"email" validate:"email,lte=191"`
+	Phone       string `json:"phone" validate:"omitempty,alphanum,lte=191"`
+	Email       string `json:"email" validate:"omitempty,email,lte=191"`
 	RealName    string `json:"real_name" validate:"lte=191"`
 	OperatorID  uint   `json:"-"` // Filled by system
 }
