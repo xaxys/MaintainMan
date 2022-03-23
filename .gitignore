@@ -1,4 +1,6 @@
 .vscode
+.idea
 *.yaml
 *.yml
 *.exe
+*.db
