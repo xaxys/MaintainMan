@@ -98,6 +98,14 @@ func Route(app *iris.Application) {
 					order.Post("/{id:uint}/hold", middleware.PermInterceptor("order.hold"), controller.HoldOrder)
 					order.Post("/{id:uint}/appraise", middleware.PermInterceptor("order.appraise"), controller.AppraiseOrder)
 				})
+
+				account.PartyFunc("/tag", func(tag router.Party) {
+					tag.Get("/{id:uint}", middleware.PermInterceptor("tag.viewall"), controller.GetTagByID)
+					tag.Get("/sort", middleware.PermInterceptor("tag.viewall"), controller.GetAllTagSorts)
+					tag.Get("/sort/{name:string}", middleware.PermInterceptor("tag.viewall"), controller.GetAllTagsBySort)
+					tag.Post("/", middleware.PermInterceptor("tag.create"), controller.CreateTag)
+					tag.Delete("/{id:uint}", middleware.PermInterceptor("tag.delete"), controller.DeleteTagByID)
+				})
 			})
 		})
 	})

@@ -8,9 +8,9 @@ type Tag struct {
 	Orders []*Order `gorm:"many2many:order_tags;"`
 }
 
-type ModifyTagJson struct {
-	Sort  string `json:"sort" validate:"lte=191"`
-	Name  string `json:"name" validate:"lte=191"`
+type CreateTagJson struct {
+	Sort  string `json:"sort" validate:"required,lte=191"`
+	Name  string `json:"name" validate:"required,lte=191"`
 	Level uint   `json:"level" validate:"gte=0"`
 }
 

@@ -54,7 +54,7 @@ func GetAllTagsBySort(sort string) (tags []*model.Tag, err error) {
 	return
 }
 
-func CreateTag(aul *model.ModifyTagJson) (tag *model.Tag, err error) {
+func CreateTag(aul *model.CreateTagJson) (tag *model.Tag, err error) {
 	tag = JsonToTag(aul)
 	if err = database.DB.Create(tag).Error; err != nil {
 		logger.Logger.Debugf("CreateTagErr: %v\n", err)
@@ -62,7 +62,7 @@ func CreateTag(aul *model.ModifyTagJson) (tag *model.Tag, err error) {
 	return
 }
 
-func UpdateTag(id uint, aul *model.ModifyTagJson) (tag *model.Tag, err error) {
+func UpdateTag(id uint, aul *model.CreateTagJson) (tag *model.Tag, err error) {
 	tag = JsonToTag(aul)
 	tag.ID = id
 	if err = database.DB.Model(tag).Updates(tag).Error; err != nil {
@@ -78,7 +78,7 @@ func DeleteTag(id uint) (err error) {
 	return
 }
 
-func JsonToTag(aul *model.ModifyTagJson) *model.Tag {
+func JsonToTag(aul *model.CreateTagJson) *model.Tag {
 	return &model.Tag{
 		Name:  aul.Name,
 		Sort:  aul.Sort,

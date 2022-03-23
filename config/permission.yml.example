@@ -27,8 +27,8 @@ permission:
     close: "关闭订单"
     update: "更新订单"
     updateall: "更新所有订单"
-    assignall: "分配订单"
-    assign: "给自己分配订单"
+    assign: "分配订单"
+    selfassign: "给自己分配订单"
     release: "释放订单"
     reject: "拒绝订单"
     report: "上报订单"
@@ -44,7 +44,11 @@ permission:
       deleteall: "删除所有评论"
       viewall: "查看所有评论"
     viewall: "查看所有订单"
-  parts:
+  tag:
+    create: "创建标签"
+    delete: "删除标签"
+    viewall: "查看所有标签"
+  item:
     create: "创建零件"
     update: "更新零件"
     consume: "消耗零件"
