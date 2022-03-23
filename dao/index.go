@@ -12,7 +12,7 @@ func Filter(orderBy string, uoffset, ulimit uint) (db *gorm.DB) {
 	limit := int(ulimit)
 	db = database.DB
 	if len(orderBy) > 0 {
-		db = db.Order(orderBy + " desc")
+		db = db.Order(orderBy)
 	}
 	if offset > 0 {
 		db = db.Offset(offset)

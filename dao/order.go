@@ -12,7 +12,7 @@ import (
 func GetOrderByID(id uint) (*model.Order, error) {
 	order := &model.Order{}
 
-	if err := database.DB.Preload("Tags").First(order, id).Error; err != nil {
+	if err := database.DB.Preload("Tags").Preload("Comments").First(order, id).Error; err != nil {
 		logger.Logger.Debugf("GetOrderByIDErr: %v\n", err)
 		return nil, err
 	}
@@ -26,7 +26,7 @@ func GetOrderByUser(userID, status, offset uint) (orders []*model.Order, err err
 		Status: status,
 	}
 
-	if err = Filter("id", offset, 0).Where(order).Find(&orders).Error; err != nil {
+	if err = Filter("id desc", offset, 0).Preload("Tags").Where(order).Find(&orders).Error; err != nil {
 		logger.Logger.Debugf("GetOrderByUserErr: %v\n", err)
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func GetAllOrdersWithParam(aul *model.AllOrderJson) (orders []*model.Order, err 
 		UserID: aul.UserID,
 		Status: aul.Status,
 	}
-	db := Filter(aul.OrderBy, aul.Offset, aul.Limit).Where(order)
+	db := Filter(aul.OrderBy, aul.Offset, aul.Limit).Preload("Tags").Where(order)
 	if len(aul.Tags) > 0 {
 		if aul.Conjunctve {
 			for _, tag := range aul.Tags {

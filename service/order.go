@@ -301,5 +301,7 @@ func OrderToJson(order *model.Order) *model.OrderJson {
 		UpdatedAt:    order.UpdatedAt.Unix(),
 		Appraisal:    order.Appraisal,
 		Tags:         util.TransSlice(order.Tags, TagToJson),
+		AllowComment: order.AllowComment == 1,
+		Comments:     util.Tenary(order.AllowComment == 1, util.TransSlice(order.Comments, CommentToJson), nil),
 	}
 }
