@@ -35,7 +35,6 @@ func Route(app *iris.Application) {
 				account.Use(middleware.HeaderExtractor, middleware.TokenValidator, middleware.LoginInterceptor)
 
 				account.Get("/renew", middleware.PermInterceptor("user.renew"), controller.UserRenew)
-				account.Get("/graphql", controller.GetGraphQL)
 
 				account.PartyFunc("/user", func(user router.Party) {
 					user.Get("/", controller.GetUser)
