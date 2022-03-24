@@ -14,6 +14,7 @@ type User struct {
 	LoginIP     string    `gorm:"not null; size:40; default:0.0.0.0; comment:最后登录IP"`
 	LoginTime   time.Time `gorm:"not null; comment:最后登录时间"`
 	RealName    string    `gorm:"not null; size:191; comment:真实姓名"`
+	OpenID      string    `gorm:"not null; size:191; unique; comment:微信openid"`
 	Orders      []*Order  `gorm:"foreignkey:UserID"`
 }
 
@@ -25,7 +26,8 @@ type LoginJson struct {
 }
 
 type WxLoginJson struct {
-	Code string `json:"code" validate:"required"`
+	Code   string `json:"code" validate:"required"`
+	UserID uint   `json:"-"` // Filled by system
 }
 
 type WxLoginResponseJson struct {

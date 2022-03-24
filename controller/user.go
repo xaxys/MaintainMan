@@ -46,6 +46,7 @@ func WxUserLogin(ctx iris.Context) {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
+	aul.UserID, _ = ctx.Values().GetUint("user_id")
 	response := service.WxUserLogin(aul)
 	ctx.Values().Set("response", response)
 }

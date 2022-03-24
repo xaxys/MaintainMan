@@ -54,6 +54,17 @@ func GetUserByPhone(phone string) (*model.User, error) {
 	return user, nil
 }
 
+func GetUserByOpenID(openid string) (*model.User, error) {
+	user := &model.User{OpenID: openid}
+
+	if err := database.DB.Where(user).First(user).Error; err != nil {
+		logger.Logger.Debugf("GetUserByOpenIDErr: %v\n", err)
+		return nil, err
+	}
+
+	return user, nil
+}
+
 func GetAllUsersWithParam(aul *model.AllUserJson) (users []*model.User, err error) {
 	user := &model.User{
 		Name:        aul.Name,
@@ -103,6 +114,16 @@ func UpdateUser(id uint, json *model.ModifyUserJson) (*model.User, error) {
 	}
 
 	return user, nil
+}
+
+func AttachOpenIDToUser(id uint, openid string) error {
+	user := &model.User{}
+	user.ID = id
+	if err := database.DB.Where(user).Update("openid", openid).Error; err != nil {
+		logger.Logger.Debugf("AttachOpenIDToUserErr: %v\n", err)
+		return err
+	}
+	return nil
 }
 
 func DeleteUser(id uint) error {

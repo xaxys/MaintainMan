@@ -31,12 +31,12 @@ func Route(app *iris.Application) {
 			v1.Post("/login", middleware.PermInterceptor("user.login"), controller.UserLogin)
 			v1.Post("/wxlogin", middleware.PermInterceptor("user.login"), controller.WxUserLogin)
 			v1.Post("/register", middleware.PermInterceptor("user.register"), controller.UserRegister)
-			v1.PartyFunc("/", func(account router.Party) {
-				account.Use(middleware.HeaderExtractor, middleware.TokenValidator, middleware.LoginInterceptor)
+			v1.PartyFunc("/", func(api router.Party) {
+				api.Use(middleware.HeaderExtractor, middleware.TokenValidator, middleware.LoginInterceptor)
 
-				account.Get("/renew", middleware.PermInterceptor("user.renew"), controller.UserRenew)
+				api.Get("/renew", middleware.PermInterceptor("user.renew"), controller.UserRenew)
 
-				account.PartyFunc("/user", func(user router.Party) {
+				api.PartyFunc("/user", func(user router.Party) {
 					user.Get("/", controller.GetUser)
 					user.Put("/", middleware.PermInterceptor("user.update"), controller.UpdateUser)
 					user.Post("/", middleware.PermInterceptor("user.create"), controller.CreateUser)
@@ -46,7 +46,7 @@ func Route(app *iris.Application) {
 					user.Delete("/{id:uint}", middleware.PermInterceptor("user.delete"), controller.DeleteUserByID)
 				})
 
-				account.PartyFunc("/role", func(role router.Party) {
+				api.PartyFunc("/role", func(role router.Party) {
 					role.Get("/", controller.GetRole)
 					role.Post("/", middleware.PermInterceptor("role.create"), controller.CreateRole)
 					role.Get("/all", middleware.PermInterceptor("role.viewall"), controller.GetAllRoles)
@@ -57,12 +57,12 @@ func Route(app *iris.Application) {
 					role.Delete("/{name:string}", middleware.PermInterceptor("role.delete"), controller.DeleteRoleByName)
 				})
 
-				account.PartyFunc("/permission", func(perm router.Party) {
+				api.PartyFunc("/permission", func(perm router.Party) {
 					perm.Get("/all", middleware.PermInterceptor("permission.viewall"), controller.GetAllPermissions)
 					perm.Get("/{name:string}", middleware.PermInterceptor("permission.viewall"), controller.GetPermissionByName)
 				})
 
-				account.PartyFunc("/announce", func(announce router.Party) {
+				api.PartyFunc("/announce", func(announce router.Party) {
 					announce.Get("/", middleware.PermInterceptor("announce.viewall"), controller.GetLatestAnnounces)
 					announce.Get("/all", middleware.PermInterceptor("announce.viewall"), controller.GetAllAnnounces)
 					announce.Get("/{id:uint}", middleware.PermInterceptor("announce.viewall"), controller.GetAnnounceByID)
@@ -72,7 +72,7 @@ func Route(app *iris.Application) {
 					announce.Get("/{id:uint}/hit", middleware.PermInterceptor("announce.viewall"), controller.HitAnnounceByID)
 				})
 
-				account.PartyFunc("/order", func(order router.Party) {
+				api.PartyFunc("/order", func(order router.Party) {
 					order.PartyFunc("/user", func(user router.Party) {
 						order.Get("/", controller.GetUserOrders)
 						order.Put("/{id:uint}", middleware.PermInterceptor("order.update"), controller.UpdateOrder)
@@ -99,7 +99,7 @@ func Route(app *iris.Application) {
 					order.Post("/{id:uint}/appraise", middleware.PermInterceptor("order.appraise"), controller.AppraiseOrder)
 				})
 
-				account.PartyFunc("/tag", func(tag router.Party) {
+				api.PartyFunc("/tag", func(tag router.Party) {
 					tag.Get("/{id:uint}", middleware.PermInterceptor("tag.viewall"), controller.GetTagByID)
 					tag.Get("/sort", middleware.PermInterceptor("tag.viewall"), controller.GetAllTagSorts)
 					tag.Get("/sort/{name:string}", middleware.PermInterceptor("tag.viewall"), controller.GetAllTagsBySort)
@@ -107,7 +107,7 @@ func Route(app *iris.Application) {
 					tag.Delete("/{id:uint}", middleware.PermInterceptor("tag.delete"), controller.DeleteTagByID)
 				})
 
-				account.PartyFunc("/item", func(item router.Party) {
+				api.PartyFunc("/item", func(item router.Party) {
 					item.Get("/name/{name:string}", middleware.PermInterceptor("item.viewall"), controller.GetItemByName)
 					item.Get("/name/{name:string}/fuzzy", middleware.PermInterceptor("item.viewall"), controller.GetItemsByFuzzyName)
 					item.Get("/all", middleware.PermInterceptor("item.viewall"), controller.GetAllItems)
@@ -117,7 +117,7 @@ func Route(app *iris.Application) {
 					item.Delete("/{id:uint}", middleware.PermInterceptor("item.delete"), controller.DeleteItemByID)
 				})
 
-				account.PartyFunc("/comment", func(comment router.Party) {
+				api.PartyFunc("/comment", func(comment router.Party) {
 					comment.Get("/{id:uint}", middleware.PermInterceptor("comment.viewall"), controller.GetCommentsByOrder)
 					comment.Post("/{id:uint}", middleware.PermInterceptor("comment.create"), controller.CreateComment)
 					comment.Delete("/{id:uint}", middleware.PermInterceptor("comment.delete"), controller.DeleteComment)

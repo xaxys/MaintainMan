@@ -139,22 +139,34 @@ func WxUserLogin(aul *model.WxLoginJson) *model.ApiJson {
 		return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
 	}
 
-	user, err := dao.GetUserByName(wxres.OpenID)
+	user, err := dao.GetUserByOpenID(wxres.OpenID)
+	userID := user.ID
 	if err != nil {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorQueryDatabase(err)
 		}
-		aul := &model.ModifyUserJson{
-			Name:     wxres.OpenID,
-			Password: util.RandomString(32),
-		}
-		user, err = dao.CreateUser(aul)
-		if err != nil {
-			return model.ErrorInsertDatabase(err)
+		if aul.UserID != 0 {
+			if err := dao.AttachOpenIDToUser(aul.UserID, wxres.OpenID); err != nil {
+				return model.ErrorUpdateDatabase(err)
+			}
+			userID = aul.UserID
+		} else {
+			aul := &model.ModifyUserJson{
+				Name:     wxres.OpenID,
+				Password: util.RandomString(32),
+			}
+			user, err = dao.CreateUser(aul)
+			if err != nil {
+				return model.ErrorInsertDatabase(err)
+			}
+			if err := dao.AttachOpenIDToUser(user.ID, wxres.OpenID); err != nil {
+				return model.ErrorUpdateDatabase(err)
+			}
+			userID = user.ID
 		}
 	}
 
-	token, err := util.GetJwtString(user.ID, user.RoleName)
+	token, err := util.GetJwtString(userID, user.RoleName)
 	if err != nil {
 		return model.ErrorBuildJWT(err)
 	}
