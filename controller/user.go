@@ -29,13 +29,14 @@ func GetAllUsers(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// UserLogin XXX:更改了获取本地IP的接口
 func UserLogin(ctx iris.Context) {
 	aul := &model.LoginJson{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	aul.LoginIP = ctx.RemoteAddr()
+	aul.LoginIP = ctx.Request().RemoteAddr
 	response := service.UserLogin(aul)
 	ctx.Values().Set("response", response)
 }
@@ -63,7 +64,7 @@ func UserRegister(ctx iris.Context) {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	aul.RoleName = ""
+	//aul.RoleName = ""
 	aul.DivisionID = 0
 	response := service.CreateUser(aul)
 	ctx.Values().Set("response", response)
