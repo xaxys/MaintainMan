@@ -65,6 +65,7 @@ func GetAllUsersWithParam(aul *model.AllUserJson) (users []*model.User, err erro
 	return
 }
 
+// CreateUser XXX:增加ModifyJson向User传递IP地址的逻辑
 func CreateUser(json *model.ModifyUserJson) (*model.User, error) {
 	salt, _ := bcrypt.Salt(10)
 	hash, _ := bcrypt.Hash(json.Password, salt)
@@ -78,7 +79,6 @@ func CreateUser(json *model.ModifyUserJson) (*model.User, error) {
 
 	user := JsonToUser(json)
 	user.CreatedBy = json.OperatorID
-
 	if err := database.DB.Create(user).Error; err != nil {
 		logger.Logger.Debugf("CreateUserErr: %v\n", err)
 		return nil, err

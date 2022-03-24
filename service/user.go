@@ -184,6 +184,7 @@ func UserLogin(aul *model.LoginJson) *model.ApiJson {
 		}
 	}
 
+	user.LoginIP = aul.LoginIP
 	if err := dao.CheckLogin(user, aul.Password); err != nil {
 		return model.ErrorVerification(fmt.Errorf("密码错误"))
 	}
