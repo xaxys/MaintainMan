@@ -16,12 +16,11 @@ func CreateDefaultUsers() {
 }
 
 func CreateSystemAdmin() {
-	aul := &ModifyUserJson{
-		Name:        config.AppConfig.GetString("admin.name"),
-		DisplayName: config.AppConfig.GetString("admin.display_name"),
-		Password:    config.AppConfig.GetString("admin.password"),
-		RoleName:    config.AppConfig.GetString("admin.role_name"),
-	}
+	aul := &CreateUserRequest{}
+	aul.Name = config.AppConfig.GetString("admin.name")
+	aul.DisplayName = config.AppConfig.GetString("admin.display_name")
+	aul.Password = config.AppConfig.GetString("admin.password")
+	aul.RoleName = config.AppConfig.GetString("admin.role_name")
 
 	if _, err := dao.GetUserByID(1); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {

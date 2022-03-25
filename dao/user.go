@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jameskeane/bcrypt"
+	"github.com/jinzhu/copier"
 )
 
 func GetUserByID(id uint) (*model.User, error) {
@@ -65,7 +66,7 @@ func GetUserByOpenID(openid string) (*model.User, error) {
 	return user, nil
 }
 
-func GetAllUsersWithParam(aul *model.AllUserJson) (users []*model.User, err error) {
+func GetAllUsersWithParam(aul *model.AllUserRequest) (users []*model.User, err error) {
 	user := &model.User{
 		Name:        aul.Name,
 		DisplayName: aul.DisplayName,
@@ -76,8 +77,7 @@ func GetAllUsersWithParam(aul *model.AllUserJson) (users []*model.User, err erro
 	return
 }
 
-// CreateUser XXX:增加ModifyJson向User传递IP地址的逻辑
-func CreateUser(json *model.ModifyUserJson) (*model.User, error) {
+func CreateUser(json *model.CreateUserRequest) (*model.User, error) {
 	salt, _ := bcrypt.Salt(10)
 	hash, _ := bcrypt.Hash(json.Password, salt)
 	json.Password = string(hash)
@@ -88,8 +88,8 @@ func CreateUser(json *model.ModifyUserJson) (*model.User, error) {
 		json.RoleName = GetDefaultRoleName()
 	}
 
-	user := JsonToUser(json)
-	user.CreatedBy = json.OperatorID
+	user := &model.User{}
+	copier.Copy(user, json)
 	if err := database.DB.Create(user).Error; err != nil {
 		logger.Logger.Debugf("CreateUserErr: %v\n", err)
 		return nil, err
@@ -98,16 +98,17 @@ func CreateUser(json *model.ModifyUserJson) (*model.User, error) {
 	return user, nil
 }
 
-func UpdateUser(id uint, json *model.ModifyUserJson) (*model.User, error) {
-	user := JsonToUser(json)
-	user.ID = id
-	user.UpdatedBy = json.OperatorID
+func UpdateUser(id uint, json *model.ModifyUserRequest, operator uint) (*model.User, error) {
 	if json.Password != "" {
 		salt, _ := bcrypt.Salt(10)
 		hash, _ := bcrypt.Hash(json.Password, salt)
-		user.Password = string(hash)
+		json.Password = string(hash)
 	}
 
+	user := &model.User{}
+	copier.Copy(user, json)
+	user.ID = id
+	user.UpdatedBy = operator
 	if err := database.DB.Model(user).Updates(user).Error; err != nil {
 		logger.Logger.Debugf("UpdateUserErr: %v\n", err)
 		return nil, err
@@ -148,17 +149,4 @@ func CheckLogin(user *model.User, password string) error {
 		return err
 	}
 	return nil
-}
-
-func JsonToUser(json *model.ModifyUserJson) (user *model.User) {
-	return &model.User{
-		Name:        json.Name,
-		Password:    json.Password,
-		DisplayName: json.DisplayName,
-		RoleName:    json.RoleName,
-		DivisionID:  json.DivisionID,
-		Phone:       json.Phone,
-		Email:       json.Email,
-		RealName:    json.RealName,
-	}
 }

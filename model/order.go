@@ -40,9 +40,7 @@ type AllOrderJson struct {
 	Status     uint   `json:"status"`
 	Tags       []uint `json:"tags"`
 	Conjunctve bool   `json:"conjunctve"`
-	OrderBy    string `json:"order_by"`
-	Offset     uint   `json:"offset"`
-	Limit      uint   `json:"limit"`
+	PageParam
 }
 
 type OrderJson struct {

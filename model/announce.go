@@ -22,13 +22,11 @@ type ModifyAnnounceJson struct {
 }
 
 type AllAnnounceJson struct {
-	Title     string `json:"title" validate:"lte=191"`
-	StartTime int64  `json:"start_time" validate:"gte=-1,lte=253370764799"`
-	EndTime   int64  `json:"end_time" validate:"gte=-1,lte=253370764799"`
-	Inclusive bool   `json:"inclusive"`
-	OrderBy   string `json:"order_by" validate:"oneof=id hits title start_time end_time create_at update_at create_by update_by"`
-	Limit     uint   `json:"limit"`
-	Offset    uint   `json:"offset"`
+	Title     string `url:"title" validate:"lte=191"`
+	StartTime int64  `url:"start_time" validate:"gte=-1,lte=253370764799"`
+	EndTime   int64  `url:"end_time" validate:"gte=-1,lte=253370764799"`
+	Inclusive bool   `url:"inclusive"`
+	PageParam
 }
 
 type AnnounceJson struct {

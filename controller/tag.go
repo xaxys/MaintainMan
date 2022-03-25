@@ -8,7 +8,7 @@ import (
 )
 
 func GetTagByID(ctx iris.Context) {
-	id, _ := ctx.Params().GetUint("id")
+	id := ctx.Params().GetUintDefault("user_id", 0)
 	response := service.GetTagByID(id)
 	ctx.Values().Set("response", response)
 }
@@ -35,7 +35,7 @@ func CreateTag(ctx iris.Context) {
 }
 
 func DeleteTagByID(ctx iris.Context) {
-	id, _ := ctx.Params().GetUint("id")
+	id := ctx.Params().GetUintDefault("user_id", 0)
 	response := service.DeleteTag(id)
 	ctx.Values().Set("response", response)
 }

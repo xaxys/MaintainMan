@@ -8,107 +8,107 @@ import (
 )
 
 func GetUser(ctx iris.Context) {
-	id, _ := ctx.Values().GetUint("user_id")
-	response := service.GetUserInfoByID(id)
+	auth := ctx.Values().Get("auth").(*model.AuthInfo)
+	response := service.GetUserInfoByID(auth.User, auth)
 	ctx.Values().Set("response", response)
 }
 
 func GetUserByID(ctx iris.Context) {
-	id, _ := ctx.Params().GetUint("id")
-	response := service.GetUserByID(id)
+	auth := ctx.Values().Get("auth").(*model.AuthInfo)
+	response := service.GetUserByID(auth.User, auth)
 	ctx.Values().Set("response", response)
 }
 
 func GetAllUsers(ctx iris.Context) {
-	aul := &model.AllUserJson{}
-	if err := ctx.ReadJSON(&aul); err != nil {
+	aul := &model.AllUserRequest{}
+	if err := ctx.ReadQuery(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	response := service.GetAllUsers(aul)
+	auth := ctx.Values().Get("auth").(*model.AuthInfo)
+	response := service.GetAllUsers(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
-// UserLogin XXX:更改了获取本地IP的接口
 func UserLogin(ctx iris.Context) {
-	aul := &model.LoginJson{}
+	aul := &model.LoginRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	aul.LoginIP = ctx.Request().RemoteAddr
-	response := service.UserLogin(aul)
+	auth := ctx.Values().Get("auth").(*model.AuthInfo)
+	response := service.UserLogin(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
 func WxUserLogin(ctx iris.Context) {
-	aul := &model.WxLoginJson{}
+	aul := &model.WxLoginRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	aul.UserID, _ = ctx.Values().GetUint("user_id")
-	response := service.WxUserLogin(aul)
+	auth := ctx.Values().Get("auth").(*model.AuthInfo)
+	response := service.WxUserLogin(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
 func UserRenew(ctx iris.Context) {
-	id, _ := ctx.Values().GetUint("user_id")
-	response := service.UserRenew(id)
+	id := ctx.Values().GetUintDefault("user_id", 0)
+	auth := ctx.Values().Get("auth").(*model.AuthInfo)
+	response := service.UserRenew(id, auth)
 	ctx.Values().Set("response", response)
 }
 
 func UserRegister(ctx iris.Context) {
-	aul := &model.ModifyUserJson{}
+	aul := &model.RegisterUserRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	//aul.RoleName = ""
-	aul.DivisionID = 0
-	response := service.CreateUser(aul)
+	auth := ctx.Values().Get("auth").(*model.AuthInfo)
+	response := service.RegisterUser(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
 func CreateUser(ctx iris.Context) {
-	aul := &model.ModifyUserJson{}
+	aul := &model.CreateUserRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	aul.OperatorID, _ = ctx.Values().GetUint("user_id")
-	response := service.CreateUser(aul)
+	auth := ctx.Values().Get("auth").(*model.AuthInfo)
+	response := service.CreateUser(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
 func UpdateUser(ctx iris.Context) {
-	aul := &model.ModifyUserJson{}
+	aul := &model.ModifyUserRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
 	aul.RoleName = ""
 	aul.DivisionID = 0
-	id, _ := ctx.Values().GetUint("user_id")
-	aul.OperatorID = id
-	response := service.UpdateUser(id, aul)
+	auth := ctx.Values().Get("auth").(*model.AuthInfo)
+	response := service.UpdateUser(auth.User, aul, auth)
 	ctx.Values().Set("response", response)
 }
 
-func UpdateUserByID(ctx iris.Context) {
-	aul := &model.ModifyUserJson{}
+func ForceUpdateUser(ctx iris.Context) {
+	aul := &model.ModifyUserRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	aul.OperatorID, _ = ctx.Values().GetUint("user_id")
-	id, _ := ctx.Params().GetUint("id")
-	response := service.UpdateUser(id, aul)
+	id := ctx.Params().GetUintDefault("user_id", 0)
+	auth := ctx.Values().Get("auth").(*model.AuthInfo)
+	response := service.UpdateUser(id, aul, auth)
 	ctx.Values().Set("response", response)
 }
 
-func DeleteUserByID(ctx iris.Context) {
-	id, _ := ctx.Params().GetUint("id")
-	response := service.DeleteUser(id)
+func ForceDeleteUser(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("user_id", 0)
+	auth := ctx.Values().Get("auth").(*model.AuthInfo)
+	response := service.DeleteUser(id, auth)
 	ctx.Values().Set("response", response)
 }

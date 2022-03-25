@@ -18,19 +18,16 @@ type User struct {
 	Orders      []*Order  `gorm:"foreignkey:UserID"`
 }
 
-type LoginJson struct {
-	Account   string    `json:"account" validate:"required,lte=191"`
-	Password  string    `json:"password" validate:"gte=8,lte=32"`
-	LoginIP   string    `json:"-"` // Filled by system
-	LoginTime time.Time `json:"-"` // Filled by system
+type LoginRequest struct {
+	Account  string `json:"account" validate:"required,lte=191"`
+	Password string `json:"password" validate:"gte=8,lte=32"`
 }
 
-type WxLoginJson struct {
-	Code   string `json:"code" validate:"required"`
-	UserID uint   `json:"-"` // Filled by system
+type WxLoginRequest struct {
+	Code string `json:"code" validate:"required"`
 }
 
-type WxLoginResponseJson struct {
+type WxLoginResponse struct {
 	OpenID     string `json:"openid"`
 	SessionKey string `json:"session_key"`
 	UnionID    string `json:"unionid"`
@@ -38,24 +35,36 @@ type WxLoginResponseJson struct {
 	ErrMsg     string `json:"errmsg"`
 }
 
-type ModifyUserJson struct {
+type RegisterUserRequest struct {
 	Name        string `json:"name" validate:"required,gte=2,lte=50"`
 	Password    string `json:"password" validate:"required,gte=8,lte=32"`
 	DisplayName string `json:"display_name" validate:"required,lte=191"`
-	RoleName    string `json:"role_name" validate:"omitempty,gte=2,lte=50"`
-	DivisionID  uint   `json:"division_id"`
 	Phone       string `json:"phone" validate:"omitempty,alphanum,lte=191"`
 	Email       string `json:"email" validate:"omitempty,email,lte=191"`
 	RealName    string `json:"real_name" validate:"lte=191"`
-	OperatorID  uint   `json:"-"` // Filled by system
 }
 
-type AllUserJson struct {
-	Name        string `json:"name" validate:"gte=2,lte=50"`
-	DisplayName string `json:"display_name" validate:"gte=2,lte=50"`
-	OrderBy     string `json:"order_by"`
-	Limit       uint   `json:"limit"`
-	Offset      uint   `json:"offset"`
+type CreateUserRequest struct {
+	RegisterUserRequest
+	RoleName   string `json:"role_name" validate:"omitempty,lte=50"`
+	DivisionID uint   `json:"division_id"`
+}
+
+type ModifyUserRequest struct {
+	Name        string `json:"name" validate:"omitempty,gte=2,lte=50"`
+	Password    string `json:"password" validate:"omitempty,gte=8,lte=32"`
+	DisplayName string `json:"display_name" validate:"omitempty,lte=191"`
+	Phone       string `json:"phone" validate:"omitempty,alphanum,lte=191"`
+	Email       string `json:"email" validate:"omitempty,email,lte=191"`
+	RealName    string `json:"real_name" validate:"omitempty,lte=191"`
+	RoleName    string `json:"role_name" validate:"omitempty,lte=50"`
+	DivisionID  uint   `json:"division_id"`
+}
+
+type AllUserRequest struct {
+	Name        string `json:"name" validate:"omitempty,gte=2,lte=50"`
+	DisplayName string `json:"display_name" validate:"omitempty,lte=191"`
+	PageParam
 }
 
 type UserJson struct {

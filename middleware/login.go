@@ -26,14 +26,18 @@ func init() {
 			jwtInfo := jwtToken.Claims.(jwt.MapClaims)
 			uid := uint(jwtInfo["user_id"].(float64))
 			role := jwtInfo["user_role"].(string)
-			ctx.Values().Set("user_id", uid)
-			ctx.Values().Set("user_role", role)
+			auth := &model.AuthInfo{
+				User: uid,
+				Role: role,
+				IP:   ctx.Request().RemoteAddr,
+			}
+			ctx.Values().Set("auth", auth)
 		}
 		ctx.Next()
 	}
 
 	LoginInterceptor = func(ctx iris.Context) {
-		if u := ctx.Values().Get("user_id"); u == nil {
+		if ctx.Values().Get("auth").(*model.AuthInfo) == nil {
 			ctx.JSON(model.ErrorUnauthorized(fmt.Errorf("无法获取到登陆用户信息，请重新登陆")))
 			ctx.StopExecution()
 		}

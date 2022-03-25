@@ -8,7 +8,7 @@ import (
 )
 
 func GetItemByID(ctx iris.Context) {
-	id, _ := ctx.Params().GetUint("id")
+	id := ctx.Params().GetUintDefault("user_id", 0)
 	response := service.GetItemByID(id)
 	ctx.Values().Set("response", response)
 }
@@ -46,7 +46,7 @@ func CreateItem(ctx iris.Context) {
 }
 
 func DeleteItemByID(ctx iris.Context) {
-	id, _ := ctx.Params().GetUint("id")
+	id := ctx.Params().GetUintDefault("user_id", 0)
 	response := service.DeleteItem(id)
 	ctx.Values().Set("response", response)
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func GetAnnounceByID(ctx iris.Context) {
-	id, _ := ctx.Params().GetUint("id")
+	id := ctx.Params().GetUintDefault("user_id", 0)
 	response := service.GetAnnounceByID(id)
 	ctx.Values().Set("response", response)
 }
@@ -48,20 +48,20 @@ func UpdateAnnounceByID(ctx iris.Context) {
 		return
 	}
 	aul.OperatorID, _ = ctx.Values().GetUint("user_id")
-	id, _ := ctx.Params().GetUint("id")
+	id := ctx.Params().GetUintDefault("user_id", 0)
 	response := service.UpdateAnnounce(id, aul)
 	ctx.Values().Set("response", response)
 }
 
 func DeleteAnnounceByID(ctx iris.Context) {
-	id, _ := ctx.Params().GetUint("id")
+	id := ctx.Params().GetUintDefault("user_id", 0)
 	response := service.DeleteAnnounce(id)
 	ctx.Values().Set("response", response)
 }
 
 func HitAnnounceByID(ctx iris.Context) {
-	id, _ := ctx.Params().GetUint("id")
-	uid, _ := ctx.Values().GetUint("user_id")
+	id := ctx.Params().GetUintDefault("user_id", 0)
+	uid := ctx.Values().GetUintDefault("user_id", 0)
 	response := service.HitAnnounce(id, uid)
 	ctx.Values().Set("response", response)
 }

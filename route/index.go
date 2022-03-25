@@ -42,8 +42,8 @@ func Route(app *iris.Application) {
 					user.Post("/", middleware.PermInterceptor("user.create"), controller.CreateUser)
 					user.Get("/all", middleware.PermInterceptor("user.viewall"), controller.GetAllUsers)
 					user.Get("/{id:uint}", middleware.PermInterceptor("user.viewall"), controller.GetUserByID)
-					user.Put("/{id:uint}", middleware.PermInterceptor("user.updateall"), controller.UpdateUserByID)
-					user.Delete("/{id:uint}", middleware.PermInterceptor("user.delete"), controller.DeleteUserByID)
+					user.Put("/{id:uint}", middleware.PermInterceptor("user.updateall"), controller.ForceUpdateUser)
+					user.Delete("/{id:uint}", middleware.PermInterceptor("user.delete"), controller.ForceDeleteUser)
 				})
 
 				api.PartyFunc("/role", func(role router.Party) {

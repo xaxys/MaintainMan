@@ -11,9 +11,7 @@ type Item struct {
 }
 
 type AllItemJson struct {
-	OrderBy string `json:"order_by"`
-	Offset  uint   `json:"offset"`
-	Limit   uint   `json:"limit"`
+	PageParam
 }
 
 type CreateItemJson struct {

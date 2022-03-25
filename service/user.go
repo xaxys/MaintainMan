@@ -11,7 +11,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetUserByID(id uint) *model.ApiJson {
+func GetUserByID(id uint, auth *model.AuthInfo) *model.ApiJson {
 	user, err := dao.GetUserByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -23,7 +23,7 @@ func GetUserByID(id uint) *model.ApiJson {
 	return model.Success(UserToJson(user), "获取成功")
 }
 
-func GetUserInfoByID(id uint) *model.ApiJson {
+func GetUserInfoByID(id uint, auth *model.AuthInfo) *model.ApiJson {
 	user, err := dao.GetUserByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -37,7 +37,7 @@ func GetUserInfoByID(id uint) *model.ApiJson {
 	return model.Success(json, "获取成功")
 }
 
-func GetUserByName(name string) *model.ApiJson {
+func GetUserByName(name string, auth *model.AuthInfo) *model.ApiJson {
 	user, err := dao.GetUserByName(name)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -49,7 +49,7 @@ func GetUserByName(name string) *model.ApiJson {
 	return model.Success(UserToJson(user), "获取成功")
 }
 
-func GetUserInfoByName(name string) *model.ApiJson {
+func GetUserInfoByName(name string, auth *model.AuthInfo) *model.ApiJson {
 	user, err := dao.GetUserByName(name)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -63,7 +63,14 @@ func GetUserInfoByName(name string) *model.ApiJson {
 	return model.Success(json, "获取成功")
 }
 
-func CreateUser(aul *model.ModifyUserJson) *model.ApiJson {
+func RegisterUser(aul *model.RegisterUserRequest, auth *model.AuthInfo) *model.ApiJson {
+	req := &model.CreateUserRequest{
+		RegisterUserRequest: *aul,
+	}
+	return CreateUser(req, auth)
+}
+
+func CreateUser(aul *model.CreateUserRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
@@ -79,11 +86,11 @@ func CreateUser(aul *model.ModifyUserJson) *model.ApiJson {
 
 }
 
-func UpdateUser(id uint, aul *model.ModifyUserJson) *model.ApiJson {
+func UpdateUser(id uint, aul *model.ModifyUserRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	u, err := dao.UpdateUser(id, aul)
+	u, err := dao.UpdateUser(id, aul, auth.User)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
@@ -95,7 +102,7 @@ func UpdateUser(id uint, aul *model.ModifyUserJson) *model.ApiJson {
 	return model.SuccessUpdate(UserToJson(u), "更新成功")
 }
 
-func DeleteUser(id uint) *model.ApiJson {
+func DeleteUser(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err := dao.DeleteUser(id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
@@ -106,7 +113,7 @@ func DeleteUser(id uint) *model.ApiJson {
 	return model.SuccessUpdate(nil, "删除成功")
 }
 
-func GetAllUsers(aul *model.AllUserJson) *model.ApiJson {
+func GetAllUsers(aul *model.AllUserRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
@@ -122,16 +129,15 @@ func GetAllUsers(aul *model.AllUserJson) *model.ApiJson {
 	return model.Success(us, "获取成功")
 }
 
-const wxURL = "https://api.weixin.qq.com/sns/jscode2session"
-
-func WxUserLogin(aul *model.WxLoginJson) *model.ApiJson {
+func WxUserLogin(aul *model.WxLoginRequest, auth *model.AuthInfo) *model.ApiJson {
+	const wxURL = "https://api.weixin.qq.com/sns/jscode2session"
 	params := map[string]string{
 		"appid":      config.AppConfig.GetString("wechat.appid"),
 		"secret":     config.AppConfig.GetString("wechat.secret"),
 		"js_code":    aul.Code,
 		"grant_type": "authorization_code",
 	}
-	wxres := &model.WxLoginResponseJson{}
+	wxres := &model.WxLoginResponse{}
 	if err := util.HttpRequest(wxURL, "GET", params, wxres); err != nil {
 		return model.ErrorVerification(err)
 	}
@@ -145,15 +151,17 @@ func WxUserLogin(aul *model.WxLoginJson) *model.ApiJson {
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorQueryDatabase(err)
 		}
-		if aul.UserID != 0 {
-			if err := dao.AttachOpenIDToUser(aul.UserID, wxres.OpenID); err != nil {
+		if auth.User != 0 {
+			if err := dao.AttachOpenIDToUser(auth.User, wxres.OpenID); err != nil {
 				return model.ErrorUpdateDatabase(err)
 			}
-			userID = aul.UserID
+			userID = auth.User
 		} else {
-			aul := &model.ModifyUserJson{
-				Name:     wxres.OpenID,
-				Password: util.RandomString(32),
+			aul := &model.CreateUserRequest{
+				RegisterUserRequest: model.RegisterUserRequest{
+					Name:     wxres.OpenID,
+					Password: util.RandomString(32),
+				},
 			}
 			user, err = dao.CreateUser(aul)
 			if err != nil {
@@ -173,7 +181,7 @@ func WxUserLogin(aul *model.WxLoginJson) *model.ApiJson {
 	return model.Success(token, "登陆成功")
 }
 
-func UserLogin(aul *model.LoginJson) *model.ApiJson {
+func UserLogin(aul *model.LoginRequest, auth *model.AuthInfo) *model.ApiJson {
 	var user *model.User
 	var err error
 	if err := util.Validator.Struct(aul); err != nil {
@@ -196,7 +204,7 @@ func UserLogin(aul *model.LoginJson) *model.ApiJson {
 		}
 	}
 
-	user.LoginIP = aul.LoginIP
+	user.LoginIP = auth.IP
 	if err := dao.CheckLogin(user, aul.Password); err != nil {
 		return model.ErrorVerification(fmt.Errorf("密码错误"))
 	}
@@ -207,7 +215,7 @@ func UserLogin(aul *model.LoginJson) *model.ApiJson {
 	return model.Success(token, "登陆成功")
 }
 
-func UserRenew(uid uint) *model.ApiJson {
+func UserRenew(uid uint, auth *model.AuthInfo) *model.ApiJson {
 	user, err := dao.GetUserByID(uid)
 	token, err := util.GetJwtString(user.ID, user.RoleName)
 	if err != nil {
