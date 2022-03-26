@@ -10,19 +10,17 @@ type ItemLog struct {
 	ChangePrice float64 `gorm:"not null; default:0; comment:开销 正:进货 负:订单收费"`
 }
 
-type AddItemJson struct {
-	ItemID     uint    `json:"item_id"`
-	Num        uint    `json:"num"`
-	Price      float64 `json:"price"`
-	OperatorID uint    `json:"-"` // Filled by system
+type AddItemRequest struct {
+	ItemID uint    `json:"item_id"`
+	Num    uint    `json:"num"`
+	Price  float64 `json:"price"`
 }
 
-type ConsumeItemJson struct {
-	ItemID     uint    `json:"item_id"`
-	OrderID    uint    `json:"order_id"`
-	Num        uint    `json:"num"`
-	Price      float64 `json:"price"`
-	OperatorID uint    `json:"-"` // Filled by system
+type ConsumeItemRequest struct {
+	ItemID  uint    `json:"item_id"`
+	OrderID uint    `json:"order_id"`
+	Num     uint    `json:"num"`
+	Price   float64 `json:"price"`
 }
 
 type ItemLogJson struct {

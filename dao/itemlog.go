@@ -1,29 +1,23 @@
 package dao
 
-import "maintainman/model"
+import (
+	"maintainman/model"
+)
 
-func ItemLogAdd(aul *model.AddItemJson) *model.ItemLog {
+func ItemLogAdd(aul *model.AddItemRequest) *model.ItemLog {
 	itemlog := &model.ItemLog{
 		ItemID:      aul.ItemID,
 		ChangeNum:   int(aul.Num),
 		ChangePrice: aul.Price,
-		BaseModel: model.BaseModel{
-			CreatedBy: aul.OperatorID,
-			UpdatedBy: aul.OperatorID,
-		},
 	}
 	return itemlog
 }
 
-func ItemLogConsume(aul *model.ConsumeItemJson) *model.ItemLog {
+func ItemLogConsume(aul *model.ConsumeItemRequest) *model.ItemLog {
 	itemlog := &model.ItemLog{
 		ItemID:      aul.ItemID,
 		ChangeNum:   -int(aul.Num),
 		ChangePrice: -aul.Price,
-		BaseModel: model.BaseModel{
-			CreatedBy: aul.OperatorID,
-			UpdatedBy: aul.OperatorID,
-		},
 	}
 	return itemlog
 }

@@ -3,39 +3,45 @@ package controller
 import (
 	"maintainman/model"
 	"maintainman/service"
+	"maintainman/util"
 
 	"github.com/kataras/iris/v12"
 )
 
 func GetTagByID(ctx iris.Context) {
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	response := service.GetTagByID(id)
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetTagByID(id, auth)
 	ctx.Values().Set("response", response)
 }
 
 func GetAllTagSorts(ctx iris.Context) {
-	response := service.GetAllTagSorts()
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetAllTagSorts(auth)
 	ctx.Values().Set("response", response)
 }
 
 func GetAllTagsBySort(ctx iris.Context) {
 	name := ctx.Params().GetString("name")
-	response := service.GetAllTagsBySort(name)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetAllTagsBySort(name, auth)
 	ctx.Values().Set("response", response)
 }
 
 func CreateTag(ctx iris.Context) {
-	aul := &model.CreateTagJson{}
+	aul := &model.CreateTagRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	response := service.CreateTag(aul)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.CreateTag(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
-func DeleteTagByID(ctx iris.Context) {
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	response := service.DeleteTag(id)
+func DeleteTag(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.DeleteTag(id, auth)
 	ctx.Values().Set("response", response)
 }

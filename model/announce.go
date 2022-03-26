@@ -13,15 +13,28 @@ type Announce struct {
 	Hits      uint       `gorm:"not null; default:0; index; comment:点击数"`
 }
 
-type ModifyAnnounceJson struct {
-	Title      string `json:"title" validate:"lte=191"`
-	Content    string `json:"content"`
-	StartTime  int64  `json:"start_time" validate:"gte=-1,lte=253370764799"`
-	EndTime    int64  `json:"end_time" validate:"eq=-1|gtfield=StartTime,lte=253370764799"`
-	OperatorID uint   `json:"-"` // Filled by system
+type CreateAnnounceRequest struct {
+	Title     string `json:"title" validate:"required,lte=191"`
+	Content   string `json:"content" validate:"required"`
+	StartTime int64  `json:"start_time" validate:"gte=-1,lte=253370764799"`
+	EndTime   int64  `json:"end_time" validate:"eq=-1|gtfield=StartTime,lte=253370764799"`
 }
 
-type AllAnnounceJson struct {
+type UpdateAnnounceRequest struct {
+	Title     string `json:"title" validate:"lte=191"`
+	Content   string `json:"content"`
+	StartTime int64  `json:"start_time" validate:"gte=-1,lte=253370764799"`
+	EndTime   int64  `json:"end_time" validate:"eq=-1|gtfield=StartTime,lte=253370764799"`
+}
+
+type ModifyAnnounceRequest struct {
+	Title     string
+	Content   string
+	StartTime int64
+	EndTime   int64
+}
+
+type AllAnnounceRequest struct {
 	Title     string `url:"title" validate:"lte=191"`
 	StartTime int64  `url:"start_time" validate:"gte=-1,lte=253370764799"`
 	EndTime   int64  `url:"end_time" validate:"gte=-1,lte=253370764799"`

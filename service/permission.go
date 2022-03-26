@@ -5,12 +5,12 @@ import (
 	"maintainman/model"
 )
 
-func GetPermission(name string) *model.ApiJson {
+func GetPermission(name string, auth *model.AuthInfo) *model.ApiJson {
 	perm := dao.GetPermission(name)
 	return model.Success(perm, "获取成功")
 }
 
-func GetAllPermissions() *model.ApiJson {
+func GetAllPermissions(auth *model.AuthInfo) *model.ApiJson {
 	perm := dao.GetAllPermissions()
 	return model.Success(perm, "获取成功")
 }

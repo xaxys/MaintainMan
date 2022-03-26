@@ -1,4 +1,4 @@
-package model
+package util
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 
 func TestPermissionSet(t *testing.T) {
 	perms := []string{"admin.*", "user.update"}
-	s := NewPermissionSet().Add(perms...)
+	s := NewPermSet().Add(perms...)
 	if !s.Has("admin.whatever") {
 		t.Error("admin.whatever should be true")
 	}

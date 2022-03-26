@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetAnnounceByID(id uint) *model.ApiJson {
+func GetAnnounceByID(id uint, auth *model.AuthInfo) *model.ApiJson {
 	announce, err := dao.GetAnnounceByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -25,7 +25,7 @@ func GetAnnounceByID(id uint) *model.ApiJson {
 	return model.Success(AnnounceToJson(announce), "获取成功")
 }
 
-func GetAnnounceByTitle(title string) *model.ApiJson {
+func GetAnnounceByTitle(title string, auth *model.AuthInfo) *model.ApiJson {
 	announce, err := dao.GetAnnounceByTitle(title)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -37,7 +37,7 @@ func GetAnnounceByTitle(title string) *model.ApiJson {
 	return model.Success(AnnounceToJson(announce), "获取成功")
 }
 
-func GetAllAnnounces(aul *model.AllAnnounceJson) *model.ApiJson {
+func GetAllAnnounces(aul *model.AllAnnounceRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
@@ -53,37 +53,40 @@ func GetAllAnnounces(aul *model.AllAnnounceJson) *model.ApiJson {
 	return model.Success(as, "获取成功")
 }
 
-func GetLatestAnnounces(offset uint) *model.ApiJson {
+func GetLatestAnnounces(param *model.PageParam, auth *model.AuthInfo) *model.ApiJson {
 	now := time.Now().Unix()
-	aul := &model.AllAnnounceJson{
+	aul := &model.AllAnnounceRequest{
 		StartTime: now,
 		EndTime:   now,
 		Inclusive: false,
 		PageParam: model.PageParam{
-			Offset:  offset,
-			OrderBy: "id",
+			OrderBy: "id desc",
+			Offset:  param.Offset,
+			Limit:   param.Limit,
 		},
 	}
-	return GetAllAnnounces(aul)
+	return GetAllAnnounces(aul, auth)
 }
 
-func CreateAnnounce(aul *model.ModifyAnnounceJson) *model.ApiJson {
+func CreateAnnounce(aul *model.CreateAnnounceRequest, auth *model.AuthInfo) *model.ApiJson {
 	// TODO: Localize error info: https://blog.xizhibei.me/2019/06/16/an-introduction-to-golang-validator/
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	announce, err := dao.CreateAnnounce(aul)
+	req := model.ModifyAnnounceRequest(*aul)
+	announce, err := dao.CreateAnnounce(&req, auth.User)
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 	}
 	return model.SuccessCreate(AnnounceToJson(announce), "创建成功")
 }
 
-func UpdateAnnounce(id uint, aul *model.ModifyAnnounceJson) *model.ApiJson {
+func UpdateAnnounce(id uint, aul *model.UpdateAnnounceRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	announce, err := dao.UpdateAnnounce(id, aul)
+	req := model.ModifyAnnounceRequest(*aul)
+	announce, err := dao.UpdateAnnounce(id, &req, auth.User)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
@@ -94,7 +97,7 @@ func UpdateAnnounce(id uint, aul *model.ModifyAnnounceJson) *model.ApiJson {
 	return model.SuccessUpdate(AnnounceToJson(announce), "更新成功")
 }
 
-func DeleteAnnounce(id uint) *model.ApiJson {
+func DeleteAnnounce(id uint, auth *model.AuthInfo) *model.ApiJson {
 	err := dao.DeleteAnnounce(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -106,8 +109,8 @@ func DeleteAnnounce(id uint) *model.ApiJson {
 	return model.SuccessUpdate(nil, "删除成功")
 }
 
-func HitAnnounce(id, uid uint) *model.ApiJson {
-	key := fmt.Sprintf("%d:%d", id, uid)
+func HitAnnounce(id uint, auth *model.AuthInfo) *model.ApiJson {
+	key := fmt.Sprintf("%d:%d", id, auth.User)
 	if _, ok := database.Cache.Get(key); ok {
 		return model.Success(nil, "浏览过了")
 	}
@@ -120,7 +123,7 @@ func HitAnnounce(id, uid uint) *model.ApiJson {
 }
 
 func AnnounceToJson(announce *model.Announce) *model.AnnounceJson {
-	return util.NotNil(announce, &model.AnnounceJson{
+	return util.NilOrValue(announce, &model.AnnounceJson{
 		ID:        announce.ID,
 		Title:     announce.Title,
 		Content:   announce.Content,

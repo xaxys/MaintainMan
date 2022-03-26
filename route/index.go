@@ -66,16 +66,15 @@ func Route(app *iris.Application) {
 					announce.Get("/", middleware.PermInterceptor("announce.viewall"), controller.GetLatestAnnounces)
 					announce.Get("/all", middleware.PermInterceptor("announce.viewall"), controller.GetAllAnnounces)
 					announce.Get("/{id:uint}", middleware.PermInterceptor("announce.viewall"), controller.GetAnnounceByID)
-					announce.Post("/", middleware.PermInterceptor("announce.create"), controller.CreateAnnounceByID)
-					announce.Put("/{id:uint}", middleware.PermInterceptor("announce.update"), controller.UpdateAnnounceByID)
-					announce.Delete("/{id:uint}", middleware.PermInterceptor("announce.delete"), controller.DeleteAnnounceByID)
-					announce.Get("/{id:uint}/hit", middleware.PermInterceptor("announce.viewall"), controller.HitAnnounceByID)
+					announce.Post("/", middleware.PermInterceptor("announce.create"), controller.CreateAnnounce)
+					announce.Put("/{id:uint}", middleware.PermInterceptor("announce.update"), controller.UpdateAnnounce)
+					announce.Delete("/{id:uint}", middleware.PermInterceptor("announce.delete"), controller.DeleteAnnounce)
+					announce.Get("/{id:uint}/hit", middleware.PermInterceptor("announce.viewall"), controller.HitAnnounce)
 				})
 
 				api.PartyFunc("/order", func(order router.Party) {
 					order.PartyFunc("/user", func(user router.Party) {
 						order.Get("/", controller.GetUserOrders)
-						order.Put("/{id:uint}", middleware.PermInterceptor("order.update"), controller.UpdateOrder)
 					})
 
 					order.PartyFunc("/repairer", func(repairer router.Party) {
@@ -84,19 +83,32 @@ func Route(app *iris.Application) {
 					})
 
 					order.Get("/all", middleware.PermInterceptor("order.viewall"), controller.GetAllOrders)
-					order.Get("/{id:uint}", middleware.PermInterceptor("order.viewall"), controller.GetOrderByID)
 					order.Post("/", middleware.PermInterceptor("order.create"), controller.CreateOrder)
-					order.Put("/{id:uint}", middleware.PermInterceptor("order.updateall"), controller.UpdateOrderByID)
-					// change order status
-					order.Post("/{id:uint}/release", middleware.PermInterceptor("order.update"), controller.ReleaseOrder)
-					order.Post("/{id:uint}/assign", middleware.PermInterceptor("order.assign"), controller.AssignOrder)
-					order.Post("/{id:uint}/selfassign", middleware.PermInterceptor("order.selfassign"), controller.SelfAssignOrder)
-					order.Post("/{id:uint}/complete", middleware.PermInterceptor("order.complete"), controller.CompleteOrder)
-					order.Post("/{id:uint}/cancel", middleware.PermInterceptor("order.cancel"), controller.CancelOrder)
-					order.Post("/{id:uint}/reject", middleware.PermInterceptor("order.reject"), controller.RejectOrder)
-					order.Post("/{id:uint}/report", middleware.PermInterceptor("order.report"), controller.ReportOrder)
-					order.Post("/{id:uint}/hold", middleware.PermInterceptor("order.hold"), controller.HoldOrder)
-					order.Post("/{id:uint}/appraise", middleware.PermInterceptor("order.appraise"), controller.AppraiseOrder)
+
+					order.PartyFunc("/{id:uint}", func(orderID router.Party) {
+						order.Get("/", middleware.PermInterceptor("order.viewall"), controller.GetOrderByID)
+						order.Put("/update", middleware.PermInterceptor("order.update"), controller.UpdateOrder)
+						order.Put("/update/force", middleware.PermInterceptor("order.updateall"), controller.ForceUpdateOrder)
+						// change order status
+						order.Post("/release", middleware.PermInterceptor("order.update"), controller.ReleaseOrder)
+						order.Post("/assign", middleware.PermInterceptor("order.assign"), controller.AssignOrder)
+						order.Post("/selfassign", middleware.PermInterceptor("order.selfassign"), controller.SelfAssignOrder)
+						order.Post("/complete", middleware.PermInterceptor("order.complete"), controller.CompleteOrder)
+						order.Post("/cancel", middleware.PermInterceptor("order.cancel"), controller.CancelOrder)
+						order.Post("/reject", middleware.PermInterceptor("order.reject"), controller.RejectOrder)
+						order.Post("/report", middleware.PermInterceptor("order.report"), controller.ReportOrder)
+						order.Post("/hold", middleware.PermInterceptor("order.hold"), controller.HoldOrder)
+						order.Post("/appraise", middleware.PermInterceptor("order.appraise"), controller.AppraiseOrder)
+
+						order.PartyFunc("/comment", func(comment router.Party) {
+							comment.Get("/", middleware.PermInterceptor("comment.viewall"), controller.GetCommentsByOrder)
+							comment.Post("/", middleware.PermInterceptor("comment.create"), controller.CreateComment)
+							comment.Delete("/", middleware.PermInterceptor("comment.delete"), controller.DeleteComment)
+							comment.Post("/force", middleware.PermInterceptor("comment.createall"), controller.ForceCreateComment)
+							comment.Delete("/force", middleware.PermInterceptor("comment.deleteall"), controller.ForceDeleteComment)
+						})
+					})
+
 				})
 
 				api.PartyFunc("/tag", func(tag router.Party) {
@@ -104,7 +116,7 @@ func Route(app *iris.Application) {
 					tag.Get("/sort", middleware.PermInterceptor("tag.viewall"), controller.GetAllTagSorts)
 					tag.Get("/sort/{name:string}", middleware.PermInterceptor("tag.viewall"), controller.GetAllTagsBySort)
 					tag.Post("/", middleware.PermInterceptor("tag.create"), controller.CreateTag)
-					tag.Delete("/{id:uint}", middleware.PermInterceptor("tag.delete"), controller.DeleteTagByID)
+					tag.Delete("/{id:uint}", middleware.PermInterceptor("tag.delete"), controller.DeleteTag)
 				})
 
 				api.PartyFunc("/item", func(item router.Party) {
@@ -114,15 +126,7 @@ func Route(app *iris.Application) {
 					item.Get("/{id:uint}", middleware.PermInterceptor("item.viewall"), controller.GetItemByID)
 					item.Post("/", middleware.PermInterceptor("item.create"), controller.CreateItem)
 					item.Post("/{id:uint}", middleware.PermInterceptor("item.update"), controller.AddItem)
-					item.Delete("/{id:uint}", middleware.PermInterceptor("item.delete"), controller.DeleteItemByID)
-				})
-
-				api.PartyFunc("/comment", func(comment router.Party) {
-					comment.Get("/{id:uint}", middleware.PermInterceptor("comment.viewall"), controller.GetCommentsByOrder)
-					comment.Post("/{id:uint}", middleware.PermInterceptor("comment.create"), controller.CreateComment)
-					comment.Delete("/{id:uint}", middleware.PermInterceptor("comment.delete"), controller.DeleteComment)
-					comment.Post("/all/{id:uint}", middleware.PermInterceptor("comment.createall"), controller.CreateCommentOverride)
-					comment.Delete("/all/{id:uint}", middleware.PermInterceptor("comment.deleteall"), controller.DeleteCommentByID)
+					item.Delete("/{id:uint}", middleware.PermInterceptor("item.delete"), controller.DeleteItem)
 				})
 			})
 		})

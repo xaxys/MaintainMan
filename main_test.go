@@ -53,7 +53,7 @@ func getSuperAdminToken() string {
 	apiJson := service.UserLogin(&model.LoginRequest{
 		Account:  superAdmin.Name,
 		Password: superAdmin.Password,
-	}, nil)
+	}, "0.0.0.0", nil)
 	return util.Strval(apiJson.Data)
 }
 

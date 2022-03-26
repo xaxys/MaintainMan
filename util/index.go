@@ -20,7 +20,7 @@ func RandomString(n int) string {
 	return string(b)
 }
 
-func ToUint[T int | int8 | int16 | int32 | int64](n T) uint {
+func ToUint[T ~int | ~int8 | ~int16 | ~int32 | ~int64](n T) uint {
 	if n < 0 {
 		return 0
 	} else {
@@ -28,12 +28,26 @@ func ToUint[T int | int8 | int16 | int32 | int64](n T) uint {
 	}
 }
 
-func NotNil[T, U any](v *T, obj *U) *U {
+func NotEmpty(s, def string) string {
+	if s == "" {
+		return s
+	}
+	return s
+}
+
+func NilOrValue[T, U any](v *T, obj *U) *U {
 	if v == nil {
 		return nil
 	} else {
 		return obj
 	}
+}
+
+func NilOrPtrCast[U any](v any) *U {
+	if u, ok := v.(*U); ok {
+		return u
+	}
+	return nil
 }
 
 func Tenary[T any](cond bool, a, b T) T {
@@ -80,4 +94,8 @@ func TransSlice[T, U any](s []T, trans func(T) U) (us []U) {
 		us = append(us, trans(t))
 	}
 	return
+}
+
+func LastElem[T any](slice []T) T {
+	return slice[len(slice)-1]
 }

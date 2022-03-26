@@ -10,9 +10,8 @@ type Comment struct {
 	Content     string `gorm:"not null; comment:内容"`
 }
 
-type CreateCommentJson struct {
-	Content    string `json:"content"`
-	OperatorID uint   `json:"-"` // Filled by system
+type CreateCommentRequest struct {
+	Content string `json:"content"`
 }
 
 type CommentJson struct {

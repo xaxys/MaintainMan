@@ -7,19 +7,20 @@ import (
 	"maintainman/util"
 )
 
-func GetCommentsByOrder(id, offset, operator uint) *model.ApiJson {
+func GetCommentsByOrder(id uint, param *model.PageParam, auth *model.AuthInfo) *model.ApiJson {
 	order, err := dao.GetOrderWithLastStatus(id)
 	if err != nil {
 		return model.ErrorNotFound(err)
 	}
-	if order.UserID != operator && order.StatusList[len(order.StatusList)-1].RepairerID != operator {
+	if order.UserID != auth.User && util.LastElem(order.StatusList).RepairerID != auth.User {
 		return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能查看评论"))
 	}
-	return GetCommentsByOrderID(id, offset)
+	return ForceGetCommentsByOrder(id, param, auth)
 }
 
-func GetCommentsByOrderID(id, offset uint) *model.ApiJson {
-	comments, err := dao.GetCommentsByOrder(id, offset)
+func ForceGetCommentsByOrder(id uint, param *model.PageParam, auth *model.AuthInfo) *model.ApiJson {
+	param.OrderBy = util.NotEmpty(param.OrderBy, "id desc")
+	comments, err := dao.GetCommentsByOrder(id, param)
 	if err != nil {
 		return model.ErrorQueryDatabase(err)
 	}
@@ -27,40 +28,40 @@ func GetCommentsByOrderID(id, offset uint) *model.ApiJson {
 	return model.Success(cs, "获取成功")
 }
 
-func CreateComment(oid uint, aul *model.CreateCommentJson) *model.ApiJson {
-	order, err := dao.GetOrderWithLastStatus(oid)
+func CreateComment(id uint, aul *model.CreateCommentRequest, auth *model.AuthInfo) *model.ApiJson {
+	order, err := dao.GetOrderWithLastStatus(id)
 	if err != nil {
 		return model.ErrorNotFound(err)
 	}
-	if order.UserID != aul.OperatorID && order.StatusList[len(order.StatusList)-1].RepairerID != aul.OperatorID {
-		return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能查看评论"))
+	if order.UserID != auth.User && util.LastElem(order.StatusList).RepairerID != auth.User {
+		return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能创建评论"))
 	}
-	return CreateCommentOverride(oid, aul)
+	return ForceCreateComment(id, aul, auth)
 }
 
-func CreateCommentOverride(oid uint, aul *model.CreateCommentJson) *model.ApiJson {
+func ForceCreateComment(id uint, aul *model.CreateCommentRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	comment, err := dao.CreateComment(oid, aul.OperatorID, aul.Content)
+	comment, err := dao.CreateComment(id, auth.User, aul)
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 	}
 	return model.SuccessCreate(CommentToJson(comment), "创建成功")
 }
 
-func DeleteComment(id, operator uint) *model.ApiJson {
+func DeleteComment(id uint, auth *model.AuthInfo) *model.ApiJson {
 	comment, err := dao.GetCommentByID(id)
 	if err != nil {
 		return model.ErrorNotFound(err)
 	}
-	if comment.UserID != operator {
+	if comment.UserID != auth.User {
 		return model.ErrorUpdateDatabase(fmt.Errorf("操作人不是评论创建者"))
 	}
-	return DeleteCommentByID(id)
+	return ForceDeleteComment(id, auth)
 }
 
-func DeleteCommentByID(id uint) *model.ApiJson {
+func ForceDeleteComment(id uint, auth *model.AuthInfo) *model.ApiJson {
 	err := dao.DeleteComment(id)
 	if err != nil {
 		return model.ErrorQueryDatabase(err)
@@ -70,11 +71,12 @@ func DeleteCommentByID(id uint) *model.ApiJson {
 
 func CommentToJson(comment *model.Comment) *model.CommentJson {
 	return &model.CommentJson{
-		ID:        comment.ID,
-		OrderID:   comment.OrderID,
-		UserID:    comment.UserID,
-		UserName:  comment.UserName,
-		Content:   comment.Content,
-		CreatedAt: comment.CreatedAt.Unix(),
+		ID:          comment.ID,
+		OrderID:     comment.OrderID,
+		UserID:      comment.UserID,
+		UserName:    comment.UserName,
+		SequenceNum: comment.SequenceNum,
+		Content:     comment.Content,
+		CreatedAt:   comment.CreatedAt.Unix(),
 	}
 }

@@ -23,7 +23,16 @@ type Order struct {
 	// Place        *Place     `gorm:"foreignkey:PlaceID"`
 }
 
-type ModifyOrderJson struct {
+type CreateOrderRequest struct {
+	Title        string `json:"title" validate:"required,lte=191"`
+	Content      string `json:"content" validate:"required"`
+	Address      string `json:"address" validate:"required"`
+	ContactName  string `json:"contact_name" validate:"required,lte=191"`
+	ContactPhone string `json:"contact_phone" validate:"required,lte=191"`
+	Tags         []uint `json:"add_tags"`
+}
+
+type UpdateOrderRequest struct {
 	Title        string `json:"title" validate:"lte=191"`
 	Content      string `json:"content"`
 	Address      string `json:"address"`
@@ -31,15 +40,24 @@ type ModifyOrderJson struct {
 	ContactPhone string `json:"contact_phone" validate:"lte=191"`
 	AddTags      []uint `json:"add_tags"`
 	DelTags      []uint `json:"del_tags"`
-	OperatorID   uint   // Filled by system
 }
 
-type AllOrderJson struct {
-	Title      string `json:"title" validate:"lte=191"`
-	UserID     uint   `json:"user_id"`
-	Status     uint   `json:"status"`
-	Tags       []uint `json:"tags"`
-	Conjunctve bool   `json:"conjunctve"`
+type AllOrderRequest struct {
+	Title      string `url:"title" validate:"lte=191"`
+	UserID     uint   `url:"user_id"`
+	Status     uint   `url:"status"`
+	Tags       []uint `url:"tags"`
+	Conjunctve bool   `url:"conjunctve"`
+	PageParam
+}
+
+type UserOrderRequest struct {
+	Status uint `url:"status"`
+	PageParam
+}
+
+type RepairerOrderRequest struct {
+	Current bool `url:"current"`
 	PageParam
 }
 

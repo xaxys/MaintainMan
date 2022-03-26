@@ -25,7 +25,7 @@ func CreateSystemAdmin() {
 	if _, err := dao.GetUserByID(1); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			logger.Logger.Debug("Create default administrator account")
-			if _, err := dao.CreateUser(aul); err != nil {
+			if _, err := dao.CreateUser(aul, 0); err != nil {
 				panic("Failed to create default administrator")
 			}
 		} else {

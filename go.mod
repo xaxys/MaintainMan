@@ -3,6 +3,7 @@ module maintainman
 go 1.18
 
 require (
+	github.com/jinzhu/copier v0.3.5
 	github.com/kataras/golog v0.1.7
 	github.com/spf13/viper v1.10.1
 )
@@ -35,7 +36,6 @@ require (
 	github.com/iris-contrib/httpexpect/v2 v2.3.1 // indirect
 	github.com/iris-contrib/jade v1.1.4 // indirect
 	github.com/iris-contrib/schema v0.0.6 // indirect
-	github.com/jinzhu/copier v0.3.5 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/josharian/intern v1.0.0 // indirect

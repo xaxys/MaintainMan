@@ -10,11 +10,7 @@ type Item struct {
 	ItemLogs    []*ItemLog `gorm:"foreignkey:ItemID"`
 }
 
-type AllItemJson struct {
-	PageParam
-}
-
-type CreateItemJson struct {
+type CreateItemRequest struct {
 	Name        string `json:"name" validate:"required,lte=191"`
 	Discription string `json:"discription"`
 }

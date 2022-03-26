@@ -5,14 +5,14 @@ import (
 	"maintainman/model"
 )
 
-func GetOrderByRepairer(id uint, current bool, offset uint) (orders []*model.Order, err error) {
+func GetOrderByRepairer(id uint, json *model.RepairerOrderRequest) (orders []*model.Order, err error) {
 	status := &model.Status{
 		RepairerID: id,
-		Current:    current,
+		Current:    json.Current,
 	}
 	statuses := []*model.Status{}
 
-	if err = Filter("id desc", offset, 0).Preload("Order").Where(status).Find(&statuses).Error; err != nil {
+	if err = PageFilter(&json.PageParam).Preload("Order").Where(status).Find(&statuses).Error; err != nil {
 		logger.Logger.Debugf("GetOrderByRepairerErr: %v\n", err)
 		return
 	}
@@ -31,7 +31,6 @@ func NewStatus(status, repairer uint, operator uint) *model.Status {
 		Current:    true,
 		BaseModel: model.BaseModel{
 			CreatedBy: operator,
-			UpdatedBy: operator,
 		},
 	}
 }

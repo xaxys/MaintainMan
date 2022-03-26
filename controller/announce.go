@@ -9,59 +9,63 @@ import (
 )
 
 func GetAnnounceByID(ctx iris.Context) {
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	response := service.GetAnnounceByID(id)
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetAnnounceByID(id, auth)
 	ctx.Values().Set("response", response)
 }
 
 func GetAllAnnounces(ctx iris.Context) {
-	aul := &model.AllAnnounceJson{}
-	if err := ctx.ReadJSON(&aul); err != nil {
+	aul := &model.AllAnnounceRequest{}
+	if err := ctx.ReadQuery(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	response := service.GetAllAnnounces(aul)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetAllAnnounces(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
 func GetLatestAnnounces(ctx iris.Context) {
-	offset, _ := ctx.URLParamInt("offset")
-	response := service.GetLatestAnnounces(util.ToUint(offset))
+	param := ExtractPageParam(ctx)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetLatestAnnounces(param, auth)
 	ctx.Values().Set("response", response)
 }
 
-func CreateAnnounceByID(ctx iris.Context) {
-	aul := &model.ModifyAnnounceJson{}
+func CreateAnnounce(ctx iris.Context) {
+	aul := &model.CreateAnnounceRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	aul.OperatorID, _ = ctx.Values().GetUint("user_id")
-	response := service.CreateAnnounce(aul)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.CreateAnnounce(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
-func UpdateAnnounceByID(ctx iris.Context) {
-	aul := &model.ModifyAnnounceJson{}
+func UpdateAnnounce(ctx iris.Context) {
+	aul := &model.UpdateAnnounceRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	aul.OperatorID, _ = ctx.Values().GetUint("user_id")
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	response := service.UpdateAnnounce(id, aul)
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.UpdateAnnounce(id, aul, auth)
 	ctx.Values().Set("response", response)
 }
 
-func DeleteAnnounceByID(ctx iris.Context) {
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	response := service.DeleteAnnounce(id)
+func DeleteAnnounce(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.DeleteAnnounce(id, auth)
 	ctx.Values().Set("response", response)
 }
 
-func HitAnnounceByID(ctx iris.Context) {
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	uid := ctx.Values().GetUintDefault("user_id", 0)
-	response := service.HitAnnounce(id, uid)
+func HitAnnounce(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.HitAnnounce(id, auth)
 	ctx.Values().Set("response", response)
 }

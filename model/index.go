@@ -11,7 +11,7 @@ type BaseModel struct {
 }
 
 type PageParam struct {
-	OrderBy string `url:"order_by"`
+	OrderBy string `url:"order_by" validate:"omitempty,order_by"`
 	Offset  uint   `url:"offset"`
 	Limit   uint   `url:"limit"`
 }

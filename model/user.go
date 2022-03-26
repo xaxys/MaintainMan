@@ -50,7 +50,7 @@ type CreateUserRequest struct {
 	DivisionID uint   `json:"division_id"`
 }
 
-type ModifyUserRequest struct {
+type UpdateUserRequest struct {
 	Name        string `json:"name" validate:"omitempty,gte=2,lte=50"`
 	Password    string `json:"password" validate:"omitempty,gte=8,lte=32"`
 	DisplayName string `json:"display_name" validate:"omitempty,lte=191"`

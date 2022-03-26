@@ -9,52 +9,55 @@ import (
 )
 
 func GetCommentsByOrder(ctx iris.Context) {
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	offset, _ := ctx.URLParamInt("offset")
-	uid := ctx.Values().GetUintDefault("user_id", 0)
-	response := service.GetCommentsByOrder(id, util.ToUint(offset), uid)
+	id := ctx.Params().GetUintDefault("id", 0)
+	param := ExtractPageParam(ctx)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetCommentsByOrder(id, param, auth)
 	ctx.Values().Set("response", response)
 }
 
-func GetCommentsByOrderID(ctx iris.Context) {
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	offset, _ := ctx.URLParamInt("offset")
-	response := service.GetCommentsByOrderID(id, util.ToUint(offset))
+func ForceGetCommentsByOrder(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("id", 0)
+	param := ExtractPageParam(ctx)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.ForceGetCommentsByOrder(id, param, auth)
 	ctx.Values().Set("response", response)
 }
 
-func CreateCommentOverride(ctx iris.Context) {
-	oid := ctx.Params().GetUintDefault("user_id", 0)
-	aul := &model.CreateCommentJson{}
+func ForceCreateComment(ctx iris.Context) {
+	aul := &model.CreateCommentRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	response := service.CreateCommentOverride(oid, aul)
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.ForceCreateComment(id, aul, auth)
 	ctx.Values().Set("response", response)
 }
 
 func CreateComment(ctx iris.Context) {
-	oid := ctx.Params().GetUintDefault("user_id", 0)
-	aul := &model.CreateCommentJson{}
+	aul := &model.CreateCommentRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	aul.OperatorID, _ = ctx.Values().GetUint("user_id")
-	response := service.CreateComment(oid, aul)
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.CreateComment(id, aul, auth)
 	ctx.Values().Set("response", response)
 }
 
 func DeleteComment(ctx iris.Context) {
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	response := service.DeleteCommentByID(id)
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.ForceDeleteComment(id, auth)
 	ctx.Values().Set("response", response)
 }
 
-func DeleteCommentByID(ctx iris.Context) {
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	uid := ctx.Values().GetUintDefault("user_id", 0)
-	response := service.DeleteComment(id, uid)
+func ForceDeleteComment(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.DeleteComment(id, auth)
 	ctx.Values().Set("response", response)
 }

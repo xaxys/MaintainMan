@@ -12,7 +12,7 @@ func TestRole(t *testing.T) {
 	fmt.Printf("all %d roles: %v\n", len(roles), roles)
 
 	// test creat role
-	aul := *&model.CreateRoleJson{
+	aul := *&model.CreateRoleRequest{
 		Name:        "test role 1",
 		DisplayName: "test role 1",
 		Permissions: []string{"perm.test"},
@@ -22,7 +22,7 @@ func TestRole(t *testing.T) {
 		t.Error(err)
 	}
 
-	aul2 := *&model.CreateRoleJson{
+	aul2 := *&model.CreateRoleRequest{
 		Name:        "test role 2",
 		Inheritance: []string{"test role 1"},
 	}
@@ -47,7 +47,7 @@ func TestRole(t *testing.T) {
 	fmt.Printf("role test role 1: %v\n", *role)
 
 	// test update role
-	aul3 := *&model.UpdateRoleJson{
+	aul3 := *&model.UpdateRoleRequest{
 		DisplayName:    "test role 1 (new)",
 		AddPermissions: []string{"perm.test.2"},
 		DelPermissions: []string{"perm.test"},
@@ -63,7 +63,7 @@ func TestRole(t *testing.T) {
 		t.Error("test role 1 does not has test role 2 permission")
 	}
 
-	aul4 := *&model.UpdateRoleJson{
+	aul4 := *&model.UpdateRoleRequest{
 		DelInheritance: []string{"test role 1"},
 	}
 	err = UpdateRole("test role 2", &aul4)

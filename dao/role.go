@@ -54,7 +54,7 @@ func NewRolePersistence(config *viper.Viper) (s *RolePersistence) {
 			}
 			s.guest = role
 		}
-		role.Permissions = model.NewPermissionSet().Add(role.RawPermissions...)
+		role.Permissions = util.NewPermSet().Add(role.RawPermissions...)
 		s.index[role.Name] = role
 		for _, inhe := range role.RawInheritance {
 			inheRole := s.index[inhe]
@@ -295,7 +295,7 @@ func SetGuestRole(name string) (err error) {
 	return nil
 }
 
-func CreateRole(aul *model.CreateRoleJson) (err error) {
+func CreateRole(aul *model.CreateRoleRequest) (err error) {
 	roleLock.RLock()
 	if _, ok := RolePO.index[aul.Name]; ok {
 		err = fmt.Errorf("Role %s already exists", aul.Name)
@@ -314,7 +314,7 @@ func CreateRole(aul *model.CreateRoleJson) (err error) {
 	role := &RoleWithLock{
 		Role: &model.Role{
 			RoleInfo:    &info,
-			Permissions: model.NewPermissionSet(),
+			Permissions: util.NewPermSet(),
 		},
 	}
 	addPermission(role, aul.Permissions...)
@@ -329,7 +329,7 @@ func CreateRole(aul *model.CreateRoleJson) (err error) {
 	return
 }
 
-func UpdateRole(name string, aul *model.UpdateRoleJson) error {
+func UpdateRole(name string, aul *model.UpdateRoleRequest) error {
 	r, err := getRole(name)
 	if err != nil {
 		return fmt.Errorf("Role %s does not exist", name)

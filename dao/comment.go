@@ -17,33 +17,36 @@ func GetCommentByID(id uint) (*model.Comment, error) {
 	return comment, nil
 }
 
-func GetCommentsByOrder(id, offset uint) (comments []*model.Comment, err error) {
-	comment := &model.Comment{
-		OrderID: id,
-	}
-	if err = Filter("id desc", offset, 0).Where(comment).Find(&comments).Error; err != nil {
+func GetCommentsByOrder(id uint, param *model.PageParam) (comments []*model.Comment, err error) {
+	comment := &model.Comment{OrderID: id}
+	if err = PageFilter(param).Where(comment).Find(&comments).Error; err != nil {
 		logger.Logger.Debugf("GetCommentsByOrderErr: %v\n", err)
 		return
 	}
 	return
 }
 
-func CreateComment(oid, uid uint, content string) (comment *model.Comment, err error) {
-	comment = &model.Comment{
-		OrderID: oid,
-		UserID:  uid,
-		Content: content,
-		BaseModel: model.BaseModel{
-			CreatedBy: uid,
-			UpdatedBy: uid,
-		},
-	}
+func CreateComment(oid, uid uint, aul *model.CreateCommentRequest) (comment *model.Comment, err error) {
 	if err = database.DB.Transaction(func(tx *gorm.DB) error {
 		cmt := &model.Comment{OrderID: oid}
 		if err := tx.Where(cmt).Order("id desc").First(cmt).Error; err != nil {
 			return err
 		}
-		comment.SequenceNum = cmt.SequenceNum + 1
+		user := &model.User{}
+		if err := tx.First(user, uid).Error; err != nil {
+			return err
+		}
+		comment = &model.Comment{
+			OrderID:     oid,
+			UserID:      uid,
+			UserName:    user.Name,
+			Content:     aul.Content,
+			SequenceNum: cmt.SequenceNum + 1,
+			BaseModel: model.BaseModel{
+				CreatedBy: uid,
+				UpdatedBy: uid,
+			},
+		}
 		if err := tx.Create(comment).Error; err != nil {
 			return err
 		}

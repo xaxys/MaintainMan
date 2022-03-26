@@ -3,70 +3,77 @@ package controller
 import (
 	"maintainman/model"
 	"maintainman/service"
+	"maintainman/util"
 
 	"github.com/kataras/iris/v12"
 )
 
 func GetItemByID(ctx iris.Context) {
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	response := service.GetItemByID(id)
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetItemByID(id, auth)
 	ctx.Values().Set("response", response)
 }
 
 func GetItemByName(ctx iris.Context) {
 	name := ctx.Params().Get("name")
-	response := service.GetItemByName(name)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetItemByName(name, auth)
 	ctx.Values().Set("response", response)
 }
 
 func GetItemsByFuzzyName(ctx iris.Context) {
 	name := ctx.Params().Get("name")
-	response := service.GetItemsByFuzzyName(name)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetItemsByFuzzyName(name, auth)
 	ctx.Values().Set("response", response)
 }
 
 func GetAllItems(ctx iris.Context) {
-	aul := &model.AllItemJson{}
-	if err := ctx.ReadJSON(aul); err != nil {
-		ctx.Values().Set("response", model.ErrorInvalidData(err))
-		return
-	}
-	response := service.GetAllItems(aul)
+	param := ExtractPageParam(ctx)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetAllItems(param, auth)
 	ctx.Values().Set("response", response)
 }
 
 func CreateItem(ctx iris.Context) {
-	aul := &model.CreateItemJson{}
+	aul := &model.CreateItemRequest{}
 	if err := ctx.ReadJSON(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	response := service.CreateItem(aul)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.CreateItem(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
-func DeleteItemByID(ctx iris.Context) {
-	id := ctx.Params().GetUintDefault("user_id", 0)
-	response := service.DeleteItem(id)
+func DeleteItem(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.DeleteItem(id, auth)
 	ctx.Values().Set("response", response)
 }
 
 func AddItem(ctx iris.Context) {
-	aul := &model.AddItemJson{}
+	aul := &model.AddItemRequest{}
 	if err := ctx.ReadJSON(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	response := service.AddItem(aul)
+	aul.ItemID = ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.AddItem(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
 func ConsumeItem(ctx iris.Context) {
-	aul := &model.ConsumeItemJson{}
+	aul := &model.ConsumeItemRequest{}
 	if err := ctx.ReadJSON(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	response := service.ConsumeItem(aul)
+	aul.OrderID = ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.ConsumeItem(aul, auth)
 	ctx.Values().Set("response", response)
 }

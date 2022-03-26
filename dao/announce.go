@@ -11,27 +11,23 @@ import (
 
 func GetAnnounceByID(id uint) (*model.Announce, error) {
 	announce := &model.Announce{}
-
 	if err := database.DB.First(announce, id).Error; err != nil {
 		logger.Logger.Debugf("GetAnnounceByIDErr: %v\n", err)
 		return nil, err
 	}
-
 	return announce, nil
 }
 
 func GetAnnounceByTitle(title string) (*model.Announce, error) {
 	announce := &model.Announce{Title: title}
-
 	if err := database.DB.Where(announce).First(announce).Error; err != nil {
 		logger.Logger.Debugf("GetAnnounceByNameErr: %v\n", err)
 		return nil, err
 	}
-
 	return announce, nil
 }
 
-func GetAllAnnouncesWithParam(aul *model.AllAnnounceJson) (announces []*model.Announce, err error) {
+func GetAllAnnouncesWithParam(aul *model.AllAnnounceRequest) (announces []*model.Announce, err error) {
 	db := Filter(aul.OrderBy, aul.Offset, aul.Limit)
 	if aul.Title != "" {
 		db = db.Where("title like ?", aul.Title)
@@ -58,7 +54,7 @@ func GetAllAnnouncesWithParam(aul *model.AllAnnounceJson) (announces []*model.An
 	return
 }
 
-func CreateAnnounce(json *model.ModifyAnnounceJson) (*model.Announce, error) {
+func CreateAnnounce(json *model.ModifyAnnounceRequest, operator uint) (*model.Announce, error) {
 	announce := JsonToAnnounce(json)
 	if announce.StartTime == nil {
 		now := time.Now()
@@ -68,7 +64,7 @@ func CreateAnnounce(json *model.ModifyAnnounceJson) (*model.Announce, error) {
 		now := time.Unix(253370764799, 0)
 		announce.EndTime = &now
 	}
-	announce.CreatedBy = json.OperatorID
+	announce.CreatedBy = operator
 
 	if err := database.DB.Create(announce).Error; err != nil {
 		logger.Logger.Debugf("CreateAnnounceErr: %v\n", err)
@@ -78,10 +74,10 @@ func CreateAnnounce(json *model.ModifyAnnounceJson) (*model.Announce, error) {
 	return announce, nil
 }
 
-func UpdateAnnounce(id uint, json *model.ModifyAnnounceJson) (*model.Announce, error) {
+func UpdateAnnounce(id uint, json *model.ModifyAnnounceRequest, operator uint) (*model.Announce, error) {
 	announce := JsonToAnnounce(json)
 	announce.ID = id
-	announce.UpdatedBy = json.OperatorID
+	announce.UpdatedBy = operator
 
 	if err := database.DB.Model(announce).Updates(announce).Error; err != nil {
 		logger.Logger.Debugf("UpdateAnnounceErr: %v\n", err)
@@ -109,7 +105,7 @@ func HitAnnounce(id uint) error {
 	return nil
 }
 
-func JsonToAnnounce(json *model.ModifyAnnounceJson) (ret *model.Announce) {
+func JsonToAnnounce(json *model.ModifyAnnounceRequest) (ret *model.Announce) {
 	ret = &model.Announce{
 		Title:   json.Title,
 		Content: json.Content,

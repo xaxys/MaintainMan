@@ -77,7 +77,7 @@ func CreateUser(aul *model.CreateUserRequest, auth *model.AuthInfo) *model.ApiJs
 	if util.EmailRegex.MatchString(aul.Name) || util.PhoneRegex.MatchString(aul.Name) {
 		return model.ErrorValidation(errors.New("用户名不能为邮箱或手机号"))
 	}
-	u, err := dao.CreateUser(aul)
+	u, err := dao.CreateUser(aul, auth.User)
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 
@@ -86,7 +86,7 @@ func CreateUser(aul *model.CreateUserRequest, auth *model.AuthInfo) *model.ApiJs
 
 }
 
-func UpdateUser(id uint, aul *model.ModifyUserRequest, auth *model.AuthInfo) *model.ApiJson {
+func UpdateUser(id uint, aul *model.UpdateUserRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
@@ -129,7 +129,7 @@ func GetAllUsers(aul *model.AllUserRequest, auth *model.AuthInfo) *model.ApiJson
 	return model.Success(us, "获取成功")
 }
 
-func WxUserLogin(aul *model.WxLoginRequest, auth *model.AuthInfo) *model.ApiJson {
+func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *model.ApiJson {
 	const wxURL = "https://api.weixin.qq.com/sns/jscode2session"
 	params := map[string]string{
 		"appid":      config.AppConfig.GetString("wechat.appid"),
@@ -146,42 +146,48 @@ func WxUserLogin(aul *model.WxLoginRequest, auth *model.AuthInfo) *model.ApiJson
 	}
 
 	user, err := dao.GetUserByOpenID(wxres.OpenID)
-	userID := user.ID
+	id := user.ID
 	if err != nil {
+		// If user related to openid not found, attach openid to current user OR create a new one
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorQueryDatabase(err)
 		}
 		if auth.User != 0 {
+			// If already login, attach openid to current user
 			if err := dao.AttachOpenIDToUser(auth.User, wxres.OpenID); err != nil {
 				return model.ErrorUpdateDatabase(err)
 			}
-			userID = auth.User
+			id = auth.User
 		} else {
+			// If not login, create a new user
 			aul := &model.CreateUserRequest{
 				RegisterUserRequest: model.RegisterUserRequest{
 					Name:     wxres.OpenID,
 					Password: util.RandomString(32),
 				},
 			}
-			user, err = dao.CreateUser(aul)
+			user, err = dao.CreateUser(aul, auth.User)
 			if err != nil {
 				return model.ErrorInsertDatabase(err)
 			}
 			if err := dao.AttachOpenIDToUser(user.ID, wxres.OpenID); err != nil {
 				return model.ErrorUpdateDatabase(err)
 			}
-			userID = user.ID
+			id = user.ID
 		}
 	}
 
-	token, err := util.GetJwtString(userID, user.RoleName)
+	if err := dao.ForceLogin(id, ip); err != nil {
+		return model.ErrorUpdateDatabase(fmt.Errorf("登录失败"))
+	}
+	token, err := util.GetJwtString(id, user.RoleName)
 	if err != nil {
 		return model.ErrorBuildJWT(err)
 	}
 	return model.Success(token, "登陆成功")
 }
 
-func UserLogin(aul *model.LoginRequest, auth *model.AuthInfo) *model.ApiJson {
+func UserLogin(aul *model.LoginRequest, ip string, auth *model.AuthInfo) *model.ApiJson {
 	var user *model.User
 	var err error
 	if err := util.Validator.Struct(aul); err != nil {
@@ -204,7 +210,7 @@ func UserLogin(aul *model.LoginRequest, auth *model.AuthInfo) *model.ApiJson {
 		}
 	}
 
-	user.LoginIP = auth.IP
+	user.LoginIP = ip
 	if err := dao.CheckLogin(user, aul.Password); err != nil {
 		return model.ErrorVerification(fmt.Errorf("密码错误"))
 	}
@@ -215,9 +221,19 @@ func UserLogin(aul *model.LoginRequest, auth *model.AuthInfo) *model.ApiJson {
 	return model.Success(token, "登陆成功")
 }
 
-func UserRenew(uid uint, auth *model.AuthInfo) *model.ApiJson {
-	user, err := dao.GetUserByID(uid)
-	token, err := util.GetJwtString(user.ID, user.RoleName)
+func UserRenew(id uint, ip string, auth *model.AuthInfo) *model.ApiJson {
+	user, err := dao.GetUserByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		} else {
+			return model.ErrorQueryDatabase(err)
+		}
+	}
+	if err := dao.ForceLogin(id, ip); err != nil {
+		return model.ErrorUpdateDatabase(fmt.Errorf("登录失败"))
+	}
+	token, err := util.GetJwtString(id, user.RoleName)
 	if err != nil {
 		return model.ErrorBuildJWT(err)
 	}
@@ -225,7 +241,7 @@ func UserRenew(uid uint, auth *model.AuthInfo) *model.ApiJson {
 }
 
 func UserToJson(user *model.User) *model.UserJson {
-	return util.NotNil(user, &model.UserJson{
+	return util.NilOrValue(user, &model.UserJson{
 		ID:          user.ID,
 		Name:        user.Name,
 		DisplayName: user.DisplayName,

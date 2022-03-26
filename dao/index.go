@@ -3,9 +3,14 @@ package dao
 import (
 	"maintainman/config"
 	"maintainman/database"
+	"maintainman/model"
 
 	"gorm.io/gorm"
 )
+
+func PageFilter(param *model.PageParam) *gorm.DB {
+	return Filter(param.OrderBy, param.Offset, param.Limit)
+}
 
 func Filter(orderBy string, uoffset, ulimit uint) (db *gorm.DB) {
 	offset := int(uoffset)

@@ -7,12 +7,12 @@ import (
 	"maintainman/util"
 )
 
-func GetRoleByName(name string) *model.ApiJson {
+func GetRoleByName(name string, auth *model.AuthInfo) *model.ApiJson {
 	role := dao.GetRole(name)
 	return model.Success(role, "获取成功")
 }
 
-func CreateRole(aul *model.CreateRoleJson) *model.ApiJson {
+func CreateRole(aul *model.CreateRoleRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
@@ -31,7 +31,7 @@ func CreateRole(aul *model.CreateRoleJson) *model.ApiJson {
 
 }
 
-func UpdateRole(name string, aul *model.UpdateRoleJson) *model.ApiJson {
+func UpdateRole(name string, aul *model.UpdateRoleRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
@@ -47,7 +47,7 @@ func UpdateRole(name string, aul *model.UpdateRoleJson) *model.ApiJson {
 	return model.SuccessUpdate(role, "更新成功")
 }
 
-func DeleteRole(name string) *model.ApiJson {
+func DeleteRole(name string, auth *model.AuthInfo) *model.ApiJson {
 	if dao.GetRole(name) == nil {
 		return model.ErrorNotFound(fmt.Errorf("Role %s not found", name))
 	}
@@ -58,7 +58,7 @@ func DeleteRole(name string) *model.ApiJson {
 	return model.SuccessUpdate(nil, "删除成功")
 }
 
-func SetDefaultRole(name string) *model.ApiJson {
+func SetDefaultRole(name string, auth *model.AuthInfo) *model.ApiJson {
 	if dao.GetRole(name) == nil {
 		return model.ErrorNotFound(fmt.Errorf("Role %s not found", name))
 	}
@@ -69,7 +69,7 @@ func SetDefaultRole(name string) *model.ApiJson {
 	return model.SuccessUpdate(nil, "操作成功")
 }
 
-func SetGuestRole(name string) *model.ApiJson {
+func SetGuestRole(name string, auth *model.AuthInfo) *model.ApiJson {
 	if dao.GetRole(name) == nil {
 		return model.ErrorNotFound(fmt.Errorf("Role %s not found", name))
 	}
@@ -80,7 +80,7 @@ func SetGuestRole(name string) *model.ApiJson {
 	return model.SuccessUpdate(nil, "操作成功")
 }
 
-func GetAllRoles() *model.ApiJson {
+func GetAllRoles(auth *model.AuthInfo) *model.ApiJson {
 	roles := dao.GetAllRoles()
 	return model.Success(roles, "操作成功")
 }

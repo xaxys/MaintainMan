@@ -34,16 +34,17 @@ func GetItemsByFuzzyName(name string) (items []*model.Item, err error) {
 	return
 }
 
-func GetAllItems(aul *model.AllItemJson) (items []*model.Item, err error) {
-	if err = Filter(aul.OrderBy, aul.Offset, aul.Limit).Find(&items).Error; err != nil {
+func GetAllItems(param *model.PageParam) (items []*model.Item, err error) {
+	if err = PageFilter(param).Find(&items).Error; err != nil {
 		logger.Logger.Debugf("GetAllItemsErr: %v\n", err)
 		return
 	}
 	return
 }
 
-func CreateItem(aul *model.CreateItemJson) (*model.Item, error) {
+func CreateItem(aul *model.CreateItemRequest, operator uint) (*model.Item, error) {
 	item := JsonToItem(aul)
+	item.CreatedBy = operator
 	if err := database.DB.Create(item).Error; err != nil {
 		logger.Logger.Debugf("CreateItemErr: %v\n", err)
 		return nil, err
@@ -60,6 +61,7 @@ func DeleteItem(id uint) error {
 }
 
 func AddItem(itemlog *model.ItemLog, operator uint) (*model.ItemLog, error) {
+	itemlog.CreatedBy = operator
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
 		item, err := GetItemByID(itemlog.ItemID)
 		if err != nil {
@@ -83,6 +85,7 @@ func AddItem(itemlog *model.ItemLog, operator uint) (*model.ItemLog, error) {
 }
 
 func ConsumeItem(itemlog *model.ItemLog, operator uint) (*model.ItemLog, error) {
+	itemlog.CreatedBy = operator
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
 		item, err := GetItemByID(itemlog.ItemID)
 		if err != nil {
@@ -109,7 +112,7 @@ func ConsumeItem(itemlog *model.ItemLog, operator uint) (*model.ItemLog, error) 
 	return itemlog, nil
 }
 
-func JsonToItem(item *model.CreateItemJson) *model.Item {
+func JsonToItem(item *model.CreateItemRequest) *model.Item {
 	return &model.Item{
 		Name:        item.Name,
 		Description: item.Discription,

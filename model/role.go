@@ -1,5 +1,7 @@
 package model
 
+import "maintainman/util"
+
 type RoleInfo struct {
 	Name           string   `mapstructure:"name"`
 	DisplayName    string   `mapstructure:"display_name"`
@@ -11,8 +13,23 @@ type RoleInfo struct {
 
 type Role struct {
 	*RoleInfo
-	Permissions *PermissionSet
+	Permissions *util.PermSet
 	Inheritance []*Role
+}
+
+type CreateRoleRequest struct {
+	Name        string   `json:"name" validate:"required,gte=2,lte=50"`
+	DisplayName string   `json:"display_name" validate:"required,lte=191"`
+	Permissions []string `json:"permissions"`
+	Inheritance []string `json:"inheritance"`
+}
+
+type UpdateRoleRequest struct {
+	DisplayName    string   `json:"display_name" validate:"required,lte=191"`
+	AddPermissions []string `json:"add_permissions"`
+	DelPermissions []string `json:"del_permissions"`
+	AddInheritance []string `json:"add_inheritance"`
+	DelInheritance []string `json:"del_inheritance"`
 }
 
 type RoleJson struct {
@@ -22,21 +39,4 @@ type RoleJson struct {
 	Guest       bool              `json:"guest"`
 	Permissions []*PermissionJson `json:"permissions,omitempty"`
 	Inheritance []string          `json:"inheritance,omitempty"`
-}
-
-type CreateRoleJson struct {
-	Name        string   `json:"name" validate:"required,gte=2,lte=50"`
-	DisplayName string   `json:"display_name" validate:"required,lte=191"`
-	Permissions []string `json:"permissions"`
-	Inheritance []string `json:"inheritance"`
-	OperatorID  uint     `json:"-"` // Filled by system
-}
-
-type UpdateRoleJson struct {
-	DisplayName    string   `json:"display_name" validate:"required,lte=191"`
-	AddPermissions []string `json:"add_permissions"`
-	DelPermissions []string `json:"del_permissions"`
-	AddInheritance []string `json:"add_inheritance"`
-	DelInheritance []string `json:"del_inheritance"`
-	OperatorID     uint     `json:"-"` // Filled by system
 }

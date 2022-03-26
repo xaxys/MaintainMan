@@ -77,7 +77,7 @@ func GetAllUsersWithParam(aul *model.AllUserRequest) (users []*model.User, err e
 	return
 }
 
-func CreateUser(json *model.CreateUserRequest) (*model.User, error) {
+func CreateUser(json *model.CreateUserRequest, operator uint) (*model.User, error) {
 	salt, _ := bcrypt.Salt(10)
 	hash, _ := bcrypt.Hash(json.Password, salt)
 	json.Password = string(hash)
@@ -90,6 +90,7 @@ func CreateUser(json *model.CreateUserRequest) (*model.User, error) {
 
 	user := &model.User{}
 	copier.Copy(user, json)
+	user.CreatedBy = operator
 	if err := database.DB.Create(user).Error; err != nil {
 		logger.Logger.Debugf("CreateUserErr: %v\n", err)
 		return nil, err
@@ -98,7 +99,7 @@ func CreateUser(json *model.CreateUserRequest) (*model.User, error) {
 	return user, nil
 }
 
-func UpdateUser(id uint, json *model.ModifyUserRequest, operator uint) (*model.User, error) {
+func UpdateUser(id uint, json *model.UpdateUserRequest, operator uint) (*model.User, error) {
 	if json.Password != "" {
 		salt, _ := bcrypt.Salt(10)
 		hash, _ := bcrypt.Hash(json.Password, salt)
@@ -139,13 +140,17 @@ func CheckLogin(user *model.User, password string) error {
 	if ok := bcrypt.Match(password, user.Password); !ok {
 		return fmt.Errorf("Wrong password")
 	}
+	return ForceLogin(user.ID, user.LoginIP)
+}
+
+func ForceLogin(id uint, ip string) error {
 	u := &model.User{
-		LoginIP:   user.LoginIP,
+		LoginIP:   ip,
 		LoginTime: time.Now(),
 	}
-	u.ID = user.ID
-	if err := database.DB.Model(user).Updates(u).Error; err != nil {
-		logger.Logger.Debugf("UpdateUserErr: %v\n", err)
+	u.ID = id
+	if err := database.DB.Model(u).Updates(u).Error; err != nil {
+		logger.Logger.Debugf("ForceLoginErr: %v\n", err)
 		return err
 	}
 	return nil
