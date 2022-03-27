@@ -11,9 +11,9 @@ type BaseModel struct {
 }
 
 type PageParam struct {
-	OrderBy string `url:"order_by" validate:"omitempty,order_by"`
-	Offset  uint   `url:"offset"`
-	Limit   uint   `url:"limit"`
+	OrderBy string `json:"order_by" url:"order_by" validate:"omitempty,order_by"`
+	Offset  uint   `json:"offset" url:"offset"`
+	Limit   uint   `json:"limit" url:"limit"`
 }
 
 type AuthInfo struct {

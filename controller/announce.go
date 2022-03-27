@@ -15,13 +15,13 @@ import (
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "公告ID"
-// @Success 200 {object} model.AnnounceJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=model.AnnounceJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/announce/{id} [get]
 func GetAnnounce(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
@@ -36,14 +36,14 @@ func GetAnnounce(ctx iris.Context) {
 // @Tags announce
 // @Accept  json
 // @Produce  json
-// @Param req body model.AllAnnounceRequest true "获取公告列表请求"
-// @Success 200 {object} []model.AnnounceJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param body body model.AllAnnounceRequest true "获取公告列表请求"
+// @Success 200 {object} model.ApiJson{data=[]model.AnnounceJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/announce/all [get]
 func GetAllAnnounces(ctx iris.Context) {
 	aul := &model.AllAnnounceRequest{}
@@ -63,14 +63,14 @@ func GetAllAnnounces(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param offset query uint false "偏移量"
-// @Param limit query uint false "限制量"
-// @Success 200 {object} []model.AnnounceJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param limit query uint false "每页数据量"
+// @Success 200 {object} model.ApiJson{data=[]model.AnnounceJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/announce/ [get]
 func GetLatestAnnounces(ctx iris.Context) {
 	param := ExtractPageParam(ctx)
@@ -85,14 +85,14 @@ func GetLatestAnnounces(ctx iris.Context) {
 // @Tags announce
 // @Accept  json
 // @Produce  json
-// @Param req body model.CreateAnnounceRequest true "创建公告请求"
-// @Success 200 {object} model.AnnounceJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param body body model.CreateAnnounceRequest true "创建公告请求"
+// @Success 201 {object} model.ApiJson{data=model.AnnounceJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/announce/ [post]
 func CreateAnnounce(ctx iris.Context) {
 	aul := &model.CreateAnnounceRequest{}
@@ -112,14 +112,14 @@ func CreateAnnounce(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "公告ID"
-// @Param req body model.UpdateAnnounceRequest true "更新公告请求"
-// @Success 200 {object} model.AnnounceJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param body body model.UpdateAnnounceRequest true "更新公告请求"
+// @Success 204 {object} model.ApiJson{data=model.AnnounceJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/announce/{id} [put]
 func UpdateAnnounce(ctx iris.Context) {
 	aul := &model.UpdateAnnounceRequest{}
@@ -140,13 +140,13 @@ func UpdateAnnounce(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "公告ID"
-// @Success 200 {object} model.AnnounceJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.AnnounceJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/announce/{id} [delete]
 func DeleteAnnounce(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
@@ -162,13 +162,13 @@ func DeleteAnnounce(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "公告ID"
-// @Success 204 {object} model.AnnounceJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.AnnounceJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/announce/{id}/hit [put]
 func HitAnnounce(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)

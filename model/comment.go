@@ -19,7 +19,7 @@ type CommentJson struct {
 	OrderID     uint   `json:"order_id"`
 	UserID      uint   `json:"user_id"`
 	UserName    string `json:"user_name"`
-	SequenceNum uint   `json:"sequence_num"`
+	SequenceNum uint   `json:"sequence_num"` // 发言在该订单内的序号
 	Content     string `json:"content"`
-	CreatedAt   int64  `json:"created_at"`
+	CreatedAt   int64  `json:"created_at"` // unix timestamp in seconds (UTC)
 }

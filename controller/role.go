@@ -14,13 +14,13 @@ import (
 // @Tags role
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.RoleJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=model.RoleJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role [get]
 func GetRole(ctx iris.Context) {
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -35,13 +35,13 @@ func GetRole(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param name path string true "角色名"
-// @Success 200 {object} model.RoleJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=model.RoleJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role/{name} [get]
 func GetRoleByName(ctx iris.Context) {
 	name := ctx.Params().GetString("name")
@@ -57,13 +57,13 @@ func GetRoleByName(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param body body model.CreateRoleRequest true "创建角色请求"
-// @Success 201 {object} model.RoleJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 201 {object} model.ApiJson{data=model.RoleJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role [post]
 func CreateRole(ctx iris.Context) {
 	aul := &model.CreateRoleRequest{}
@@ -83,13 +83,13 @@ func CreateRole(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param body body model.UpdateRoleRequest true "更新角色请求"
-// @Success 204 {object} model.RoleJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.RoleJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role [put]
 func UpdateRole(ctx iris.Context) {
 	aul := &model.UpdateRoleRequest{}
@@ -110,13 +110,13 @@ func UpdateRole(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param name path string true "角色名"
-// @Success 204 {object} model.RoleJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.RoleJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role/{name}/default [put]
 func SetDefaultRole(ctx iris.Context) {
 	name := ctx.Params().GetString("name")
@@ -132,13 +132,13 @@ func SetDefaultRole(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param name path string true "角色名"
-// @Success 204 {object} model.RoleJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.RoleJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role/{name}/guest [put]
 func SetGuestRole(ctx iris.Context) {
 	name := ctx.Params().GetString("name")
@@ -154,13 +154,13 @@ func SetGuestRole(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param name path string true "角色名"
-// @Success 204 {object} model.RoleJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.RoleJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role/{name} [delete]
 func DeleteRole(ctx iris.Context) {
 	name := ctx.Params().GetString("name")
@@ -175,13 +175,13 @@ func DeleteRole(ctx iris.Context) {
 // @Tags role
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} []model.RoleJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=[]model.RoleJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role/all [get]
 func GetAllRoles(ctx iris.Context) {
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))

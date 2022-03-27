@@ -80,7 +80,6 @@ func Route(app *iris.Application) {
 					order.PartyFunc("/repairer", func(repairer router.Party) {
 						order.Get("/", controller.GetRepairerOrders)
 						order.Get("/{id:uint}", controller.ForceGetRepairerOrders)
-						order.Post("/", middleware.PermInterceptor("item.consume"), controller.ConsumeItem)
 					})
 
 					order.Get("/all", middleware.PermInterceptor("order.viewall"), controller.GetAllOrders)
@@ -90,6 +89,7 @@ func Route(app *iris.Application) {
 						order.Get("/", middleware.PermInterceptor("order.viewall"), controller.GetOrderByID)
 						order.Put("/update", middleware.PermInterceptor("order.update"), controller.UpdateOrder)
 						order.Put("/update/force", middleware.PermInterceptor("order.updateall"), controller.ForceUpdateOrder)
+						order.Post("/consume", middleware.PermInterceptor("item.consume"), controller.ConsumeItem)
 						// change order status
 						order.Post("/release", middleware.PermInterceptor("order.update"), controller.ReleaseOrder)
 						order.Post("/assign", middleware.PermInterceptor("order.assign"), controller.AssignOrder)

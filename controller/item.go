@@ -15,13 +15,13 @@ import (
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "物品ID"
-// @Success 200 {object} model.ItemJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=model.ItemJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/item/{id} [get]
 func GetItemByID(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
@@ -37,13 +37,13 @@ func GetItemByID(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param name path string true "物品名称"
-// @Success 200 {object} model.ItemJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=model.ItemJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/item/{name} [get]
 func GetItemByName(ctx iris.Context) {
 	name := ctx.Params().Get("name")
@@ -59,13 +59,13 @@ func GetItemByName(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param name path string true "物品名称"
-// @Success 200 {object} []model.ItemJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=[]model.ItemJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/item/{name}/fuzzy [get]
 func GetItemsByFuzzyName(ctx iris.Context) {
 	name := ctx.Params().Get("name")
@@ -82,14 +82,14 @@ func GetItemsByFuzzyName(ctx iris.Context) {
 // @Produce  json
 // @Param order_by query string false "排序字段"
 // @Param offset query uint false "偏移量"
-// @Param limit query uint false "限制量"
-// @Success 200 {object} []model.ItemJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param limit query uint false "每页数据量"
+// @Success 200 {object} model.ApiJson{data=[]model.ItemJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/item [get]
 func GetAllItems(ctx iris.Context) {
 	param := ExtractPageParam(ctx)
@@ -105,13 +105,13 @@ func GetAllItems(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param item body model.CreateItemRequest true "物品信息"
-// @Success 201 {object} model.ItemJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 201 {object} model.ApiJson{data=model.ItemJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/item [post]
 func CreateItem(ctx iris.Context) {
 	aul := &model.CreateItemRequest{}
@@ -131,13 +131,13 @@ func CreateItem(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "物品ID"
-// @Success 204 {object} model.ItemJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.ItemJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/item/{id} [delete]
 func DeleteItem(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
@@ -153,14 +153,14 @@ func DeleteItem(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "物品ID"
-// @Param req body model.AddItemRequest true "物品数量"
-// @Success 204 {object} model.ItemJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param body body model.AddItemRequest true "物品数量"
+// @Success 204 {object} model.ApiJson{data=model.ItemJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/item/{id} [post]
 func AddItem(ctx iris.Context) {
 	aul := &model.AddItemRequest{}
@@ -181,15 +181,15 @@ func AddItem(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "订单ID"
-// @Param req body model.ConsumeItemRequest true "物品数量"
-// @Success 204 {object} model.ItemJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id}/repairer [post]
+// @Param body body model.ConsumeItemRequest true "物品数量"
+// @Success 204 {object} model.ApiJson{data=model.ItemJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id}/consume [post]
 func ConsumeItem(ctx iris.Context) {
 	aul := &model.ConsumeItemRequest{}
 	if err := ctx.ReadJSON(aul); err != nil {

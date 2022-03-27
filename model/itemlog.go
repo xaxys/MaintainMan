@@ -27,8 +27,8 @@ type ItemLogJson struct {
 	ID          uint    `json:"id"`
 	ItemID      uint    `json:"item_id"`
 	OrderID     uint    `json:"order_id"`
-	ChangeNum   int     `json:"change_num"`
-	ChangePrice float64 `json:"change_price"`
-	CreatedAt   int64   `json:"created_at"`
-	CreatedBy   uint    `json:"created_by"`
+	ChangeNum   int     `json:"change_num"`   // 增加/消耗数量 正:增加 负:减少
+	ChangePrice float64 `json:"change_price"` // 开销 正:进货 负:订单收费
+	CreatedAt   int64   `json:"created_at"`   // unix timestamp in seconds (UTC)
+	CreatedBy   uint    `json:"created_by"`   // unix timestamp in seconds (UTC)
 }

@@ -14,13 +14,13 @@ import (
 // @Tags user
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} model.UserJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=model.UserJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/user [get]
 func GetUser(ctx iris.Context) {
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -35,13 +35,13 @@ func GetUser(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "用户ID"
-// @Success 200 {object} model.UserJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=model.UserJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/user/{id} [get]
 func GetUserByID(ctx iris.Context) {
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -57,16 +57,16 @@ func GetUserByID(ctx iris.Context) {
 // @Produce  json
 // @Param order_by query string false "排序字段"
 // @Param offset query uint false "偏移量"
-// @Param limit query uint false "限制量"
+// @Param limit query uint false "每页数据量"
 // @Param name query string false "用户名"
 // @Param display_name query string false "昵称"
-// @Success 200 {object} model.UserJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=model.UserJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/user/all [get]
 func GetAllUsers(ctx iris.Context) {
 	aul := &model.AllUserRequest{}
@@ -86,13 +86,13 @@ func GetAllUsers(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param body body model.LoginRequest true "登录信息"
-// @Success 200 {object} string
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=string} "JWT Token"
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/login [post]
 func UserLogin(ctx iris.Context) {
 	aul := &model.LoginRequest{}
@@ -112,13 +112,13 @@ func UserLogin(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param body body model.WxLoginRequest true "登录信息"
-// @Success 200 {object} string
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=string} "JWT Token"
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/wxlogin [post]
 func WxUserLogin(ctx iris.Context) {
 	aul := &model.WxLoginRequest{}
@@ -137,13 +137,13 @@ func WxUserLogin(ctx iris.Context) {
 // @Tags user
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} string
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=string} "JWT Token"
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/renew [post]
 func UserRenew(ctx iris.Context) {
 	id := ctx.Values().GetUintDefault("user_id", 0)
@@ -159,13 +159,13 @@ func UserRenew(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param body body model.RegisterUserRequest true "注册信息"
-// @Success 201 {object} string
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 201 {object} model.ApiJson{data=model.UserJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/register [post]
 func UserRegister(ctx iris.Context) {
 	aul := &model.RegisterUserRequest{}
@@ -185,13 +185,13 @@ func UserRegister(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param body body model.CreateUserRequest true "创建信息"
-// @Success 201 {object} model.UserJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 201 {object} model.ApiJson{data=model.UserJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/user [post]
 func CreateUser(ctx iris.Context) {
 	aul := &model.CreateUserRequest{}
@@ -211,13 +211,13 @@ func CreateUser(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param body body model.UpdateUserRequest true "更新信息"
-// @Success 204 {object} model.UserJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.UserJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/user [put]
 func UpdateUser(ctx iris.Context) {
 	aul := &model.UpdateUserRequest{}
@@ -240,13 +240,13 @@ func UpdateUser(ctx iris.Context) {
 // @Produce  json
 // @Param id path string true "用户ID"
 // @Param body body model.UpdateUserRequest true "更新信息"
-// @Success 204 {object} model.UserJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.UserJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/user/{id} [put]
 func ForceUpdateUser(ctx iris.Context) {
 	aul := &model.UpdateUserRequest{}
@@ -267,13 +267,13 @@ func ForceUpdateUser(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "用户ID"
-// @Success 204 {object} model.RoleJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.RoleJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/user/{id} [delete]
 func ForceDeleteUser(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)

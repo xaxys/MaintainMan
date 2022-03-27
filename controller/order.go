@@ -11,17 +11,18 @@ import (
 // GetUserOrders godoc
 // @Summary 获取当前用户的订单
 // @Description 获取当前用户的订单 分页 默认逆序 可按照订单状态过滤
+// @Description 状态 0:非法 1:待处理 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价
 // @Tags order
 // @Accept json
 // @Produce json
-// @Param req body model.UserOrderRequest true "请求参数"
-// @Success 200 {object} []model.OrderJson "返回结果 带Tag"
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param body body model.UserOrderRequest true "请求参数"
+// @Success 200 {object} model.ApiJson{data=[]model.OrderJson}  "返回结果 带Tag"
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/order/user [get]
 func GetUserOrders(ctx iris.Context) {
 	req := &model.UserOrderRequest{}
@@ -40,14 +41,14 @@ func GetUserOrders(ctx iris.Context) {
 // @Tags order
 // @Accept json
 // @Produce json
-// @Param req body model.RepairerOrderRequest true "请求参数"
-// @Success 200 {object} []model.OrderJson "返回结果 带Tag"
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param body body model.RepairerOrderRequest true "请求参数"
+// @Success 200 {object} model.ApiJson{data=[]model.OrderJson}  "返回结果 带Tag"
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/order/repairer [get]
 func GetRepairerOrders(ctx iris.Context) {
 	req := &model.RepairerOrderRequest{}
@@ -66,15 +67,16 @@ func GetRepairerOrders(ctx iris.Context) {
 // @Tags order
 // @Accept json
 // @Produce json
-// @Param req body model.RepairerOrderRequest true "请求参数"
-// @Success 200 {object} []model.OrderJson "返回结果 带Tag"
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/repairer/{id:uint} [get]
+// @Param id path uint true "维修工ID"
+// @Param body body model.RepairerOrderRequest true "请求参数"
+// @Success 200 {object} model.ApiJson{data=[]model.OrderJson}  "返回结果 带Tag"
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/repairer/{id} [get]
 func ForceGetRepairerOrders(ctx iris.Context) {
 	req := &model.RepairerOrderRequest{}
 	if err := ctx.ReadQuery(&req); err != nil {
@@ -93,14 +95,14 @@ func ForceGetRepairerOrders(ctx iris.Context) {
 // @Tags order
 // @Accept json
 // @Produce json
-// @Param req body model.AllOrderRequest true "请求参数"
-// @Success 200 {object} []model.OrderJson "返回结果 带Tag"
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param body body model.AllOrderRequest true "请求参数"
+// @Success 200 {object} model.ApiJson{data=[]model.OrderJson}  "返回结果 带Tag"
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/order/all [get]
 func GetAllOrders(ctx iris.Context) {
 	req := &model.AllOrderRequest{}
@@ -120,14 +122,14 @@ func GetAllOrders(ctx iris.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint true "订单ID"
-// @Success 200 {object} model.OrderJson "返回结果 带Tag 带Comment"
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint} [get]
+// @Success 200 {object} model.ApiJson{data=model.OrderJson}  "返回结果 带Tag 带Comment"
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id} [get]
 func GetOrderByID(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -141,14 +143,14 @@ func GetOrderByID(ctx iris.Context) {
 // @Tags order
 // @Accept json
 // @Produce json
-// @Param req body model.CreateOrderRequest true "请求参数"
-// @Success 201 {object} model.OrderJson "返回结果 不作任何保证"
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param body body model.CreateOrderRequest true "请求参数"
+// @Success 201 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/order [post]
 func CreateOrder(ctx iris.Context) {
 	aul := &model.CreateOrderRequest{}
@@ -168,15 +170,15 @@ func CreateOrder(ctx iris.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint true "订单ID"
-// @Param req body model.UpdateOrderRequest true "请求参数"
-// @Success 204 {object} model.OrderJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint} [put]
+// @Param body body model.UpdateOrderRequest true "请求参数"
+// @Success 204 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id} [put]
 func UpdateOrder(ctx iris.Context) {
 	aul := &model.UpdateOrderRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
@@ -196,15 +198,15 @@ func UpdateOrder(ctx iris.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint true "订单ID"
-// @Param req body model.UpdateOrderRequest true "请求参数"
-// @Success 204 {object} model.OrderJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint}/force [put]
+// @Param body body model.UpdateOrderRequest true "请求参数"
+// @Success 204 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id}/force [put]
 func ForceUpdateOrder(ctx iris.Context) {
 	aul := &model.UpdateOrderRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
@@ -226,14 +228,14 @@ func ForceUpdateOrder(ctx iris.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint true "订单ID"
-// @Success 204 {object} model.OrderJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint}/release [post]
+// @Success 204 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id}/release [post]
 func ReleaseOrder(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -249,14 +251,14 @@ func ReleaseOrder(ctx iris.Context) {
 // @Produce json
 // @Param id path uint true "订单ID"
 // @Param repairer query uint true "维修工ID"
-// @Success 204 {object} model.OrderJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint}/assign [post]
+// @Success 204 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id}/assign [post]
 func AssignOrder(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	repairer := util.ToUint(ctx.URLParamIntDefault("repairer", 0))
@@ -272,14 +274,14 @@ func AssignOrder(ctx iris.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint true "订单ID"
-// @Success 204 {object} model.OrderJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint}/selfassign [post]
+// @Success 204 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id}/selfassign [post]
 func SelfAssignOrder(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -294,14 +296,14 @@ func SelfAssignOrder(ctx iris.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint true "订单ID"
-// @Success 204 {object} model.OrderJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint}/complete [post]
+// @Success 204 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id}/complete [post]
 func CompleteOrder(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -316,14 +318,14 @@ func CompleteOrder(ctx iris.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint true "订单ID"
-// @Success 204 {object} model.OrderJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint}/cancel [post]
+// @Success 204 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id}/cancel [post]
 func CancelOrder(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -338,14 +340,14 @@ func CancelOrder(ctx iris.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint true "订单ID"
-// @Success 204 {object} model.OrderJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint}/reject [post]
+// @Success 204 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id}/reject [post]
 func RejectOrder(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -360,14 +362,14 @@ func RejectOrder(ctx iris.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint true "订单ID"
-// @Success 204 {object} model.OrderJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint}/report [post]
+// @Success 204 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id}/report [post]
 func ReportOrder(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -382,14 +384,14 @@ func ReportOrder(ctx iris.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint true "订单ID"
-// @Success 204 {object} model.OrderJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint}/hold [post]
+// @Success 204 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id}/hold [post]
 func HoldOrder(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -405,14 +407,14 @@ func HoldOrder(ctx iris.Context) {
 // @Produce json
 // @Param id path uint true "订单ID"
 // @Param appraisal query uint true "评价分数"
-// @Success 204 {object} model.OrderJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
-// @Router /v1/order/{id:uint}/appraise [post]
+// @Success 204 {object} model.ApiJson{data=model.OrderJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/order/{id}/appraise [post]
 func AppraiseOrder(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	appraisal := util.ToUint(ctx.URLParamIntDefault("appraisal", 0))

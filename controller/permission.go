@@ -15,13 +15,13 @@ import (
 // @Accept  json
 // @Produce  json
 // @Param name path string true "权限名"
-// @Success 200 {object} model.PermissionJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=model.PermissionJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/permission/{name} [get]
 func GetPermission(ctx iris.Context) {
 	name := ctx.Params().GetString("name")
@@ -36,13 +36,13 @@ func GetPermission(ctx iris.Context) {
 // @Tags permission
 // @Accept  json
 // @Produce  json
-// @Success 200 {object} []model.PermissionJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 200 {object} model.ApiJson{data=[]model.PermissionJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/permission/all [get]
 func GetAllPermissions(ctx iris.Context) {
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))

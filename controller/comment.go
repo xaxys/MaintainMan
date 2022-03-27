@@ -17,14 +17,14 @@ import (
 // @Param id path uint true "订单id"
 // @Param order_by query string false "排序字段"
 // @Param offset query uint false "偏移量"
-// @Param limit query uint false "限制量"
-// @Success 200 {object} []model.CommentJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param limit query uint false "每页数据量"
+// @Success 200 {object} model.ApiJson{data=[]model.CommentJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/order/{id}/comment [get]
 func GetCommentsByOrder(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
@@ -43,14 +43,14 @@ func GetCommentsByOrder(ctx iris.Context) {
 // @Param id path uint true "订单id"
 // @Param order_by query string false "排序字段"
 // @Param offset query uint false "偏移量"
-// @Param limit query uint false "限制量"
-// @Success 200 {object} []model.CommentJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Param limit query uint false "每页数据量"
+// @Success 200 {object} model.ApiJson{data=[]model.CommentJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/order/{id}/comment/force [get]
 func ForceGetCommentsByOrder(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
@@ -68,13 +68,13 @@ func ForceGetCommentsByOrder(ctx iris.Context) {
 // @Produce  json
 // @Param id path uint true "订单id"
 // @Param body body model.CreateCommentRequest true "评论信息"
-// @Success 201 {object} model.CommentJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 201 {object} model.ApiJson{data=model.CommentJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/order/{id}/comment [post]
 func ForceCreateComment(ctx iris.Context) {
 	aul := &model.CreateCommentRequest{}
@@ -96,13 +96,13 @@ func ForceCreateComment(ctx iris.Context) {
 // @Produce  json
 // @Param id path uint true "订单id"
 // @Param body body model.CreateCommentRequest true "评论信息"
-// @Success 201 {object} model.CommentJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 201 {object} model.ApiJson{data=model.CommentJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/order/{id}/comment [post]
 func CreateComment(ctx iris.Context) {
 	aul := &model.CreateCommentRequest{}
@@ -123,13 +123,13 @@ func CreateComment(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "评论id"
-// @Success 204 {object} model.CommentJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.CommentJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/comment/{id} [delete]
 func DeleteComment(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
@@ -145,13 +145,13 @@ func DeleteComment(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "评论id"
-// @Success 204 {object} model.CommentJson
-// @Failure 400 {object} model.ApiJson
-// @Failure 401 {object} model.ApiJson
-// @Failure 403 {object} model.ApiJson
-// @Failure 404 {object} model.ApiJson
-// @Failure 422 {object} model.ApiJson
-// @Failure 500 {object} model.ApiJson
+// @Success 204 {object} model.ApiJson{data=model.CommentJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/comment/{id}/force [delete]
 func ForceDeleteComment(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
