@@ -8,6 +8,21 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
+// GetItemByID godoc
+// @Summary 获取某ID物品信息
+// @Description 通过ID获取某物品信息
+// @Tags item
+// @Accept  json
+// @Produce  json
+// @Param id path uint true "物品ID"
+// @Success 200 {object} model.ItemJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/item/{id} [get]
 func GetItemByID(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -15,6 +30,21 @@ func GetItemByID(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// GetItemByName godoc
+// @Summary 获取某名称物品信息
+// @Description 通过名称获取某物品信息
+// @Tags item
+// @Accept  json
+// @Produce  json
+// @Param name path string true "物品名称"
+// @Success 200 {object} model.ItemJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/item/{name} [get]
 func GetItemByName(ctx iris.Context) {
 	name := ctx.Params().Get("name")
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -22,6 +52,21 @@ func GetItemByName(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// GetItemsByFuzzyName godoc
+// @Summary 获取大概是某些名称的物品们的信息
+// @Description 通过名称获取大概是某些名称的物品们的信息
+// @Tags item
+// @Accept  json
+// @Produce  json
+// @Param name path string true "物品名称"
+// @Success 200 {object} []model.ItemJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/item/{name}/fuzzy [get]
 func GetItemsByFuzzyName(ctx iris.Context) {
 	name := ctx.Params().Get("name")
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -29,6 +74,23 @@ func GetItemsByFuzzyName(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// GetAllItems godoc
+// @Summary 获取所有物品信息
+// @Description 获取所有物品信息 分页
+// @Tags item
+// @Accept  json
+// @Produce  json
+// @Param order_by query string false "排序字段"
+// @Param offset query uint false "偏移量"
+// @Param limit query uint false "限制量"
+// @Success 200 {object} []model.ItemJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/item [get]
 func GetAllItems(ctx iris.Context) {
 	param := ExtractPageParam(ctx)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -36,6 +98,21 @@ func GetAllItems(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// CreateItem godoc
+// @Summary 创建物品
+// @Description 创建物品
+// @Tags item
+// @Accept  json
+// @Produce  json
+// @Param item body model.CreateItemRequest true "物品信息"
+// @Success 201 {object} model.ItemJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/item [post]
 func CreateItem(ctx iris.Context) {
 	aul := &model.CreateItemRequest{}
 	if err := ctx.ReadJSON(aul); err != nil {
@@ -47,6 +124,21 @@ func CreateItem(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// DeleteItem godoc
+// @Summary 删除物品
+// @Description 删除物品
+// @Tags item
+// @Accept  json
+// @Produce  json
+// @Param id path uint true "物品ID"
+// @Success 204 {object} model.ItemJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/item/{id} [delete]
 func DeleteItem(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -54,6 +146,22 @@ func DeleteItem(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// AddItem godoc
+// @Summary 添加物品数量(进货)
+// @Description 添加物品数量(进货)
+// @Tags item
+// @Accept  json
+// @Produce  json
+// @Param id path uint true "物品ID"
+// @Param req body model.AddItemRequest true "物品数量"
+// @Success 204 {object} model.ItemJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/item/{id} [post]
 func AddItem(ctx iris.Context) {
 	aul := &model.AddItemRequest{}
 	if err := ctx.ReadJSON(aul); err != nil {
@@ -66,6 +174,22 @@ func AddItem(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// ConsumeItem godoc
+// @Summary 消耗物品数量(订单消耗)
+// @Description 消耗物品数量(订单消耗)
+// @Tags item
+// @Accept  json
+// @Produce  json
+// @Param id path uint true "订单ID"
+// @Param req body model.ConsumeItemRequest true "物品数量"
+// @Success 204 {object} model.ItemJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/order/{id}/repairer [post]
 func ConsumeItem(ctx iris.Context) {
 	aul := &model.ConsumeItemRequest{}
 	if err := ctx.ReadJSON(aul); err != nil {

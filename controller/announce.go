@@ -8,13 +8,43 @@ import (
 	"github.com/kataras/iris/v12"
 )
 
-func GetAnnounceByID(ctx iris.Context) {
+// GetAnnounce godoc
+// @Summary 获取公告
+// @Description 获取公告
+// @Tags announce
+// @Accept  json
+// @Produce  json
+// @Param id path uint true "公告ID"
+// @Success 200 {object} model.AnnounceJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/announce/{id} [get]
+func GetAnnounce(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.GetAnnounceByID(id, auth)
+	response := service.GetAnnounce(id, auth)
 	ctx.Values().Set("response", response)
 }
 
+// GetAllAnnounces godoc
+// @Summary 获取公告列表
+// @Description 获取公告列表 分页 可按标题 开始时间 结束时间 (时间之内|之外 两种模式)过滤
+// @Tags announce
+// @Accept  json
+// @Produce  json
+// @Param req body model.AllAnnounceRequest true "获取公告列表请求"
+// @Success 200 {object} []model.AnnounceJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/announce/all [get]
 func GetAllAnnounces(ctx iris.Context) {
 	aul := &model.AllAnnounceRequest{}
 	if err := ctx.ReadQuery(&aul); err != nil {
@@ -26,6 +56,22 @@ func GetAllAnnounces(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// GetLatestAnnounce godoc
+// @Summary 获取最新公告
+// @Description 获取最新公告 分页 强制逆序 开始时间 结束时间 之内
+// @Tags announce
+// @Accept  json
+// @Produce  json
+// @Param offset query uint false "偏移量"
+// @Param limit query uint false "限制量"
+// @Success 200 {object} []model.AnnounceJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/announce/ [get]
 func GetLatestAnnounces(ctx iris.Context) {
 	param := ExtractPageParam(ctx)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -33,6 +79,21 @@ func GetLatestAnnounces(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// CreateAnnounce godoc
+// @Summary 创建公告
+// @Description 创建公告
+// @Tags announce
+// @Accept  json
+// @Produce  json
+// @Param req body model.CreateAnnounceRequest true "创建公告请求"
+// @Success 200 {object} model.AnnounceJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/announce/ [post]
 func CreateAnnounce(ctx iris.Context) {
 	aul := &model.CreateAnnounceRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
@@ -44,6 +105,22 @@ func CreateAnnounce(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// UpdateAnnounce godoc
+// @Summary 更新公告
+// @Description 更新公告
+// @Tags announce
+// @Accept  json
+// @Produce  json
+// @Param id path uint true "公告ID"
+// @Param req body model.UpdateAnnounceRequest true "更新公告请求"
+// @Success 200 {object} model.AnnounceJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/announce/{id} [put]
 func UpdateAnnounce(ctx iris.Context) {
 	aul := &model.UpdateAnnounceRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
@@ -56,6 +133,21 @@ func UpdateAnnounce(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// DeleteAnnounce godoc
+// @Summary 删除公告
+// @Description 删除公告
+// @Tags announce
+// @Accept  json
+// @Produce  json
+// @Param id path uint true "公告ID"
+// @Success 200 {object} model.AnnounceJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/announce/{id} [delete]
 func DeleteAnnounce(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
@@ -63,6 +155,21 @@ func DeleteAnnounce(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// HitAnnounce godoc
+// @Summary 点击公告
+// @Description 点击公告 增加点击量 默认单个用户单篇文章12h只能点击一次
+// @Tags announce
+// @Accept  json
+// @Produce  json
+// @Param id path uint true "公告ID"
+// @Success 204 {object} model.AnnounceJson
+// @Failure 400 {object} model.ApiJson
+// @Failure 401 {object} model.ApiJson
+// @Failure 403 {object} model.ApiJson
+// @Failure 404 {object} model.ApiJson
+// @Failure 422 {object} model.ApiJson
+// @Failure 500 {object} model.ApiJson
+// @Router /v1/announce/{id}/hit [put]
 func HitAnnounce(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))

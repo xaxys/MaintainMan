@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetAnnounceByID(id uint, auth *model.AuthInfo) *model.ApiJson {
+func GetAnnounce(id uint, auth *model.AuthInfo) *model.ApiJson {
 	announce, err := dao.GetAnnounceByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
