@@ -22,6 +22,11 @@ func init() {
 	AppConfig.SetDefault("app.name", "maintainman")
 	AppConfig.SetDefault("app.listen", ":8787")
 	AppConfig.SetDefault("app.loglevel", "info")
+	AppConfig.SetDefault("app.page.limit", 100)
+	AppConfig.SetDefault("app.page.default", 50)
+	AppConfig.SetDefault("app.hit_expire_time", "12h")
+	AppConfig.SetDefault("wechat.appid", "微信小程序的appid")
+	AppConfig.SetDefault("wechat.secret", "微信小程序的secret")
 	AppConfig.SetDefault("token.key", "xaxys_2022_all_rights_reserved")
 	AppConfig.SetDefault("token.exp", "30m")
 
@@ -34,8 +39,8 @@ func init() {
 	AppConfig.SetDefault("database.mysql.user", "root")
 	AppConfig.SetDefault("database.mysql.password", "123456")
 
-	AppConfig.SetDefault("cache.expire", 86400)
-	AppConfig.SetDefault("cache.purge", 600)
+	AppConfig.SetDefault("cache.expire", "24h")
+	AppConfig.SetDefault("cache.purge", "10m")
 
 	AppConfig.SetDefault("admin.name", "admin")
 	AppConfig.SetDefault("admin.display_name", "maintainman default admin")
@@ -44,6 +49,7 @@ func init() {
 
 	if err := AppConfig.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			fmt.Printf("App configuration file not found: %v\n", err)
 			AppConfig.SafeWriteConfig()
 		} else {
 			panic(fmt.Errorf("Fatal error config file: %w \n", err))

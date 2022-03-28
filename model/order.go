@@ -74,7 +74,7 @@ type OrderJson struct {
 	AllowComment bool           `json:"allow_comment"`
 	CreatedAt    int64          `json:"created_at"` // unix timestamp in seconds (UTC)
 	UpdatedAt    int64          `json:"updated_at"` // unix timestamp in seconds (UTC)
-	Appraisal    uint           `json:"appraise"`
+	Appraisal    uint           `json:"appraisal"`
 	Tags         []*TagJson     `json:"tags,omitempty"`
 	Comments     []*CommentJson `json:"comments,omitempty"`
 }

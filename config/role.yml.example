@@ -10,21 +10,28 @@ role:
     permissions:
       - "user.register"
       - "user.login"
-      - "announce.viewall"
+      - "announce.view"
     inheritance:
   - name: user
     display_name: "普通用户"
     default: true
     permissions:
+      - "user.view"
       - "user.update"
       - "user.renew"
+      - "role.view"
+      - "announce.view"
+      - "announce.hit"
+      - "order.view"
       - "order.create"
-      - "order.close"
+      - "order.cancel"
       - "order.update"
-      - "order.grade"
+      - "order.appraise"
       - "order.urgence"
+      - "order.comment.view"
       - "order.comment.create"
       - "order.comment.delete"
+      - "tag.viewall"
     inheritance:
       - guest
   - name: maintainer
@@ -33,14 +40,14 @@ role:
       - "order.reject"
       - "order.report"
       - "order.complete"
-      - "parts.consume"
-      - "parts.viewall"
+      - "item.consume"
+      - "item.viewall"
     inheritance:
       - user
   - name: super_maintainer
     display_name: "维护工（可自行接单）"
     permissions:
-      - "order.assign"
+      - "order.selfassign"
       - "order.viewall"
     inheritance:
       - maintainer
@@ -50,7 +57,8 @@ role:
       - "user.division"
       - "announce.*"
       - "order.*"
-      - "parts.*"
+      - "tag.*"
+      - "item.*"
     inheritance:
       - maintainer
   - name: super_admin

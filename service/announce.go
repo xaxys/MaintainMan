@@ -114,7 +114,21 @@ func HitAnnounce(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if _, ok := database.Cache.Get(key); ok {
 		return model.Success(nil, "浏览过了")
 	}
-	expire := time.Duration(config.AppConfig.GetInt("app.hit_expire_time")) * time.Second
+	expire, err := time.ParseDuration(config.AppConfig.GetString("app.hit_expire.announce"))
+	if err != nil {
+		return model.ErrorInternalServer(err)
+	}
+	announce, err := dao.GetAnnounceByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		} else {
+			return model.ErrorQueryDatabase(err)
+		}
+	}
+	if time.Now().Before(*announce.StartTime) || time.Now().After(*announce.EndTime) {
+		return model.ErrorNotFound(errors.New("不在公告期间"))
+	}
 	database.Cache.Set(key, nil, expire)
 	if err := dao.HitAnnounce(id); err != nil {
 		return model.ErrorUpdateDatabase(err)

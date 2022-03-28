@@ -1,5 +1,6 @@
 permission:
   user:
+    view: "查看当前用户"
     create: "创建用户"
     update: "更新用户"
     updateall: "更新所有用户"
@@ -11,6 +12,7 @@ permission:
     register: "注册"
     renew: "更新Token"
   role:
+    view: "查看当前角色"
     create: "创建角色"
     update: "更新角色"
     delete: "删除角色"
@@ -18,13 +20,17 @@ permission:
   permission:
     viewall: "查看所有权限"
   announce:
+    view: "查看公告"
+    hit: "点击公告"
     create: "创建公告"
     update: "更新公告"
     delete: "删除公告"
-    viewall: "查看公告"
+    viewall: "查看所有公告"
   order:
+    view: "查看我的订单"
+    viewfix: "查看我维修的订单"
     create: "创建订单"
-    close: "关闭订单"
+    cancel: "取消订单"
     update: "更新订单"
     updateall: "更新所有订单"
     assign: "分配订单"
@@ -37,13 +43,14 @@ permission:
     defect: "修改故障分类"
     urgence: "修改紧急程度"
     appraise: "评分"
+    viewall: "查看所有订单"
     comment:
       create: "创建评论"
       delete: "删除评论"
+      view: "查看我的评论"
       createall: "创建所有评论"
       deleteall: "删除所有评论"
       viewall: "查看所有评论"
-    viewall: "查看所有订单"
   tag:
     create: "创建标签"
     delete: "删除标签"
