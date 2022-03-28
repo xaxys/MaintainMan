@@ -45,9 +45,9 @@ type UpdateOrderRequest struct {
 type AllOrderRequest struct {
 	Title      string `json:"title" url:"title" validate:"lte=191"`
 	UserID     uint   `json:"user_id" url:"user_id"`
-	Status     uint   `json:"status" url:"status"`
-	Tags       []uint `json:"tags" url:"tags"` // 若干 Tag 的 ID
-	Conjunctve bool   `json:"conjunctve" url:"conjunctve"`
+	Status     uint   `json:"status" url:"status"`         // 状态 0:非法 1:待处理 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价
+	Tags       []uint `json:"tags" url:"tags"`             // 若干 Tag 的 ID
+	Conjunctve bool   `json:"conjunctve" url:"conjunctve"` // true: 查询包含所有Tag的订单, false: 查询包含任一Tag的订单
 	PageParam
 }
 

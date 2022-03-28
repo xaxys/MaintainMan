@@ -25,8 +25,8 @@ type ItemInfoJson struct {
 	ItemLogs    []*ItemLogJson `json:"item_log"`
 	CreatedAt   int64          `json:"created_at"` // unix timestamp in seconds (UTC)
 	UpdatedAt   int64          `json:"updated_at"` // unix timestamp in seconds (UTC)
-	CreatedBy   uint           `json:"created_by"`
-	UpdatedBy   uint           `json:"updated_by"`
+	CreatedBy   uint           `json:"created_by"` // 创建用户ID
+	UpdatedBy   uint           `json:"updated_by"` // 更新用户ID
 }
 
 type ItemJson struct {

@@ -12,7 +12,6 @@ import (
 // @Summary 获取某ID物品信息
 // @Description 通过ID获取某物品信息
 // @Tags item
-// @Accept  json
 // @Produce  json
 // @Param id path uint true "物品ID"
 // @Success 200 {object} model.ApiJson{data=model.ItemJson}
@@ -34,7 +33,6 @@ func GetItemByID(ctx iris.Context) {
 // @Summary 获取某名称物品信息
 // @Description 通过名称获取某物品信息
 // @Tags item
-// @Accept  json
 // @Produce  json
 // @Param name path string true "物品名称"
 // @Success 200 {object} model.ApiJson{data=model.ItemJson}
@@ -56,7 +54,6 @@ func GetItemByName(ctx iris.Context) {
 // @Summary 获取大概是某些名称的物品们的信息
 // @Description 通过名称获取大概是某些名称的物品们的信息
 // @Tags item
-// @Accept  json
 // @Produce  json
 // @Param name path string true "物品名称"
 // @Success 200 {object} model.ApiJson{data=[]model.ItemJson}
@@ -78,7 +75,6 @@ func GetItemsByFuzzyName(ctx iris.Context) {
 // @Summary 获取所有物品信息
 // @Description 获取所有物品信息 分页
 // @Tags item
-// @Accept  json
 // @Produce  json
 // @Param order_by query string false "排序字段"
 // @Param offset query uint false "偏移量"

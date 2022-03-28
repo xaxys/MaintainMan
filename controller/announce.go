@@ -12,7 +12,6 @@ import (
 // @Summary 获取公告
 // @Description 获取公告
 // @Tags announce
-// @Accept  json
 // @Produce  json
 // @Param id path uint true "公告ID"
 // @Success 200 {object} model.ApiJson{data=model.AnnounceJson}
@@ -34,9 +33,14 @@ func GetAnnounce(ctx iris.Context) {
 // @Summary 获取公告列表
 // @Description 获取公告列表 分页 可按标题 开始时间 结束时间 (时间之内|之外 两种模式)过滤
 // @Tags announce
-// @Accept  json
 // @Produce  json
-// @Param body body model.AllAnnounceRequest true "获取公告列表请求"
+// @Param title query string false "标题"
+// @Param start_time query string false "开始时间; unix timestamp in seconds (UTC); -1代表不限; 含本数"
+// @Param end_time query string false "结束时间; unix timestamp in seconds (UTC); -1代表不限; 含本数"
+// @Param inclusive query bool false "true: 查询开始时间晚于start,且结束时间早于end的(在某段时间内开始并结束的); false: 查询开始时间早于start,且结束时间晚于end的(在某段时间内都能看到的)"
+// @Param order_by query string false "排序字段 (默认为ID正序) 只接受"{field} {asc|desc}"格式 (e.g. "id desc")"
+// @Param offset query uint false "偏移量 (默认为0)"
+// @Param limit query uint false "每页数据量 (默认为50)"
 // @Success 200 {object} model.ApiJson{data=[]model.AnnounceJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
@@ -60,7 +64,6 @@ func GetAllAnnounces(ctx iris.Context) {
 // @Summary 获取最新公告
 // @Description 获取最新公告 分页 强制逆序 开始时间 结束时间 之内
 // @Tags announce
-// @Accept  json
 // @Produce  json
 // @Param offset query uint false "偏移量"
 // @Param limit query uint false "每页数据量"
@@ -159,7 +162,6 @@ func DeleteAnnounce(ctx iris.Context) {
 // @Summary 点击公告
 // @Description 点击公告 增加点击量 默认单个用户单篇文章12h只能点击一次
 // @Tags announce
-// @Accept  json
 // @Produce  json
 // @Param id path uint true "公告ID"
 // @Success 204 {object} model.ApiJson{data=model.AnnounceJson}

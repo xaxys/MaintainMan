@@ -12,7 +12,6 @@ import (
 // @Summary 获取订单的评论信息
 // @Description 获取订单的评论信息 分页 操作者必须是订单的创建者 或 曾经被分配给该订单的维修工
 // @Tags comment
-// @Accept  json
 // @Produce  json
 // @Param id path uint true "订单id"
 // @Param order_by query string false "排序字段"
@@ -38,7 +37,6 @@ func GetCommentsByOrder(ctx iris.Context) {
 // @Summary 获取订单的评论信息(管理员)
 // @Description 获取任意订单的评论信息 分页
 // @Tags comment
-// @Accept  json
 // @Produce  json
 // @Param id path uint true "订单id"
 // @Param order_by query string false "排序字段"

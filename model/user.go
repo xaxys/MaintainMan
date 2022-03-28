@@ -20,7 +20,7 @@ type User struct {
 
 type LoginRequest struct {
 	Account  string `json:"account" validate:"required,lte=191"`
-	Password string `json:"password" validate:"gte=8,lte=32"`
+	Password string `json:"password" validate:"required,gte=8,lte=32"`
 }
 
 type WxLoginRequest struct {
@@ -70,7 +70,7 @@ type AllUserRequest struct {
 type UserJson struct {
 	ID          uint      `json:"id"`
 	Name        string    `json:"name"`
-	DisplayName string    `json:"display_name"`
+	DisplayName string    `json:"display_name"` // 昵称
 	RoleName    string    `json:"user_role"`
 	Role        *RoleJson `json:"role,omitempty"`
 	Phone       string    `json:"phone"`

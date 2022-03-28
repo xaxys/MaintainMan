@@ -12,7 +12,6 @@ import (
 // @Summary 获取当前用户角色信息
 // @Description 获取当前用户角色信息
 // @Tags role
-// @Accept  json
 // @Produce  json
 // @Success 200 {object} model.ApiJson{data=model.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
@@ -32,7 +31,6 @@ func GetRole(ctx iris.Context) {
 // @Summary 获取某角色信息
 // @Description 通过角色名获取某角色信息
 // @Tags role
-// @Accept  json
 // @Produce  json
 // @Param name path string true "角色名"
 // @Success 200 {object} model.ApiJson{data=model.RoleJson}
@@ -173,7 +171,6 @@ func DeleteRole(ctx iris.Context) {
 // @Summary 获取所有角色
 // @Description 获取所有角色 不分页
 // @Tags role
-// @Accept  json
 // @Produce  json
 // @Success 200 {object} model.ApiJson{data=[]model.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}

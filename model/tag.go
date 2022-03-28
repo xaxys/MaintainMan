@@ -11,7 +11,7 @@ type Tag struct {
 type CreateTagRequest struct {
 	Sort  string `json:"sort" validate:"required,lte=191"`
 	Name  string `json:"name" validate:"required,lte=191"`
-	Level uint   `json:"level" validate:"gte=0"`
+	Level uint   `json:"level" validate:"required,gte=0"`
 }
 
 type TagJson struct {

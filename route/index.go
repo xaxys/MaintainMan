@@ -108,7 +108,6 @@ func Route(app *iris.Application) {
 							comment.Post("/force", middleware.PermInterceptor("comment.createall"), controller.ForceCreateComment)
 						})
 					})
-
 				})
 
 				api.PartyFunc("/tag", func(tag router.Party) {
