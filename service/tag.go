@@ -14,9 +14,8 @@ func GetTagByID(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	return model.Success(TagToJson(tag), "获取成功")
 }
