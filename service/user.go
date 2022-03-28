@@ -77,7 +77,8 @@ func CreateUser(aul *model.CreateUserRequest, auth *model.AuthInfo) *model.ApiJs
 	if util.EmailRegex.MatchString(aul.Name) || util.PhoneRegex.MatchString(aul.Name) {
 		return model.ErrorValidation(errors.New("用户名不能为邮箱或手机号"))
 	}
-	u, err := dao.CreateUser(aul, auth.User)
+	operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
+	u, err := dao.CreateUser(aul, operator)
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 

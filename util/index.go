@@ -35,11 +35,34 @@ func NotEmpty(s, def string) string {
 	return s
 }
 
+func NotNil[T, U any](v *T, u *T) *T {
+	if v == nil {
+		return u
+	}
+	return v
+}
+
 func NilOrValue[T, U any](v *T, obj *U) *U {
 	if v == nil {
 		return nil
 	} else {
 		return obj
+	}
+}
+
+func NilOrLazyValue[T, U any](v *T, fn func(*T) *U) *U {
+	if v == nil {
+		return nil
+	} else {
+		return fn(v)
+	}
+}
+
+func NilOrBaseValue[T, U any](v *T, fn func(*T) U, def U) U {
+	if v == nil {
+		return def
+	} else {
+		return fn(v)
 	}
 }
 

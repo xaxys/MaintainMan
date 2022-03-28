@@ -4,7 +4,6 @@ import (
 	"maintainman/model"
 	"maintainman/service"
 	"maintainman/util"
-	"time"
 
 	"github.com/kataras/iris/v12"
 )
@@ -171,13 +170,7 @@ func UserRegister(ctx iris.Context) {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	//auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	//TODO:修改判断空指针逻辑
-	auth := &model.AuthInfo{
-		IP:   ctx.Request().RemoteAddr,
-		User: uint(time.Now().Unix()),
-	}
-
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
 	response := service.RegisterUser(aul, auth)
 	ctx.Values().Set("response", response)
 }

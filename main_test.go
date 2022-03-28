@@ -1,23 +1,25 @@
 package main
 
 import (
-	"github.com/kataras/iris/v12"
-	"github.com/kataras/iris/v12/httptest"
-	"github.com/spf13/cast"
 	"maintainman/config"
 	"maintainman/logger"
 	"maintainman/model"
 	"maintainman/route"
 	"maintainman/service"
+	"maintainman/util"
 	"math/rand"
 	"net"
 	"regexp"
 	"strconv"
 	"strings"
 	"testing"
+
+	"github.com/kataras/iris/v12"
+	"github.com/kataras/iris/v12/httptest"
+	"github.com/spf13/cast"
 )
 
-func TestRegisterRouter(t *testing.T) {
+func TestRegisterLoginRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	users := generateRandomUsers("testUser", 10)
@@ -25,13 +27,6 @@ func TestRegisterRouter(t *testing.T) {
 	for _, user := range users {
 		e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated)
 	}
-}
-
-func TestLoginRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
-	users := generateRandomUsers("testUser", 10)
-
 	for _, user := range users {
 		e.POST("/v1/login").WithJSON(model.LoginRequest{
 			Account:  user.Name,
@@ -68,7 +63,7 @@ func newApp() *iris.Application {
 
 func generateRandomUsers(prefix string, num uint) (usersRegister []model.RegisterUserRequest) {
 	for i := uint(1); i <= num; i++ {
-		usersRegister = append(usersRegister, initUser(prefix+strconv.Itoa(int(i)), "12345678", "user"+strconv.Itoa(int(i))))
+		usersRegister = append(usersRegister, initUser(prefix+strconv.Itoa(int(i))+util.RandomString(5), "12345678", "disp name user"+strconv.Itoa(int(i))))
 	}
 	return
 }
