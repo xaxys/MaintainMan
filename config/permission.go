@@ -97,7 +97,7 @@ func init() {
 			fmt.Printf("Permission configuration file not found: %v\n", err)
 			PermConfig.SafeWriteConfig()
 		} else {
-			panic(fmt.Errorf("Fatal error reading config file: %v\n", err))
+			panic(fmt.Errorf("Fatal error reading config file: %v", err))
 		}
 	}
 }

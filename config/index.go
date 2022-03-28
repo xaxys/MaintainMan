@@ -52,7 +52,7 @@ func init() {
 			fmt.Printf("App configuration file not found: %v\n", err)
 			AppConfig.SafeWriteConfig()
 		} else {
-			panic(fmt.Errorf("Fatal error config file: %w \n", err))
+			panic(fmt.Errorf("Fatal error reading config file: %v", err))
 		}
 	}
 }

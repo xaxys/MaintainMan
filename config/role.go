@@ -118,7 +118,7 @@ func init() {
 			fmt.Printf("Role configuration file not found: %v\n", err)
 			RoleConfig.SafeWriteConfig()
 		} else {
-			panic(fmt.Errorf("Fatal error reading config file: %v\n", err))
+			panic(fmt.Errorf("Fatal error reading config file: %v", err))
 		}
 	}
 }
