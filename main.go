@@ -15,5 +15,8 @@ func main() {
 	logger.Logger = app.Logger()
 	initialize.InitDefaultData()
 	route.Route(app)
-	app.Listen(config.AppConfig.GetString("app.listen"))
+	err := app.Listen(config.AppConfig.GetString("app.listen"))
+	if err != nil {
+		return
+	}
 }
