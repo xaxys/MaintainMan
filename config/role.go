@@ -29,6 +29,7 @@ func init() {
 		map[string]any{
 			"name":         "guest",
 			"display_name": "访客",
+			"guest":        true,
 			"permission": []string{
 				"user.register",
 				"user.login",
@@ -38,6 +39,7 @@ func init() {
 		map[string]any{
 			"name":         "user",
 			"display_name": "普通用户",
+			"default":      true,
 			"permission": []string{
 				"user.view",
 				"user.update",
