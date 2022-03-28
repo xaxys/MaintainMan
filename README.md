@@ -46,6 +46,12 @@ MaintainMan is a logistic report management system powered by iris.
 
 - More...
 
+## Documentation
+
+Find document here [Github Wiki](https://github.com/xaxys/MaintainMan/wiki/API-Docs).
+
+Or Beautified Document here [Maintainman Doc](https://maintainman.oasis.run/).
+
 ## Contributing
 
 You can help to make the project better by creating an issue or pull request.

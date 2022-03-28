@@ -29,7 +29,7 @@ type CreateOrderRequest struct {
 	Address      string `json:"address" validate:"required"`
 	ContactName  string `json:"contact_name" validate:"required,lte=191"`
 	ContactPhone string `json:"contact_phone" validate:"required,lte=191"`
-	Tags         []uint `json:"add_tags"`
+	Tags         []uint `json:"tags"` // 若干 Tag 的 ID
 }
 
 type UpdateOrderRequest struct {
@@ -38,16 +38,16 @@ type UpdateOrderRequest struct {
 	Address      string `json:"address"`
 	ContactName  string `json:"contact_name" validate:"lte=191"`
 	ContactPhone string `json:"contact_phone" validate:"lte=191"`
-	AddTags      []uint `json:"add_tags"`
-	DelTags      []uint `json:"del_tags"`
+	AddTags      []uint `json:"add_tags"` // 若干需要添加的 Tag 的 ID
+	DelTags      []uint `json:"del_tags"` // 若干需要删除的 Tag 的 ID
 }
 
 type AllOrderRequest struct {
-	Title      string `url:"title" validate:"lte=191"`
-	UserID     uint   `url:"user_id"`
-	Status     uint   `url:"status"`
-	Tags       []uint `url:"tags"`
-	Conjunctve bool   `url:"conjunctve"`
+	Title      string `json:"title" url:"title" validate:"lte=191"`
+	UserID     uint   `json:"user_id" url:"user_id"`
+	Status     uint   `json:"status" url:"status"`
+	Tags       []uint `json:"tags" url:"tags"` // 若干 Tag 的 ID
+	Conjunctve bool   `json:"conjunctve" url:"conjunctve"`
 	PageParam
 }
 
@@ -72,8 +72,8 @@ type OrderJson struct {
 	ContactPhone string         `json:"contact_phone"`
 	Status       uint           `json:"status"`
 	AllowComment bool           `json:"allow_comment"`
-	CreatedAt    int64          `json:"created_at"`
-	UpdatedAt    int64          `json:"updated_at"`
+	CreatedAt    int64          `json:"created_at"` // unix timestamp in seconds (UTC)
+	UpdatedAt    int64          `json:"updated_at"` // unix timestamp in seconds (UTC)
 	Appraisal    uint           `json:"appraise"`
 	Tags         []*TagJson     `json:"tags,omitempty"`
 	Comments     []*CommentJson `json:"comments,omitempty"`

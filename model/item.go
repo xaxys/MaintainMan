@@ -23,8 +23,8 @@ type ItemInfoJson struct {
 	Income      float64        `json:"income"`
 	Count       int            `json:"count"`
 	ItemLogs    []*ItemLogJson `json:"item_log"`
-	CreatedAt   int64          `json:"created_at"`
-	UpdatedAt   int64          `json:"updated_at"`
+	CreatedAt   int64          `json:"created_at"` // unix timestamp in seconds (UTC)
+	UpdatedAt   int64          `json:"updated_at"` // unix timestamp in seconds (UTC)
 	CreatedBy   uint           `json:"created_by"`
 	UpdatedBy   uint           `json:"updated_by"`
 }

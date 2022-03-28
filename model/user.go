@@ -62,8 +62,8 @@ type UpdateUserRequest struct {
 }
 
 type AllUserRequest struct {
-	Name        string `json:"name" validate:"omitempty,gte=2,lte=50"`
-	DisplayName string `json:"display_name" validate:"omitempty,lte=191"`
+	Name        string `json:"name" url:"name" validate:"omitempty,gte=2,lte=50"`
+	DisplayName string `json:"display_name" url:"display_name" validate:"omitempty,lte=191"`
 	PageParam
 }
 
@@ -76,5 +76,5 @@ type UserJson struct {
 	Phone       string    `json:"phone"`
 	Email       string    `json:"email"`
 	RealName    string    `json:"real_name"`
-	LoginTime   int64     `json:"login_time"`
+	LoginTime   int64     `json:"login_time"` // unix timestamp in seconds (UTC)
 }

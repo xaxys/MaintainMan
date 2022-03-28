@@ -35,10 +35,10 @@ type ModifyAnnounceRequest struct {
 }
 
 type AllAnnounceRequest struct {
-	Title     string `url:"title" validate:"lte=191"`
-	StartTime int64  `url:"start_time" validate:"gte=-1,lte=253370764799"`
-	EndTime   int64  `url:"end_time" validate:"gte=-1,lte=253370764799"`
-	Inclusive bool   `url:"inclusive"`
+	Title     string `json:"title" url:"title" validate:"lte=191"`
+	StartTime int64  `json:"start_time" url:"start_time" validate:"gte=-1,lte=253370764799"`
+	EndTime   int64  `json:"end_time" url:"end_time" validate:"gte=-1,lte=253370764799"`
+	Inclusive bool   `json:"inclusive" url:"inclusive"`
 	PageParam
 }
 
@@ -46,9 +46,9 @@ type AnnounceJson struct {
 	ID        uint   `json:"id"`
 	Title     string `json:"title"`
 	Content   string `json:"content"`
-	StartTime int64  `json:"start_time"`
-	EndTime   int64  `json:"end_time"`
-	Hits      uint   `json:"hits"`
-	CreatedAt int64  `json:"created_at"`
-	UpdatedAt int64  `json:"updated_at"`
+	StartTime int64  `json:"start_time"` // unix timestamp in seconds (UTC)
+	EndTime   int64  `json:"end_time"`   // unix timestamp in seconds (UTC)
+	Hits      uint   `json:"hits"`       // 点击数
+	CreatedAt int64  `json:"created_at"` // unix timestamp in seconds (UTC)
+	UpdatedAt int64  `json:"updated_at"` // unix timestamp in seconds (UTC)
 }
