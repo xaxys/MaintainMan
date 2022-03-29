@@ -13,7 +13,6 @@ import (
 // @Summary 获取当前登录用户信息
 // @Description 获取当前登录用户信息 附带角色和权限信息
 // @Tags user
-// @Accept  json
 // @Produce  json
 // @Success 200 {object} model.ApiJson{data=model.UserJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
@@ -33,7 +32,6 @@ func GetUser(ctx iris.Context) {
 // @Summary 获取某用户信息
 // @Description 通过ID获取某用户信息
 // @Tags user
-// @Accept  json
 // @Produce  json
 // @Param id path uint true "用户ID"
 // @Success 200 {object} model.ApiJson{data=model.UserJson}
@@ -54,13 +52,12 @@ func GetUserByID(ctx iris.Context) {
 // @Summary 获取所有用户信息
 // @Description 获取所有用户信息 用户名 昵称查找 分页
 // @Tags user
-// @Accept  json
 // @Produce  json
-// @Param order_by query string false "排序字段"
-// @Param offset query uint false "偏移量"
-// @Param limit query uint false "每页数据量"
 // @Param name query string false "用户名"
 // @Param display_name query string false "昵称"
+// @Param order_by query string false "排序字段 (默认为ID正序) 只接受"{field} {asc|desc}"格式 (e.g. "id desc")"
+// @Param offset query uint false "偏移量 (默认为0)"
+// @Param limit query uint false "每页数据量 (默认为50)"
 // @Success 200 {object} model.ApiJson{data=model.UserJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}

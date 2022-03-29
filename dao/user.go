@@ -92,9 +92,6 @@ func CreateUser(json *model.CreateUserRequest, operator uint) (*model.User, erro
 	copier.Copy(user, json)
 	user.CreatedBy = operator
 
-	user.OpenID = "null"
-	//TODO: 提供获取用户open_id的接口
-
 	if err := database.DB.Create(user).Error; err != nil {
 		logger.Logger.Debugf("CreateUserErr: %v\n", err)
 		return nil, err

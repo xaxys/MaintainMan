@@ -16,15 +16,15 @@ type Announce struct {
 type CreateAnnounceRequest struct {
 	Title     string `json:"title" validate:"required,lte=191"`
 	Content   string `json:"content" validate:"required"`
-	StartTime int64  `json:"start_time" validate:"gte=-1,lte=253370764799"`
-	EndTime   int64  `json:"end_time" validate:"eq=-1|gtfield=StartTime,lte=253370764799"`
+	StartTime int64  `json:"start_time" validate:"required,gte=-1,lte=253370764799"`                // unix timestamp in seconds (UTC); -1代表不限; 含本数
+	EndTime   int64  `json:"end_time" validate:"required,eq=-1|gtfield=StartTime,lte=253370764799"` // unix timestamp in seconds (UTC); -1代表不限; 含本数; 必须大于start
 }
 
 type UpdateAnnounceRequest struct {
 	Title     string `json:"title" validate:"lte=191"`
 	Content   string `json:"content"`
-	StartTime int64  `json:"start_time" validate:"gte=-1,lte=253370764799"`
-	EndTime   int64  `json:"end_time" validate:"eq=-1|gtfield=StartTime,lte=253370764799"`
+	StartTime int64  `json:"start_time" validate:"required,gte=-1,lte=253370764799"`                // unix timestamp in seconds (UTC); -1代表不限; 含本数
+	EndTime   int64  `json:"end_time" validate:"required,eq=-1|gtfield=StartTime,lte=253370764799"` // unix timestamp in seconds (UTC); -1代表不限; 含本数
 }
 
 type ModifyAnnounceRequest struct {
@@ -36,9 +36,9 @@ type ModifyAnnounceRequest struct {
 
 type AllAnnounceRequest struct {
 	Title     string `json:"title" url:"title" validate:"lte=191"`
-	StartTime int64  `json:"start_time" url:"start_time" validate:"gte=-1,lte=253370764799"`
-	EndTime   int64  `json:"end_time" url:"end_time" validate:"gte=-1,lte=253370764799"`
-	Inclusive bool   `json:"inclusive" url:"inclusive"`
+	StartTime int64  `json:"start_time" url:"start_time" validate:"gte=-1,lte=253370764799"` // unix timestamp in seconds (UTC); -1代表不限; 含本数
+	EndTime   int64  `json:"end_time" url:"end_time" validate:"gte=-1,lte=253370764799"`     // unix timestamp in seconds (UTC); -1代表不限; 含本数
+	Inclusive bool   `json:"inclusive" url:"inclusive"`                                      // true: 查询开始时间晚于start,且结束时间早于end的(在某段时间内开始并结束的); false: 查询开始时间早于start,且结束时间晚于end的(在某段时间内都能看到的)
 	PageParam
 }
 

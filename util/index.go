@@ -23,9 +23,9 @@ func RandomString(n int) string {
 func ToUint[T ~int | ~int8 | ~int16 | ~int32 | ~int64](n T) uint {
 	if n < 0 {
 		return 0
-	} else {
-		return uint(n)
 	}
+	return uint(n)
+
 }
 
 func NotEmpty(s, def string) string {
@@ -35,12 +35,35 @@ func NotEmpty(s, def string) string {
 	return s
 }
 
+func NotNil[T, U any](v *T, u *T) *T {
+	if v == nil {
+		return u
+	}
+	return v
+}
+
 func NilOrValue[T, U any](v *T, obj *U) *U {
 	if v == nil {
 		return nil
-	} else {
-		return obj
 	}
+	return obj
+
+}
+
+func NilOrLazyValue[T, U any](v *T, fn func(*T) *U) *U {
+	if v == nil {
+		return nil
+	}
+	return fn(v)
+
+}
+
+func NilOrBaseValue[T, U any](v *T, fn func(*T) U, def U) U {
+	if v == nil {
+		return def
+	}
+	return fn(v)
+
 }
 
 func NilOrPtrCast[U any](v any) *U {
@@ -53,9 +76,9 @@ func NilOrPtrCast[U any](v any) *U {
 func Tenary[T any](cond bool, a, b T) T {
 	if cond {
 		return a
-	} else {
-		return b
 	}
+	return b
+
 }
 
 func In[T comparable](key T, values ...T) bool {

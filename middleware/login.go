@@ -46,17 +46,14 @@ func init() {
 }
 
 var headerJwtConfig = jwt.Config{
-	ErrorHandler: func(ctx iris.Context, err error) {
-		if err != nil {
-			ctx.JSON(model.ErrorUnauthorized(err))
-			ctx.StopExecution()
-		}
-	},
-
-	ValidationKeyGetter: func(token *jwt.Token) (interface{}, error) {
+	SigningMethod:       jwt.SigningMethodHS256,
+	Extractor:           jwt.FromAuthHeader,
+	CredentialsOptional: true,
+	ValidationKeyGetter: func(token *jwt.Token) (any, error) {
 		return jwtkey, nil
 	},
-
-	SigningMethod: jwt.SigningMethodHS256,
-	Extractor:     jwt.FromAuthHeader,
+	ErrorHandler: func(ctx iris.Context, err error) {
+		ctx.JSON(model.ErrorUnauthorized(err))
+		ctx.StopExecution()
+	},
 }

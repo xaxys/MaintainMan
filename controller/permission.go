@@ -12,7 +12,6 @@ import (
 // @Summary 获取当前用户权限信息
 // @Description 获取当前用户权限信息
 // @Tags permission
-// @Accept  json
 // @Produce  json
 // @Param name path string true "权限名"
 // @Success 200 {object} model.ApiJson{data=model.PermissionJson}
@@ -34,7 +33,6 @@ func GetPermission(ctx iris.Context) {
 // @Summary 获取所有权限信息
 // @Description 获取所有权限信息 不分页
 // @Tags permission
-// @Accept  json
 // @Produce  json
 // @Success 200 {object} model.ApiJson{data=[]model.PermissionJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}

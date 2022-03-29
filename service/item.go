@@ -15,9 +15,8 @@ func GetItemByID(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	return model.Success(ItemToJson(item), "获取成功")
 }
@@ -27,9 +26,8 @@ func GetItemByName(name string, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	return model.Success(ItemToJson(item), "获取成功")
 }

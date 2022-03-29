@@ -12,7 +12,6 @@ import (
 // @Summary 获取某标签信息
 // @Description 通过ID获取某标签信息
 // @Tags tag
-// @Accept  json
 // @Produce  json
 // @Param id path uint true "标签ID"
 // @Success 200 {object} model.ApiJson{data=model.TagJson}
@@ -34,9 +33,8 @@ func GetTagByID(ctx iris.Context) {
 // @Summary 获取所有标签分类
 // @Description 获取所有标签分类
 // @Tags tag
-// @Accept  json
 // @Produce  json
-// @Success 200 {object} []string
+// @Success 200 {object} model.ApiJson{data=[]string}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -54,7 +52,6 @@ func GetAllTagSorts(ctx iris.Context) {
 // @Summary 获取某分类下的所有标签
 // @Description 通过分类名获取某分类下的所有标签
 // @Tags tag
-// @Accept  json
 // @Produce  json
 // @Param name path string true "分类名"
 // @Success 200 {object} model.ApiJson{data=[]model.TagJson}

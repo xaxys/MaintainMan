@@ -14,13 +14,13 @@ type User struct {
 	LoginIP     string    `gorm:"not null; size:40; default:0.0.0.0; comment:最后登录IP"`
 	LoginTime   time.Time `gorm:"not null; comment:最后登录时间"`
 	RealName    string    `gorm:"not null; size:191; comment:真实姓名"`
-	OpenID      string    `gorm:"not null; size:191; comment:微信openid"` //TODO: 更改open_id的orm格式
+	OpenID      string    `gorm:"not null; size:191; index; comment:微信openid"` //TODO: 更改open_id的orm格式
 	Orders      []*Order  `gorm:"foreignkey:UserID"`
 }
 
 type LoginRequest struct {
 	Account  string `json:"account" validate:"required,lte=191"`
-	Password string `json:"password" validate:"gte=8,lte=32"`
+	Password string `json:"password" validate:"required,gte=8,lte=32"`
 }
 
 type WxLoginRequest struct {
@@ -70,7 +70,7 @@ type AllUserRequest struct {
 type UserJson struct {
 	ID          uint      `json:"id"`
 	Name        string    `json:"name"`
-	DisplayName string    `json:"display_name"`
+	DisplayName string    `json:"display_name"` // 昵称
 	RoleName    string    `json:"user_role"`
 	Role        *RoleJson `json:"role,omitempty"`
 	Phone       string    `json:"phone"`

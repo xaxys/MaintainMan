@@ -18,9 +18,8 @@ func GetAnnounce(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	return model.Success(AnnounceToJson(announce), "获取成功")
 }
@@ -30,9 +29,8 @@ func GetAnnounceByTitle(title string, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	return model.Success(AnnounceToJson(announce), "获取成功")
 }
@@ -45,9 +43,8 @@ func GetAllAnnounces(aul *model.AllAnnounceRequest, auth *model.AuthInfo) *model
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	as := util.TransSlice(announces, AnnounceToJson)
 	return model.Success(as, "获取成功")
@@ -90,9 +87,8 @@ func UpdateAnnounce(id uint, aul *model.UpdateAnnounceRequest, auth *model.AuthI
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorUpdateDatabase(err)
 		}
+		return model.ErrorUpdateDatabase(err)
 	}
 	return model.SuccessUpdate(AnnounceToJson(announce), "更新成功")
 }
@@ -102,9 +98,8 @@ func DeleteAnnounce(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorDeleteDatabase(err)
 		}
+		return model.ErrorDeleteDatabase(err)
 	}
 	return model.SuccessUpdate(nil, "删除成功")
 }
@@ -114,7 +109,20 @@ func HitAnnounce(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if _, ok := database.Cache.Get(key); ok {
 		return model.Success(nil, "浏览过了")
 	}
-	expire := time.Duration(config.AppConfig.GetInt("app.hit_expire_time")) * time.Second
+	expire, err := time.ParseDuration(config.AppConfig.GetString("app.hit_expire.announce"))
+	if err != nil {
+		return model.ErrorInternalServer(err)
+	}
+	announce, err := dao.GetAnnounceByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
+		return model.ErrorQueryDatabase(err)
+	}
+	if time.Now().Before(*announce.StartTime) || time.Now().After(*announce.EndTime) {
+		return model.ErrorNotFound(errors.New("不在公告期间"))
+	}
 	database.Cache.Set(key, nil, expire)
 	if err := dao.HitAnnounce(id); err != nil {
 		return model.ErrorUpdateDatabase(err)

@@ -15,9 +15,8 @@ func GetOrderByID(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	return model.Success(OrderToJson(order), "获取成功")
 }
@@ -41,9 +40,8 @@ func GetOrderByRepairer(id uint, aul *model.RepairerOrderRequest, auth *model.Au
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	os := util.TransSlice(orders, OrderToJson)
 	return model.Success(os, "获取成功")
@@ -57,9 +55,8 @@ func GetAllOrders(aul *model.AllOrderRequest, auth *model.AuthInfo) *model.ApiJs
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	os := util.TransSlice(orders, OrderToJson)
 	return model.Success(os, "获取成功")

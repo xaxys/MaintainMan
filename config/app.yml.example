@@ -2,9 +2,11 @@ app:
   name: "maintainman"
   listen: ":8080"
   loglevel: "debug"
-  page_limit: 100
-  page_limit_default: 50
-  hit_expire_time: 43200 # 12 hours
+  page:
+    limit: 100
+    default: 50
+  hit_expire:
+    announce: "12h"
 
 wechat:
   appid: ""
@@ -26,9 +28,9 @@ database:
   sqlite:
     path: "maintainman.db"
 
-cache: # second
-  expire: 86400
-  purge: 600
+cache:
+  expire: "24h"
+  purge: "10m"
 
 admin: # only apply at first initialization
   name: "admin"

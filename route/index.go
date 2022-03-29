@@ -25,6 +25,7 @@ func Route(app *iris.Application) {
 		})
 
 		app.PartyFunc("/v1", func(v1 iris.Party) {
+			v1.Use(middleware.HeaderExtractor, middleware.TokenValidator)
 			v1.Done(middleware.ResponseHandler)
 			v1.SetExecutionRules(iris.ExecutionRules{Done: iris.ExecutionOptions{Force: true}})
 
@@ -32,12 +33,10 @@ func Route(app *iris.Application) {
 			v1.Post("/wxlogin", middleware.PermInterceptor("user.login"), controller.WxUserLogin)
 			v1.Post("/register", middleware.PermInterceptor("user.register"), controller.UserRegister)
 			v1.PartyFunc("/", func(api router.Party) {
-				api.Use(middleware.HeaderExtractor, middleware.TokenValidator, middleware.LoginInterceptor)
-
 				api.Get("/renew", middleware.PermInterceptor("user.renew"), controller.UserRenew)
 
 				api.PartyFunc("/user", func(user router.Party) {
-					user.Get("/", controller.GetUser)
+					user.Get("/", middleware.PermInterceptor("user.view"), controller.GetUser)
 					user.Put("/", middleware.PermInterceptor("user.update"), controller.UpdateUser)
 					user.Post("/", middleware.PermInterceptor("user.create"), controller.CreateUser)
 					user.Get("/all", middleware.PermInterceptor("user.viewall"), controller.GetAllUsers)
@@ -47,7 +46,7 @@ func Route(app *iris.Application) {
 				})
 
 				api.PartyFunc("/role", func(role router.Party) {
-					role.Get("/", controller.GetRole)
+					role.Get("/", middleware.PermInterceptor("role.view"), controller.GetRole)
 					role.Post("/", middleware.PermInterceptor("role.create"), controller.CreateRole)
 					role.Get("/all", middleware.PermInterceptor("role.viewall"), controller.GetAllRoles)
 					role.Get("/{name:string}", middleware.PermInterceptor("role.viewall"), controller.GetRoleByName)
@@ -63,25 +62,19 @@ func Route(app *iris.Application) {
 				})
 
 				api.PartyFunc("/announce", func(announce router.Party) {
-					announce.Get("/", middleware.PermInterceptor("announce.viewall"), controller.GetLatestAnnounces)
+					announce.Get("/", middleware.PermInterceptor("announce.view"), controller.GetLatestAnnounces)
 					announce.Get("/all", middleware.PermInterceptor("announce.viewall"), controller.GetAllAnnounces)
 					announce.Get("/{id:uint}", middleware.PermInterceptor("announce.viewall"), controller.GetAnnounce)
 					announce.Post("/", middleware.PermInterceptor("announce.create"), controller.CreateAnnounce)
 					announce.Put("/{id:uint}", middleware.PermInterceptor("announce.update"), controller.UpdateAnnounce)
 					announce.Delete("/{id:uint}", middleware.PermInterceptor("announce.delete"), controller.DeleteAnnounce)
-					announce.Get("/{id:uint}/hit", middleware.PermInterceptor("announce.viewall"), controller.HitAnnounce)
+					announce.Get("/{id:uint}/hit", middleware.PermInterceptor("announce.hit"), controller.HitAnnounce)
 				})
 
 				api.PartyFunc("/order", func(order router.Party) {
-					order.PartyFunc("/user", func(user router.Party) {
-						order.Get("/", controller.GetUserOrders)
-					})
-
-					order.PartyFunc("/repairer", func(repairer router.Party) {
-						order.Get("/", controller.GetRepairerOrders)
-						order.Get("/{id:uint}", controller.ForceGetRepairerOrders)
-					})
-
+					order.Get("/user", middleware.PermInterceptor("order.view"), controller.GetUserOrders)
+					order.Get("/repairer", middleware.PermInterceptor("order.viewfix"), controller.GetRepairerOrders)
+					order.Get("/repairer/{id:uint}", middleware.PermInterceptor("order.viewall"), controller.ForceGetRepairerOrders)
 					order.Get("/all", middleware.PermInterceptor("order.viewall"), controller.GetAllOrders)
 					order.Post("/", middleware.PermInterceptor("order.create"), controller.CreateOrder)
 
@@ -102,13 +95,12 @@ func Route(app *iris.Application) {
 						order.Post("/appraise", middleware.PermInterceptor("order.appraise"), controller.AppraiseOrder)
 
 						order.PartyFunc("/comment", func(comment router.Party) {
-							comment.Get("/", controller.GetCommentsByOrder)
+							comment.Get("/", middleware.PermInterceptor("comment.view"), controller.GetCommentsByOrder)
 							comment.Get("/force", middleware.PermInterceptor("comment.viewall"), controller.ForceGetCommentsByOrder)
 							comment.Post("/", middleware.PermInterceptor("comment.create"), controller.CreateComment)
 							comment.Post("/force", middleware.PermInterceptor("comment.createall"), controller.ForceCreateComment)
 						})
 					})
-
 				})
 
 				api.PartyFunc("/tag", func(tag router.Party) {

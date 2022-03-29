@@ -16,9 +16,8 @@ func GetUserByID(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	return model.Success(UserToJson(user), "获取成功")
 }
@@ -28,9 +27,8 @@ func GetUserInfoByID(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	json := UserToJson(user)
 	json.Role = dao.GetRole(user.RoleName)
@@ -42,9 +40,8 @@ func GetUserByName(name string, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	return model.Success(UserToJson(user), "获取成功")
 }
@@ -54,9 +51,8 @@ func GetUserInfoByName(name string, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	json := UserToJson(user)
 	json.Role = dao.GetRole(user.RoleName)
@@ -77,10 +73,10 @@ func CreateUser(aul *model.CreateUserRequest, auth *model.AuthInfo) *model.ApiJs
 	if util.EmailRegex.MatchString(aul.Name) || util.PhoneRegex.MatchString(aul.Name) {
 		return model.ErrorValidation(errors.New("用户名不能为邮箱或手机号"))
 	}
-	u, err := dao.CreateUser(aul, auth.User)
+	operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
+	u, err := dao.CreateUser(aul, operator)
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
-
 	}
 	return model.SuccessCreate(UserToJson(u), "创建成功")
 
@@ -94,11 +90,9 @@ func UpdateUser(id uint, aul *model.UpdateUserRequest, auth *model.AuthInfo) *mo
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorUpdateDatabase(err)
 		}
+		return model.ErrorUpdateDatabase(err)
 	}
-	u.Password = ""
 	return model.SuccessUpdate(UserToJson(u), "更新成功")
 }
 
@@ -106,9 +100,8 @@ func DeleteUser(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err := dao.DeleteUser(id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorDeleteDatabase(err)
 		}
+		return model.ErrorDeleteDatabase(err)
 	}
 	return model.SuccessUpdate(nil, "删除成功")
 }
@@ -121,9 +114,8 @@ func GetAllUsers(aul *model.AllUserRequest, auth *model.AuthInfo) *model.ApiJson
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	us := util.TransSlice(users, UserToJson)
 	return model.Success(us, "获取成功")
@@ -226,9 +218,8 @@ func UserRenew(id uint, ip string, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
-		} else {
-			return model.ErrorQueryDatabase(err)
 		}
+		return model.ErrorQueryDatabase(err)
 	}
 	if err := dao.ForceLogin(id, ip); err != nil {
 		return model.ErrorUpdateDatabase(fmt.Errorf("登录失败"))
