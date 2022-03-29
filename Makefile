@@ -29,7 +29,7 @@ build:
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
 		-o $(TARGET) $(PWD)/main.go
 
-test:
+test: clean
 	@echo "Testing MaintainMan ..."
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) test \
