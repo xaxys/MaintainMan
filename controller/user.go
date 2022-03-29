@@ -144,8 +144,8 @@ func WxUserLogin(ctx iris.Context) {
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/renew [post]
 func UserRenew(ctx iris.Context) {
-	id := ctx.Values().GetUintDefault("user_id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	id := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
 	response := service.UserRenew(id, ctx.Request().RemoteAddr, auth)
 	ctx.Values().Set("response", response)
 }
