@@ -13,7 +13,9 @@ func PermInterceptor(perm string) iris.Handler {
 		auth, _ := ctx.Values().Get("auth").(*model.AuthInfo)
 		role := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string { return v.Role }, "")
 		if err := dao.CheckPermission(role, perm); err != nil {
-			ctx.JSON(model.ErrorNoPermissions(err))
+			response := model.ErrorNoPermissions(err)
+			ctx.StatusCode(response.Code)
+			ctx.JSON(response)
 			ctx.StopExecution()
 		}
 		ctx.Next()

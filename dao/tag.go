@@ -51,7 +51,11 @@ func GetAllTagsBySort(sort string) (tags []*model.Tag, err error) {
 func CreateTag(aul *model.CreateTagRequest, operator uint) (tag *model.Tag, err error) {
 	tag = JsonToTag(aul)
 	tag.CreatedBy = operator
-	if err = database.DB.Create(tag).Error; err != nil {
+	cond := &model.Tag{
+		Sort: tag.Sort,
+		Name: tag.Name,
+	}
+	if err = database.DB.Where(cond).Attrs(tag).FirstOrInit(tag).Error; err != nil {
 		logger.Logger.Debugf("CreateTagErr: %v\n", err)
 	}
 	return
@@ -61,7 +65,7 @@ func UpdateTag(id uint, aul *model.CreateTagRequest, operator uint) (tag *model.
 	tag = JsonToTag(aul)
 	tag.ID = id
 	tag.UpdatedBy = operator
-	if err = database.DB.Model(tag).Updates(tag).Error; err != nil {
+	if err = database.DB.Where(tag).Updates(tag).Error; err != nil {
 		logger.Logger.Debugf("UpdateTagErr: %v\n", err)
 	}
 	return

@@ -39,6 +39,62 @@ func TestUserReNewRouter(t *testing.T) {
 	e.GET("/v1/renew").WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusOK)
 }
 
+func TestTagCreateRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+
+	tags := []model.CreateTagRequest{
+		{
+			Sort:  "楼名",
+			Name:  "一舍",
+			Level: 1,
+		},
+		{
+			Sort:  "楼名",
+			Name:  "二舍",
+			Level: 1,
+		},
+		{
+			Sort:  "楼名",
+			Name:  "三舍",
+			Level: 1,
+		},
+		{
+			Sort:  "紧急程度",
+			Name:  "一般",
+			Level: 1,
+		},
+		{
+			Sort:  "紧急程度",
+			Name:  "紧急",
+			Level: 1,
+		},
+		{
+			Sort:  "故障类型",
+			Name:  "漏水",
+			Level: 2,
+		},
+		{
+			Sort:  "故障类型",
+			Name:  "电线",
+			Level: 2,
+		},
+	}
+	e.POST("/v1/tag").
+		WithJSON(tags[0]).
+		Expect().Status(httptest.StatusForbidden)
+
+	for _, tag := range tags {
+		e.POST("/v1/tag").
+			WithJSON(tag).
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			Expect().Status(httptest.StatusCreated)
+	}
+}
+
+// utils
+
 func getSuperAdminToken() string {
 	superAdmin := initUser("admin", "12345678", "maintainman default admin")
 	apiJson := service.UserLogin(&model.LoginRequest{
