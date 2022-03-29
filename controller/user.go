@@ -4,6 +4,7 @@ import (
 	"maintainman/model"
 	"maintainman/service"
 	"maintainman/util"
+	"time"
 
 	"github.com/kataras/iris/v12"
 )
@@ -143,8 +144,8 @@ func WxUserLogin(ctx iris.Context) {
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/renew [post]
 func UserRenew(ctx iris.Context) {
-	id := ctx.Values().GetUintDefault("user_id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	id := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
 	response := service.UserRenew(id, ctx.Request().RemoteAddr, auth)
 	ctx.Values().Set("response", response)
 }
@@ -170,7 +171,13 @@ func UserRegister(ctx iris.Context) {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
-	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	//auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	//TODO:修改判断空指针逻辑
+	auth := &model.AuthInfo{
+		IP:   ctx.Request().RemoteAddr,
+		User: uint(time.Now().Unix()),
+	}
+
 	response := service.RegisterUser(aul, auth)
 	ctx.Values().Set("response", response)
 }

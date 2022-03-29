@@ -21,14 +21,14 @@ endif
 all: build
 
 build:
-	@echo "Building MaintianMan ..."
+	@echo "Building MaintainMan ..."
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) build \
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
 		-o $(TARGET) $(PWD)/main.go
 
 test:
-	@echo "Testing MaintianMan ..."
+	@echo "Testing MaintainMan ..."
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) test \
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \

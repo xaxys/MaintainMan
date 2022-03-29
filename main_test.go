@@ -31,7 +31,6 @@ func TestRegisterAndLoginRouter(t *testing.T) {
 	}
 }
 
-//FIXME: record not found [0.334ms] [rows:0] SELECT * FROM `users` WHERE `users`.`id` = 0 AND `users`.`deleted_at` IS NULL ORDER BY `users`.`id` LIMIT 1
 func TestUserReNewRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
