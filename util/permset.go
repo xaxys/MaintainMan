@@ -1,6 +1,9 @@
 package util
 
-import "strings"
+import (
+	"strconv"
+	"strings"
+)
 
 type PermSet struct {
 	data map[string]interface{}
@@ -18,6 +21,9 @@ func (p *PermSet) seperate(key string) ([]string, string, bool) {
 	parts := strings.Split(key, ".")
 	last := "@"
 	if parts[len(parts)-1] == "*" {
+		last = parts[len(parts)-1]
+		parts = parts[:len(parts)-1]
+	} else if _, err := strconv.Atoi(parts[len(parts)-1]); err == nil {
 		last = parts[len(parts)-1]
 		parts = parts[:len(parts)-1]
 	}
@@ -86,7 +92,18 @@ func (p *PermSet) Find(key string) (positive, found bool) {
 		}
 		data = data[v].(map[string]interface{})
 	}
-	if data[last] != nil {
+	if num, err := strconv.Atoi(last); err == nil {
+		for k, v := range data {
+			if knum, kerr := strconv.Atoi(k); kerr == nil {
+				if knum >= num && v.(bool) {
+					positive = true
+				}
+				if knum == num {
+					found = true
+				}
+			}
+		}
+	} else if data[last] != nil {
 		positive = data[last].(bool)
 		found = true
 	}

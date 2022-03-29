@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"fmt"
 	"maintainman/database"
 	"maintainman/logger"
 	"maintainman/model"
@@ -60,10 +61,10 @@ func CreateOrder(aul *model.CreateOrderRequest, operator uint) (*model.Order, er
 	copier.Copy(order, aul)
 	order.CreatedBy = operator
 
-	tags, err := GetTagsByIDs(aul.Tags)
-	if err != nil {
-		logger.Logger.Debugf("CreateOrderErr: %v\n", err)
-		return nil, err
+	tags, errs := GetTagsByIDs(aul.Tags)
+	if len(errs) > 0 {
+		logger.Logger.Debugf("CreateOrderErr: %v\n", errs)
+		return nil, fmt.Errorf("Several tags not found")
 	}
 
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
@@ -92,15 +93,15 @@ func UpdateOrder(id uint, aul *model.UpdateOrderRequest, operator uint) (*model.
 	order.ID = id
 	order.UpdatedBy = operator
 
-	addTags, err := GetTagsByIDs(aul.AddTags)
-	if err != nil {
-		logger.Logger.Debugf("UpdateOrderErr: %v\n", err)
-		return nil, err
+	addTags, errs := GetTagsByIDs(aul.AddTags)
+	if len(errs) > 0 {
+		logger.Logger.Debugf("UpdateOrderErr: %v\n", errs)
+		return nil, fmt.Errorf("Several tags not found")
 	}
-	delTags, err := GetTagsByIDs(aul.DelTags)
-	if err != nil {
-		logger.Logger.Debugf("UpdateOrderErr: %v\n", err)
-		return nil, err
+	delTags, errs := GetTagsByIDs(aul.DelTags)
+	if len(errs) > 0 {
+		logger.Logger.Debugf("UpdateOrderErr: %v\n", errs)
+		return nil, fmt.Errorf("Several tags not found")
 	}
 
 	if err := database.DB.Transaction(func(tx *gorm.DB) error {
@@ -119,7 +120,7 @@ func UpdateOrder(id uint, aul *model.UpdateOrderRequest, operator uint) (*model.
 		return nil, err
 	}
 
-	return order, err
+	return order, nil
 }
 
 func DeleteOrder(id uint) error {

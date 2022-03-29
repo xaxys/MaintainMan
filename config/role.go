@@ -1,10 +1,10 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/spf13/viper"
 )
+
+const RoleConfigVersion = "1.0.0"
 
 var (
 	RoleConfig *viper.Viper
@@ -19,6 +19,7 @@ func init() {
 	RoleConfig.AddConfigPath("/etc/maintainman/")
 	RoleConfig.AddConfigPath("$HOME/.maintainman/")
 
+	RoleConfig.SetDefault("version", RoleConfigVersion)
 	RoleConfig.SetDefault("role", []any{
 		map[string]any{
 			"name":         "banned",
@@ -113,15 +114,5 @@ func init() {
 		},
 	})
 
-	if err := RoleConfig.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			fmt.Printf("Role configuration file not found: %v\n", err)
-			if err := RoleConfig.SafeWriteConfig(); err != nil {
-				panic(fmt.Errorf("Failed to write default role configuration: %v", err))
-			}
-			fmt.Println("Default role configuration file created.")
-		} else {
-			panic(fmt.Errorf("Fatal error reading config file: %v", err))
-		}
-	}
+	ReadAndUpdateConfig(RoleConfig, "role")
 }

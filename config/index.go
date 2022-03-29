@@ -1,10 +1,10 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/spf13/viper"
 )
+
+const AppConfigVersion = "1.0.0"
 
 var (
 	AppConfig *viper.Viper
@@ -19,6 +19,7 @@ func init() {
 	AppConfig.AddConfigPath("/etc/srs_wrappper/")
 	AppConfig.AddConfigPath("$HOME/.srs_wrappper/")
 
+	AppConfig.SetDefault("version", AppConfigVersion)
 	AppConfig.SetDefault("app.name", "maintainman")
 	AppConfig.SetDefault("app.listen", ":8787")
 	AppConfig.SetDefault("app.loglevel", "info")
@@ -47,15 +48,5 @@ func init() {
 	AppConfig.SetDefault("admin.password", "123456")
 	AppConfig.SetDefault("admin.role_name", "admin")
 
-	if err := AppConfig.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			fmt.Printf("App configuration file not found: %v\n", err)
-			if err := AppConfig.SafeWriteConfig(); err != nil {
-				panic(fmt.Errorf("Failed to write default app config: %v", err))
-			}
-			fmt.Println("Default app config file created.")
-		} else {
-			panic(fmt.Errorf("Fatal error reading config file: %v", err))
-		}
-	}
+	ReadAndUpdateConfig(AppConfig, "app")
 }
