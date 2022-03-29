@@ -95,7 +95,10 @@ func init() {
 	if err := PermConfig.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			fmt.Printf("Permission configuration file not found: %v\n", err)
-			PermConfig.SafeWriteConfig()
+			if err := PermConfig.SafeWriteConfig(); err != nil {
+				panic(fmt.Errorf("Failed to write permission configuration file: %v", err))
+			}
+			fmt.Println("Default permission configuration file created.")
 		} else {
 			panic(fmt.Errorf("Fatal error reading config file: %v", err))
 		}

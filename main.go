@@ -37,13 +37,15 @@ func printBanner() {
 
 func main() {
 	printBanner()
-	app := iris.New()
+	app := newApp()
 	app.Logger().SetLevel(config.AppConfig.GetString("app.loglevel"))
+	app.Listen(config.AppConfig.GetString("app.listen"))
+}
+
+func newApp() *iris.Application {
+	app := iris.New()
 	logger.Logger = app.Logger()
 	initialize.InitDefaultData()
 	route.Route(app)
-	err := app.Listen(config.AppConfig.GetString("app.listen"))
-	if err != nil {
-		return
-	}
+	return app
 }

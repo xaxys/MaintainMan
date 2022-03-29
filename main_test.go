@@ -1,10 +1,7 @@
 package main
 
 import (
-	"maintainman/config"
-	"maintainman/logger"
 	"maintainman/model"
-	"maintainman/route"
 	"maintainman/service"
 	"maintainman/util"
 	"math/rand"
@@ -14,12 +11,11 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/httptest"
 	"github.com/spf13/cast"
 )
 
-func TestRegisterLoginRouter(t *testing.T) {
+func TestRegisterAndLoginRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	users := generateRandomUsers("testUser", 10)
@@ -51,14 +47,6 @@ func getSuperAdminToken() string {
 		Password: superAdmin.Password,
 	}, getMyIPV6(), nil)
 	return cast.ToString(apiJson.Data)
-}
-
-func newApp() *iris.Application {
-	app := iris.New()
-	app.Logger().SetLevel(config.AppConfig.GetString("app.loglevel"))
-	logger.Logger = app.Logger()
-	route.Route(app)
-	return app
 }
 
 func generateRandomUsers(prefix string, num uint) (usersRegister []model.RegisterUserRequest) {

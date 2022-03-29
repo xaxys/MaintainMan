@@ -50,7 +50,10 @@ func init() {
 	if err := AppConfig.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			fmt.Printf("App configuration file not found: %v\n", err)
-			AppConfig.SafeWriteConfig()
+			if err := AppConfig.SafeWriteConfig(); err != nil {
+				panic(fmt.Errorf("Failed to write default app config: %v", err))
+			}
+			fmt.Println("Default app config file created.")
 		} else {
 			panic(fmt.Errorf("Fatal error reading config file: %v", err))
 		}

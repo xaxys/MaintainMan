@@ -23,14 +23,14 @@ func init() {
 		map[string]any{
 			"name":         "banned",
 			"display_name": "封停用户",
-			"permission":   []string{},
+			"permissions":  []string{},
 			"inheritance":  []string{},
 		},
 		map[string]any{
 			"name":         "guest",
 			"display_name": "访客",
 			"guest":        true,
-			"permission": []string{
+			"permissions": []string{
 				"user.register",
 				"user.login",
 			},
@@ -40,7 +40,7 @@ func init() {
 			"name":         "user",
 			"display_name": "普通用户",
 			"default":      true,
-			"permission": []string{
+			"permissions": []string{
 				"user.view",
 				"user.update",
 				"user.renew",
@@ -65,7 +65,7 @@ func init() {
 		map[string]any{
 			"name":         "maintainer",
 			"display_name": "维护工",
-			"permission": []string{
+			"permissions": []string{
 				"order.reject",
 				"order.report",
 				"order.complete",
@@ -79,7 +79,7 @@ func init() {
 		map[string]any{
 			"name":         "super_maintainer",
 			"display_name": "维护工（可自行接单）",
-			"permission": []string{
+			"permissions": []string{
 				"order.selfassign",
 				"order.viewall",
 			},
@@ -90,7 +90,7 @@ func init() {
 		map[string]any{
 			"name":         "admin",
 			"display_name": "管理员",
-			"permission": []string{
+			"permissions": []string{
 				"user.division",
 				"announce.*",
 				"order.*",
@@ -104,7 +104,7 @@ func init() {
 		map[string]any{
 			"name":         "super_admin",
 			"display_name": "超级管理员",
-			"permission": []string{
+			"permissions": []string{
 				"*",
 			},
 			"inheritance": []string{
@@ -116,7 +116,10 @@ func init() {
 	if err := RoleConfig.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			fmt.Printf("Role configuration file not found: %v\n", err)
-			RoleConfig.SafeWriteConfig()
+			if err := RoleConfig.SafeWriteConfig(); err != nil {
+				panic(fmt.Errorf("Failed to write default role configuration: %v", err))
+			}
+			fmt.Println("Default role configuration file created.")
 		} else {
 			panic(fmt.Errorf("Fatal error reading config file: %v", err))
 		}
