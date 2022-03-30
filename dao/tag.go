@@ -72,7 +72,7 @@ func UpdateTag(id uint, aul *model.CreateTagRequest, operator uint) (tag *model.
 }
 
 func DeleteTag(id uint) (err error) {
-	if err = database.DB.Select(clause.Associations).Delete(&model.Tag{}).Error; err != nil {
+	if err = database.DB.Select(clause.Associations).Delete(&model.Tag{}, id).Error; err != nil {
 		logger.Logger.Debugf("DeleteTagErr: %v\n", err)
 	}
 	return

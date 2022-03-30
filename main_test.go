@@ -86,17 +86,45 @@ func TestTagSortsRouter(t *testing.T) {
 	}
 }
 
-func TestTagGetBySortRouter(t *testing.T) {
+func TestTagGetByIDRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
+	ids := []uint{}
 	for _, tag := range getTestTags() {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		resp := service.CreateTag(&tag, getSuperAdminAuthInfo())
+		ids = append(ids, resp.Data.(*model.TagJson).ID)
 	}
 
-	e.GET("/v1/tag/sort/楼名").
-		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusOK)
+	for _, id := range ids {
+		url := fmt.Sprintf("/v1/tag/%d", id)
+		resp := e.GET(url).
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			Expect().Status(httptest.StatusOK)
+		t.Log(resp.Body().Raw())
+	}
+}
+
+func TestTagDeleteRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	ids := []uint{}
+	for _, tag := range getTestTags() {
+		resp := service.CreateTag(&tag, getSuperAdminAuthInfo())
+		ids = append(ids, resp.Data.(*model.TagJson).ID)
+	}
+
+	e.DELETE(fmt.Sprintf("/v1/tag/%d", ids[0])).
+		Expect().Status(httptest.StatusForbidden)
+
+	for _, id := range ids {
+		url := fmt.Sprintf("/v1/tag/%d", id)
+		resp := e.DELETE(url).
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			Expect().Status(httptest.StatusNoContent)
+		t.Log(resp.Body().Raw())
+	}
 }
 
 // Test Utils
