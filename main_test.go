@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"maintainman/model"
 	"maintainman/service"
@@ -13,6 +14,7 @@ import (
 	"testing"
 
 	"github.com/kataras/iris/v12/httptest"
+	"github.com/spf13/cast"
 )
 
 func TestRegisterAndLoginRouter(t *testing.T) {
@@ -21,13 +23,15 @@ func TestRegisterAndLoginRouter(t *testing.T) {
 	users := generateRandomUsers("testUser", 10)
 
 	for _, user := range users {
-		e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated)
+		responseBody := e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated).Body()
+		fmt.Println(responseBody)
 	}
 	for _, user := range users {
-		e.POST("/v1/login").WithJSON(model.LoginRequest{
+		responseBody := e.POST("/v1/login").WithJSON(model.LoginRequest{
 			Account:  user.Name,
 			Password: user.Password,
-		}).Expect().Status(httptest.StatusOK)
+		}).Expect().Status(httptest.StatusOK).Body()
+		fmt.Println(responseBody)
 	}
 }
 
@@ -36,7 +40,101 @@ func TestUserReNewRouter(t *testing.T) {
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 
-	e.GET("/v1/renew").WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusOK)
+	responseBody := e.GET("/v1/renew").WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusOK).Body()
+	fmt.Println(responseBody)
+}
+
+func TestUserViewRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	responseBody := e.GET("/v1/user").WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusOK).Body()
+	fmt.Println(responseBody)
+}
+
+func TestUpdateUserRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	users := generateRandomUsers("updateUser", 10)
+	superAdminToken := getSuperAdminToken()
+
+	for _, user := range users {
+		response := e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated)
+		fmt.Println(response.Body().Raw())
+		u := response.JSON().NotNull().Object().Value("data")
+		id := uint(u.Object().Value("id").NotNull().Raw().(float64))
+
+		responseBody := e.PUT("/v1/user/"+cast.ToString(id)).WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.UpdateUserRequest{
+			Name:        user.Name + "_update",
+			Password:    user.Password + "_update",
+			DisplayName: user.DisplayName + "_update",
+			Phone:       "",
+			Email:       "",
+			RoleName:    "user",
+		}).Expect().Status(httptest.StatusNoContent).Body().Raw()
+		fmt.Println(responseBody)
+	}
+
+}
+
+func TestGetAllUsersRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	responseBody := e.GET("/v1/user/all").WithHeader("Authorization", "Bearer "+superAdminToken).WithQuery("offset", 0).WithQuery("limit", 50).Expect().Status(httptest.StatusOK).Body().Raw()
+
+	fmt.Println(responseBody)
+}
+
+//FIXME:
+func TestCreateUser(t *testing.T) {
+	app := newApp()
+	superAdminToken := getSuperAdminToken()
+	e := httptest.New(t, app)
+	users := generateRandomUsers("createUser", 10)
+	for _, user := range users {
+		responseBody := e.POST("/v1/user").WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.CreateUserRequest{
+			RegisterUserRequest: user,
+			RoleName:            "user",
+		}).Expect().Status(httptest.StatusCreated).Body().Raw()
+		fmt.Println(responseBody)
+	}
+}
+
+func TestForceDeleteUser(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	users := generateRandomUsers("deleteUser", 10)
+	superAdminToken := getSuperAdminToken()
+
+	for _, user := range users {
+		responseBody := e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated).Body().Raw()
+		fmt.Println(responseBody)
+		u := &model.UserJson{}
+		_ = json.Unmarshal([]byte(responseBody), u)
+		id := u.ID
+
+		responseBody = e.DELETE("/v1/user/"+cast.ToString(id)).WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusNoContent).Body().Raw()
+		fmt.Println(responseBody)
+	}
+}
+
+func TestGetUserById(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	users := generateRandomUsers("getUser", 10)
+	superAdminToken := getSuperAdminToken()
+
+	for _, user := range users {
+		responseBody := e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated).Body().Raw()
+		fmt.Println(responseBody)
+		u := &model.UserJson{}
+		_ = json.Unmarshal([]byte(responseBody), u)
+		id := u.ID
+
+		responseBody = e.GET("/v1/user/"+cast.ToString(id)).WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusOK).Body().Raw()
+		fmt.Println(responseBody)
+	}
 }
 
 // Tag Router

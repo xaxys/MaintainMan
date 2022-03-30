@@ -111,7 +111,7 @@ func UpdateUser(id uint, json *model.UpdateUserRequest, operator uint) (*model.U
 	copier.Copy(user, json)
 	user.ID = id
 	user.UpdatedBy = operator
-	if err := database.DB.Model(user).Updates(user).Error; err != nil {
+	if err := database.DB.Where(user, "id").Updates(user).Error; err != nil {
 		logger.Logger.Debugf("UpdateUserErr: %v\n", err)
 		return nil, err
 	}
