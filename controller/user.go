@@ -68,7 +68,7 @@ func GetUserByID(ctx iris.Context) {
 // @Router /v1/user/all [get]
 func GetAllUsers(ctx iris.Context) {
 	aul := &model.AllUserRequest{}
-	if err := ctx.ReadQuery(&aul); err != nil {
+	if err := ctx.ReadQuery(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
@@ -199,7 +199,7 @@ func UserRegister(ctx iris.Context) {
 // @Router /v1/user [post]
 func CreateUser(ctx iris.Context) {
 	aul := &model.CreateUserRequest{}
-	if err := ctx.ReadJSON(&aul); err != nil {
+	if err := ctx.ReadJSON(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}

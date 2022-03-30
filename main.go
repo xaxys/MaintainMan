@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/kataras/iris/v12"
 
 	"maintainman/config"
