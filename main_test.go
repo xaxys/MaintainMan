@@ -2,7 +2,6 @@ package main
 
 import (
 	"maintainman/model"
-	"maintainman/service"
 	"maintainman/util"
 	"math/rand"
 	"net"
@@ -12,7 +11,6 @@ import (
 	"testing"
 
 	"github.com/kataras/iris/v12/httptest"
-	"github.com/spf13/cast"
 )
 
 func TestRegisterAndLoginRouter(t *testing.T) {
@@ -96,12 +94,8 @@ func TestTagCreateRouter(t *testing.T) {
 // utils
 
 func getSuperAdminToken() string {
-	superAdmin := initUser("admin", "12345678", "maintainman default admin")
-	apiJson := service.UserLogin(&model.LoginRequest{
-		Account:  superAdmin.Name,
-		Password: superAdmin.Password,
-	}, getMyIPV6(), nil)
-	return cast.ToString(apiJson.Data)
+	token, _ := util.GetJwtString(1, "super_admin")
+	return token
 }
 
 func generateRandomUsers(prefix string, num uint) (usersRegister []model.RegisterUserRequest) {
