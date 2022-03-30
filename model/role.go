@@ -1,6 +1,9 @@
 package model
 
-import "maintainman/util"
+import (
+	"maintainman/util"
+	"sync"
+)
 
 type RoleInfo struct {
 	Name           string   `mapstructure:"name"`
@@ -15,6 +18,7 @@ type Role struct {
 	*RoleInfo
 	Permissions *util.PermSet
 	Inheritance []*Role
+	sync.RWMutex
 }
 
 type CreateRoleRequest struct {
