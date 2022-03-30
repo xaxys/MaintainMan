@@ -12,75 +12,64 @@ import (
 )
 
 var (
-	RolePO   = NewRolePersistence(config.RoleConfig)
-	roleLock = sync.RWMutex{}
+	RolePO = NewRolePersistence(config.RoleConfig)
 )
 
-type RoleWithLock struct {
-	*model.Role
-	sync.RWMutex
-}
-
 type RolePersistence struct {
+	sync.RWMutex
 	data  *viper.Viper
 	roles []model.RoleInfo
-	index map[string]*RoleWithLock
-	def   *RoleWithLock // Default role
-	guest *RoleWithLock // Guest role
+	index util.CoPtrMap[string, model.Role]
+	def   util.AtomValue[*model.Role] // Default role
+	guest util.AtomValue[*model.Role] // Guest role
 }
 
 func NewRolePersistence(config *viper.Viper) (s *RolePersistence) {
 	s = &RolePersistence{
-		data:  config,
-		index: make(map[string]*RoleWithLock),
+		data: config,
 	}
 
 	config.UnmarshalKey("role", &s.roles)
 	for i := range s.roles {
-		role := &RoleWithLock{
-			Role: &model.Role{
-				RoleInfo: &s.roles[i],
-			},
+		role := &model.Role{
+			RoleInfo: &s.roles[i],
 		}
 		if role.Default {
-			if s.def != nil {
+			if s.def.Get() != nil {
 				panic("Default role can only be set once")
 			}
-			s.def = role
+			s.def.Set(role)
 		}
 		if role.Guest {
-			if s.guest != nil {
+			if s.guest.Get() != nil {
 				panic("Guest role can only be set once")
 			}
-			s.guest = role
+			s.guest.Set(role)
 		}
 		role.Permissions = util.NewPermSet().Add(role.RawPermissions...)
-		s.index[role.Name] = role
+		s.index.Set(role.Name, role)
 		for _, inhe := range role.RawInheritance {
-			inheRole := s.index[inhe]
-			if inheRole == nil {
+			if !s.index.Has(inhe) {
 				panic(fmt.Sprintf("Role %s can not be inherited by %s. Only buttom-up inheritance is valid (latter roles are superior)", inhe, role.Name))
 			}
-			role.Inheritance = append(role.Inheritance, inheRole.Role)
+			role.Inheritance = append(role.Inheritance, s.index.Get(inhe))
 		}
 	}
-	if s.def == nil {
+	if s.def.Get() == nil {
 		panic("Default role is not set")
 	}
 	return
 }
 
 func saveRole() {
-	roleLock.Lock()
+	RolePO.Lock()
 	RolePO.data.Set("role", RolePO.roles)
-	go RolePO.data.WriteConfig()
-	roleLock.Unlock()
+	RolePO.data.WriteConfig()
+	RolePO.Unlock()
 }
 
-func getRole(role string) (*RoleWithLock, error) {
-	roleLock.RLock()
-	defer roleLock.RUnlock()
-	r := RolePO.index[role]
+func getRole(role string) (*model.Role, error) {
+	r := RolePO.index.Get(role)
 	if r == nil {
 		return nil, fmt.Errorf("Role %s does not exist", role)
 	}
@@ -97,7 +86,7 @@ func AddPermission(role string, perms ...string) error {
 	return nil
 }
 
-func addPermission(role *RoleWithLock, perms ...string) {
+func addPermission(role *model.Role, perms ...string) {
 	role.Lock()
 	role.RawPermissions = append(role.RawPermissions, perms...)
 	role.Permissions.Add(perms...)
@@ -114,7 +103,7 @@ func DeletePermission(role string, permission ...string) error {
 	return nil
 }
 
-func deletePermission(role *RoleWithLock, permission ...string) {
+func deletePermission(role *model.Role, permission ...string) {
 	role.Lock()
 	role.RawPermissions = util.Remove(role.RawPermissions, permission...)
 	role.Permissions.Delete(permission...)
@@ -129,7 +118,7 @@ func HasPermission(role, permission string) bool {
 	return hasPermission(r, permission)
 }
 
-func hasPermission(role *RoleWithLock, permission string) bool {
+func hasPermission(role *model.Role, permission string) bool {
 	role.RLock()
 	defer role.RUnlock()
 	if has, ok := role.Permissions.Find(permission); ok {
@@ -174,16 +163,17 @@ func AddInheritance(role string, inherit ...string) error {
 	return nil
 }
 
-func addInheritance(role *RoleWithLock, inherit ...string) error {
+func addInheritance(role *model.Role, inherit ...string) error {
 	role.Lock()
 	nonexist := []string{}
 	role.RawInheritance = append(role.RawInheritance, inherit...)
 	for _, inhe := range inherit {
-		inheRole := RolePO.index[inhe]
+		inheRole := RolePO.index.Get(inhe)
 		if inheRole == nil {
 			nonexist = append(nonexist, inhe)
+		} else {
+			role.Inheritance = append(role.Inheritance, inheRole)
 		}
-		role.Inheritance = append(role.Inheritance, inheRole.Role)
 	}
 	role.Unlock()
 
@@ -203,16 +193,17 @@ func DeleteInheritance(role string, inherit ...string) error {
 	return nil
 }
 
-func deleteInheritance(role *RoleWithLock, inherit ...string) error {
+func deleteInheritance(role *model.Role, inherit ...string) error {
 	role.Lock()
 	nonexist := []string{}
 	role.RawInheritance = util.Remove(role.RawInheritance, inherit...)
 	for _, inhe := range inherit {
-		inheRole := RolePO.index[inhe]
+		inheRole := RolePO.index.Get(inhe)
 		if inheRole == nil {
 			nonexist = append(nonexist, inhe)
+		} else {
+			role.Inheritance = util.Remove(role.Inheritance, inheRole)
 		}
-		role.Inheritance = util.Remove(role.Inheritance, inheRole.Role)
 	}
 	role.Unlock()
 
@@ -240,9 +231,7 @@ func SetDefaultRole(name string) error {
 	def.Default = false
 	def.Unlock()
 
-	roleLock.Lock()
-	RolePO.def = r
-	roleLock.Unlock()
+	RolePO.def.Set(r)
 
 	r.Lock()
 	r.Default = true
@@ -263,7 +252,7 @@ func SetGuestRole(name string) (err error) {
 		}
 	}
 
-	var r *RoleWithLock
+	var r *model.Role
 	if name != "" {
 		r, err = getRole(name)
 		if err != nil {
@@ -281,9 +270,7 @@ func SetGuestRole(name string) (err error) {
 		guest.Unlock()
 	}
 
-	roleLock.Lock()
-	RolePO.guest = r
-	roleLock.Unlock()
+	RolePO.guest.Set(r)
 
 	if r == nil {
 		r.Lock()
@@ -296,13 +283,8 @@ func SetGuestRole(name string) (err error) {
 }
 
 func CreateRole(aul *model.CreateRoleRequest) (err error) {
-	roleLock.RLock()
-	if _, ok := RolePO.index[aul.Name]; ok {
-		err = fmt.Errorf("Role %s already exists", aul.Name)
-	}
-	roleLock.RUnlock()
-	if err != nil {
-		return
+	if RolePO.index.Has(aul.Name) {
+		return fmt.Errorf("Role %s already exists", aul.Name)
 	}
 
 	info := model.RoleInfo{
@@ -311,19 +293,18 @@ func CreateRole(aul *model.CreateRoleRequest) (err error) {
 		Default:     false,
 	}
 
-	role := &RoleWithLock{
-		Role: &model.Role{
-			RoleInfo:    &info,
-			Permissions: util.NewPermSet(),
-		},
+	role := &model.Role{
+		RoleInfo:    &info,
+		Permissions: util.NewPermSet(),
 	}
 	addPermission(role, aul.Permissions...)
 	err = addInheritance(role, aul.Inheritance...)
 
-	roleLock.Lock()
+	RolePO.Lock()
 	RolePO.roles = append(RolePO.roles, info)
-	RolePO.index[aul.Name] = role
-	roleLock.Unlock()
+	RolePO.Unlock()
+
+	RolePO.index.Set(aul.Name, role)
 
 	saveRole()
 	return
@@ -358,26 +339,31 @@ func UpdateRole(name string, aul *model.UpdateRoleRequest) error {
 }
 
 func DeleteRole(name string) error {
-	roleLock.RLock()
-	if RolePO.def == RolePO.index[name] {
-		roleLock.RUnlock()
+	if !RolePO.index.Has(name) {
+		return fmt.Errorf("Role %s does not exist", name)
+	}
+	if RolePO.def.Get() == RolePO.index.Get(name) {
+		RolePO.RUnlock()
 		return fmt.Errorf("Cannot delete default role")
 	}
-	for _, role := range RolePO.index {
+	err := RolePO.index.Range(func(k string, role *model.Role) error {
+		role.RLock()
 		for _, inhe := range role.Inheritance {
 			if inhe.Name == name {
-				roleLock.RUnlock()
 				return fmt.Errorf("Cannot delete role %s, it is inherited by %s", name, role.Name)
 			}
 		}
+		role.RUnlock()
+		return nil
+	})
+	if err != nil {
+		return err
 	}
-	roleLock.RUnlock()
-
-	roleLock.Lock()
-	r := RolePO.index[name]
-	RolePO.roles = util.RemoveByRef(RolePO.roles, r.RoleInfo)
-	delete(RolePO.index, name)
-	roleLock.Unlock()
+	if r := RolePO.index.LoadAndDelete(name); r != nil {
+		RolePO.Lock()
+		RolePO.roles = util.RemoveByRef(RolePO.roles, r.RoleInfo)
+		RolePO.Unlock()
+	}
 
 	saveRole()
 	return nil
@@ -391,10 +377,8 @@ func GetRole(name string) *model.RoleJson {
 	return RoleToJson(r)
 }
 
-func getDefaultRole() *RoleWithLock {
-	roleLock.RLock()
-	defer roleLock.RUnlock()
-	return RolePO.def
+func getDefaultRole() *model.Role {
+	return RolePO.def.Get()
 }
 
 func GetDefaultRole() *model.RoleJson {
@@ -403,23 +387,24 @@ func GetDefaultRole() *model.RoleJson {
 }
 
 func GetDefaultRoleName() string {
-	roleLock.RLock()
-	defer roleLock.RUnlock()
-	return RolePO.def.Name
+	r := getDefaultRole()
+	if r == nil {
+		return ""
+	}
+	r.RLock()
+	defer r.RUnlock()
+	return r.Name
 }
 
-func getGuestRole() *RoleWithLock {
-	roleLock.RLock()
-	defer roleLock.RUnlock()
-	return RolePO.guest
+func getGuestRole() *model.Role {
+	return RolePO.guest.Get()
 }
 
 func GetGuestRole() *model.RoleJson {
-	r := getGuestRole()
-	if r == nil {
-		return nil
+	if r := getGuestRole(); r != nil {
+		return RoleToJson(r)
 	}
-	return RoleToJson(r)
+	return nil
 }
 
 func GetGuestRoleName() string {
@@ -433,16 +418,15 @@ func GetGuestRoleName() string {
 }
 
 func GetAllRoles() (roles []*model.RoleJson) {
-	roleLock.RLock()
-	for _, r := range RolePO.index {
+	RolePO.index.Range(func(k string, r *model.Role) error {
 		role := RoleToJson(r)
 		roles = append(roles, role)
-	}
-	roleLock.RUnlock()
+		return nil
+	})
 	return
 }
 
-func RoleToJson(role *RoleWithLock) *model.RoleJson {
+func RoleToJson(role *model.Role) *model.RoleJson {
 	if role == nil {
 		return nil
 	}
