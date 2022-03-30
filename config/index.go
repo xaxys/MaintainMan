@@ -19,7 +19,6 @@ func init() {
 	AppConfig.AddConfigPath("/etc/srs_wrappper/")
 	AppConfig.AddConfigPath("$HOME/.srs_wrappper/")
 
-	AppConfig.SetDefault("version", AppConfigVersion)
 	AppConfig.SetDefault("app.name", "maintainman")
 	AppConfig.SetDefault("app.listen", ":8787")
 	AppConfig.SetDefault("app.loglevel", "info")
@@ -48,5 +47,5 @@ func init() {
 	AppConfig.SetDefault("admin.password", "123456")
 	AppConfig.SetDefault("admin.role_name", "admin")
 
-	ReadAndUpdateConfig(AppConfig, "app")
+	ReadAndUpdateConfig(AppConfig, "app", AppConfigVersion)
 }

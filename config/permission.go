@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const PermConfigVersion = "1.0.0"
+const PermConfigVersion = "1.0.1"
 
 var (
 	PermConfig *viper.Viper
@@ -19,7 +19,6 @@ func init() {
 	PermConfig.AddConfigPath("/etc/maintainman/")
 	PermConfig.AddConfigPath("$HOME/.maintainman/")
 
-	PermConfig.SetDefault("version", PermConfigVersion)
 	PermConfig.SetDefault("permission", map[string]any{
 		"user": map[string]any{
 			"view":      "查看当前用户",
@@ -80,9 +79,10 @@ func init() {
 			"deleteall": "删除所有评论",
 		},
 		"tag": map[string]any{
-			"create":  "创建标签",
-			"delete":  "删除标签",
-			"viewall": "查看所有标签",
+			"create": "创建标签",
+			"delete": "删除标签",
+			"view":   "查看标签",
+			"add":    "添加标签",
 		},
 		"item": map[string]any{
 			"create":  "创建零件",
@@ -93,5 +93,5 @@ func init() {
 		},
 	})
 
-	ReadAndUpdateConfig(PermConfig, "permission")
+	ReadAndUpdateConfig(PermConfig, "permission", PermConfigVersion)
 }

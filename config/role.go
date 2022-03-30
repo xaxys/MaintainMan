@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const RoleConfigVersion = "1.0.0"
+const RoleConfigVersion = "1.0.1"
 
 var (
 	RoleConfig *viper.Viper
@@ -19,7 +19,6 @@ func init() {
 	RoleConfig.AddConfigPath("/etc/maintainman/")
 	RoleConfig.AddConfigPath("$HOME/.maintainman/")
 
-	RoleConfig.SetDefault("version", RoleConfigVersion)
 	RoleConfig.SetDefault("role", []any{
 		map[string]any{
 			"name":         "banned",
@@ -57,7 +56,8 @@ func init() {
 				"order.comment.view",
 				"order.comment.create",
 				"order.comment.delete",
-				"tag.viewall",
+				"tag.view.1",
+				"tag.add.1",
 			},
 			"inheritance": []string{
 				"guest",
@@ -72,6 +72,8 @@ func init() {
 				"order.complete",
 				"item.consume",
 				"item.viewall",
+				"tag.view.2",
+				"tag.add.2",
 			},
 			"inheritance": []string{
 				"user",
@@ -114,5 +116,5 @@ func init() {
 		},
 	})
 
-	ReadAndUpdateConfig(RoleConfig, "role")
+	ReadAndUpdateConfig(RoleConfig, "role", RoleConfigVersion)
 }

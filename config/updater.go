@@ -8,8 +8,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-func ReadAndUpdateConfig(config *viper.Viper, name string) {
-	version := config.GetString("version")
+func ReadAndUpdateConfig(config *viper.Viper, name string, version string) {
 	if err := config.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			fmt.Printf("%s configuration file not found: %v\n", name, err)
@@ -21,14 +20,16 @@ func ReadAndUpdateConfig(config *viper.Viper, name string) {
 			panic(fmt.Errorf("Fatal error reading %s configuration: %v", name, err))
 		}
 	}
-	if cmp := VersionCompare(version, config.GetString("version")); cmp != 0 {
+	fileVersion := config.GetString("version")
+	config.SetDefault("version", version)
+	if cmp := VersionCompare(version, fileVersion); cmp != 0 {
 		fmt.Printf("%s configuration file version mismatch.\n", name)
 		fmt.Printf("expect version: %s, but got: %s.\n", version, config.GetString("version"))
 		if cmp < 0 {
 			fmt.Printf("you may need to update your app vesion.\n")
 		}
 		if cmp > 0 {
-			fmt.Printf("trying to your %s configuration file.\n conflict entries will not be updated.", name)
+			fmt.Printf("trying to update your %s configuration file.\n conflict entries will not be updated.\n", name)
 			config.Set("version", version)
 			if err := config.WriteConfig(); err != nil {
 				panic(fmt.Errorf("Failed to write %s configuration file: %v", name, err))

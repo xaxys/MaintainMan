@@ -1,5 +1,5 @@
 # Only buttom-up inheritance is valid (latter roles are superior)
-version: 1.0.0
+version: 1.0.1
 role:
   - name: banned
     display_name: "封停用户"
@@ -11,7 +11,6 @@ role:
     permissions:
       - "user.register"
       - "user.login"
-      - "announce.view"
     inheritance:
   - name: user
     display_name: "普通用户"
@@ -32,7 +31,8 @@ role:
       - "order.comment.view"
       - "order.comment.create"
       - "order.comment.delete"
-      - "tag.viewall"
+      - "tag.view.1"
+      - "tag.add.1"
     inheritance:
       - guest
   - name: maintainer
@@ -43,6 +43,8 @@ role:
       - "order.complete"
       - "item.consume"
       - "item.viewall"
+      - "tag.view.2"
+      - "tag.add.2"
     inheritance:
       - user
   - name: super_maintainer
