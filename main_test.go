@@ -305,6 +305,10 @@ func TestGetUserOrdersRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
 	responseBody := e.GET("/v1/order/user").
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
@@ -319,6 +323,10 @@ func TestGetAllOrdersRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
 	responseBody := e.GET("/v1/order/all").
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
@@ -333,6 +341,10 @@ func TestGetRepairerOrdersRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
 
 	response := e.POST("/v1/user").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -361,6 +373,10 @@ func TestGetRepairerOrdersByIDRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
 
 	response := e.POST("/v1/user").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -394,6 +410,10 @@ func TestGetOrderByIdRouter(t *testing.T) {
 	responseBody := e.GET("/v1/order/1").
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
 
 	responseBody = e.GET("/v1/order/1").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
