@@ -4,7 +4,7 @@ type Order struct {
 	BaseModel
 	UserID       uint       `gorm:"not null; index:idx_order_user_status,priority:1; comment:用户ID"`
 	User         *User      `gorm:"foreignkey:UserID"`
-	Title        string     `gorm:"not null; unique; size:191; comment:标题"`
+	Title        string     `gorm:"not null; index; size:191; comment:标题"`
 	Content      string     `gorm:"not null; comment:内容"`
 	Address      string     `gorm:"not null; comment:地址"`
 	ContactName  string     `gorm:"not null; size:191; comment:联系人"`

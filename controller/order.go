@@ -28,7 +28,7 @@ import (
 // @Router /v1/order/user [get]
 func GetUserOrders(ctx iris.Context) {
 	req := &model.UserOrderRequest{}
-	if err := ctx.ReadQuery(&req); err != nil {
+	if err := ctx.ReadQuery(req); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
@@ -128,7 +128,7 @@ func GetAllOrders(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
-// GetOrder godoc
+// GetOrderByID GetOrder godoc
 // @Summary 获取某个订单
 // @Description 通过ID获取某个订单
 // @Tags order
@@ -155,7 +155,7 @@ func GetOrderByID(ctx iris.Context) {
 // @Tags order
 // @Accept json
 // @Produce json
-// @Param body body model.CreateOrderRequest true "请求参数"
+// @Param body model.CreateOrderRequest true "请求参数"
 // @Success 201 {object} model.ApiJson{data=model.OrderJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
@@ -166,7 +166,8 @@ func GetOrderByID(ctx iris.Context) {
 // @Router /v1/order [post]
 func CreateOrder(ctx iris.Context) {
 	aul := &model.CreateOrderRequest{}
-	if err := ctx.ReadJSON(&aul); err != nil {
+
+	if err := ctx.ReadJSON(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}

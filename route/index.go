@@ -79,22 +79,22 @@ func Route(app *iris.Application) {
 					order.Post("/", middleware.PermInterceptor("order.create"), controller.CreateOrder)
 
 					order.PartyFunc("/{id:uint}", func(orderID router.Party) {
-						order.Get("/", middleware.PermInterceptor("order.viewall"), controller.GetOrderByID)
-						order.Put("/update", middleware.PermInterceptor("order.update"), controller.UpdateOrder)
-						order.Put("/update/force", middleware.PermInterceptor("order.updateall"), controller.ForceUpdateOrder)
-						order.Post("/consume", middleware.PermInterceptor("item.consume"), controller.ConsumeItem)
+						orderID.Get("/", middleware.PermInterceptor("order.viewall"), controller.GetOrderByID)
+						orderID.Put("/update", middleware.PermInterceptor("order.update"), controller.UpdateOrder)
+						orderID.Put("/update/force", middleware.PermInterceptor("order.updateall"), controller.ForceUpdateOrder)
+						orderID.Post("/consume", middleware.PermInterceptor("item.consume"), controller.ConsumeItem)
 						// change order status
-						order.Post("/release", middleware.PermInterceptor("order.update"), controller.ReleaseOrder)
-						order.Post("/assign", middleware.PermInterceptor("order.assign"), controller.AssignOrder)
-						order.Post("/selfassign", middleware.PermInterceptor("order.selfassign"), controller.SelfAssignOrder)
-						order.Post("/complete", middleware.PermInterceptor("order.complete"), controller.CompleteOrder)
-						order.Post("/cancel", middleware.PermInterceptor("order.cancel"), controller.CancelOrder)
-						order.Post("/reject", middleware.PermInterceptor("order.reject"), controller.RejectOrder)
-						order.Post("/report", middleware.PermInterceptor("order.report"), controller.ReportOrder)
-						order.Post("/hold", middleware.PermInterceptor("order.hold"), controller.HoldOrder)
-						order.Post("/appraise", middleware.PermInterceptor("order.appraise"), controller.AppraiseOrder)
+						orderID.Post("/release", middleware.PermInterceptor("order.update"), controller.ReleaseOrder)
+						orderID.Post("/assign", middleware.PermInterceptor("order.assign"), controller.AssignOrder)
+						orderID.Post("/selfassign", middleware.PermInterceptor("order.selfassign"), controller.SelfAssignOrder)
+						orderID.Post("/complete", middleware.PermInterceptor("order.complete"), controller.CompleteOrder)
+						orderID.Post("/cancel", middleware.PermInterceptor("order.cancel"), controller.CancelOrder)
+						orderID.Post("/reject", middleware.PermInterceptor("order.reject"), controller.RejectOrder)
+						orderID.Post("/report", middleware.PermInterceptor("order.report"), controller.ReportOrder)
+						orderID.Post("/hold", middleware.PermInterceptor("order.hold"), controller.HoldOrder)
+						orderID.Post("/appraise", middleware.PermInterceptor("order.appraise"), controller.AppraiseOrder)
 
-						order.PartyFunc("/comment", func(comment router.Party) {
+						orderID.PartyFunc("/comment", func(comment router.Party) {
 							comment.Get("/", middleware.PermInterceptor("comment.view"), controller.GetCommentsByOrder)
 							comment.Get("/force", middleware.PermInterceptor("comment.viewall"), controller.ForceGetCommentsByOrder)
 							comment.Post("/", middleware.PermInterceptor("comment.create"), controller.CreateComment)

@@ -131,14 +131,19 @@ func HitAnnounce(id uint, auth *model.AuthInfo) *model.ApiJson {
 }
 
 func AnnounceToJson(announce *model.Announce) *model.AnnounceJson {
-	return util.NilOrValue(announce, &model.AnnounceJson{
-		ID:        announce.ID,
-		Title:     announce.Title,
-		Content:   announce.Content,
-		StartTime: announce.StartTime.Unix(),
-		EndTime:   announce.EndTime.Unix(),
-		Hits:      announce.Hits,
-		CreatedAt: announce.CreatedAt.Unix(),
-		UpdatedAt: announce.UpdatedAt.Unix(),
-	})
+	if announce == nil {
+		return nil
+	} else {
+		return &model.AnnounceJson{
+			ID:        announce.ID,
+			Title:     announce.Title,
+			Content:   announce.Content,
+			StartTime: announce.StartTime.Unix(),
+			EndTime:   announce.EndTime.Unix(),
+			Hits:      announce.Hits,
+			CreatedAt: announce.CreatedAt.Unix(),
+			UpdatedAt: announce.UpdatedAt.Unix(),
+		}
+	}
+
 }
