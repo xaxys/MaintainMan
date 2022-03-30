@@ -260,7 +260,7 @@ func TestTagDeleteRouter(t *testing.T) {
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	ids := []uint{}
-	for _, tag := range getTestTags() {
+	for _, tag := range generateRandomTags("randSorts ", "randName ", 30) {
 		resp := service.CreateTag(&tag, getSuperAdminAuthInfo())
 		ids = append(ids, resp.Data.(*model.TagJson).ID)
 	}
@@ -277,7 +277,7 @@ func TestTagDeleteRouter(t *testing.T) {
 	}
 }
 
-//Test Order Router
+// Test Order Router
 func TestCreateOrderRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
@@ -294,7 +294,7 @@ func TestCreateOrderRouter(t *testing.T) {
 	t.Log(responseBody)
 
 	for _, order := range orders {
-		responseBody = e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		responseBody := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
 			WithJSON(order).Expect().Status(httptest.StatusCreated).Body().Raw()
 		t.Log(responseBody)
 	}
@@ -486,6 +486,13 @@ func getTestTags() []model.CreateTagRequest {
 	}
 }
 
+func generateRandomTags(baseSort, baseName string, num uint) (tags []model.CreateTagRequest) {
+	for i := uint(1); i <= num; i++ {
+		tags = append(tags, initTag(baseSort+util.RandomString(1), baseName+util.RandomString(5), uint(rand.Int())))
+	}
+	return
+}
+
 func generateRandomOrders(baseTitle string, baseName string, num uint) (orders []model.CreateOrderRequest) {
 	for i := uint(1); i <= num; i++ {
 		orders = append(orders, initOrder(baseTitle, "Content:"+strconv.Itoa(rand.Intn(100000)), "Address:"+strconv.Itoa(rand.Intn(100000)), baseName, uint(rand.Int63n(7))))
@@ -500,6 +507,14 @@ func initUser(name string, password string, displayName string) model.RegisterUs
 		DisplayName: displayName,
 		Phone:       strconv.Itoa(rand.Intn(100000)),
 		Email:       strconv.Itoa(rand.Intn(100000)) + "@qq.com",
+	}
+}
+
+func initTag(sort, name string, level uint) model.CreateTagRequest {
+	return model.CreateTagRequest{
+		Sort:  sort,
+		Name:  name,
+		Level: level,
 	}
 }
 
