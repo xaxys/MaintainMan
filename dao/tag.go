@@ -32,7 +32,7 @@ func GetTagsByIDs(ids []uint) (tags []*model.Tag, errs []error) {
 }
 
 func GetAllTagSorts() (sorts []string, err error) {
-	if err = database.DB.Model(&model.Tag{}).Distinct().Pluck("sort", &sorts).Error; err != nil {
+	if err = database.DB.Model(&model.Tag{}).Distinct().Pluck("Sort", &sorts).Error; err != nil {
 		logger.Logger.Debugf("GetAllTagSortsErr: %v\n", err)
 	}
 	return
@@ -55,7 +55,7 @@ func CreateTag(aul *model.CreateTagRequest, operator uint) (tag *model.Tag, err 
 		Sort: tag.Sort,
 		Name: tag.Name,
 	}
-	if err = database.DB.Where(cond).Attrs(tag).FirstOrInit(tag).Error; err != nil {
+	if err = database.DB.Where(cond).Attrs(tag).FirstOrCreate(tag).Error; err != nil {
 		logger.Logger.Debugf("CreateTagErr: %v\n", err)
 	}
 	return

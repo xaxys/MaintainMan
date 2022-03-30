@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"maintainman/model"
+	"maintainman/service"
 	"maintainman/util"
 	"math/rand"
 	"net"
@@ -37,12 +39,90 @@ func TestUserReNewRouter(t *testing.T) {
 	e.GET("/v1/renew").WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusOK)
 }
 
+// Tag Router
+
 func TestTagCreateRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 
-	tags := []model.CreateTagRequest{
+	tags := getTestTags()
+
+	e.POST("/v1/tag").
+		WithJSON(tags[0]).
+		Expect().Status(httptest.StatusForbidden)
+
+	for _, tag := range tags {
+		e.POST("/v1/tag").
+			WithJSON(tag).
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			Expect().Status(httptest.StatusCreated)
+	}
+}
+
+func TestTagSortsRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	for _, tag := range getTestTags() {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+
+	e.GET("/v1/tag/sort").
+		Expect().Status(httptest.StatusForbidden)
+
+	response := e.GET("/v1/tag/sort").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusOK)
+	t.Log(response.Body().Raw())
+
+	sorts := response.JSON().NotNull().Object().Value("data").Array().NotEmpty()
+	for _, sort := range sorts.Iter() {
+		url := fmt.Sprintf("/v1/tag/sort/%s", sort.String().NotEmpty().Raw())
+		resp := e.GET(url).
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			Expect().Status(httptest.StatusOK)
+		t.Log(resp.Body().Raw())
+	}
+}
+
+func TestTagGetBySortRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	for _, tag := range getTestTags() {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+
+	e.GET("/v1/tag/sort/楼名").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusOK)
+}
+
+// Test Utils
+
+func getSuperAdminToken() string {
+	token, _ := util.GetJwtString(1, "super_admin")
+	return token
+}
+
+func getSuperAdminAuthInfo() *model.AuthInfo {
+	return &model.AuthInfo{
+		User: 1,
+		Role: "super_admin",
+		IP:   getMyIPV6(),
+	}
+}
+
+func generateRandomUsers(prefix string, num uint) (usersRegister []model.RegisterUserRequest) {
+	for i := uint(1); i <= num; i++ {
+		usersRegister = append(usersRegister, initUser(prefix+strconv.Itoa(int(i))+util.RandomString(5), "12345678", "disp name user"+strconv.Itoa(int(i))))
+	}
+	return
+}
+
+func getTestTags() []model.CreateTagRequest {
+	return []model.CreateTagRequest{
 		{
 			Sort:  "楼名",
 			Name:  "一舍",
@@ -79,30 +159,6 @@ func TestTagCreateRouter(t *testing.T) {
 			Level: 2,
 		},
 	}
-	e.POST("/v1/tag").
-		WithJSON(tags[0]).
-		Expect().Status(httptest.StatusForbidden)
-
-	for _, tag := range tags {
-		e.POST("/v1/tag").
-			WithJSON(tag).
-			WithHeader("Authorization", "Bearer "+superAdminToken).
-			Expect().Status(httptest.StatusCreated)
-	}
-}
-
-// utils
-
-func getSuperAdminToken() string {
-	token, _ := util.GetJwtString(1, "super_admin")
-	return token
-}
-
-func generateRandomUsers(prefix string, num uint) (usersRegister []model.RegisterUserRequest) {
-	for i := uint(1); i <= num; i++ {
-		usersRegister = append(usersRegister, initUser(prefix+strconv.Itoa(int(i))+util.RandomString(5), "12345678", "disp name user"+strconv.Itoa(int(i))))
-	}
-	return
 }
 
 func initUser(name string, password string, displayName string) model.RegisterUserRequest {
