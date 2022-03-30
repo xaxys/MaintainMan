@@ -15,7 +15,7 @@ func ReadAndUpdateConfig(config *viper.Viper, name string, version string) {
 			if err := config.SafeWriteConfig(); err != nil {
 				panic(fmt.Errorf("Failed to write %s configuration file: %v", name, err))
 			}
-			fmt.Printf("Default %s configuration file created.\n", name)
+			fmt.Printf("default %s configuration file created.\n", name)
 		} else {
 			panic(fmt.Errorf("Fatal error reading %s configuration: %v", name, err))
 		}
@@ -23,13 +23,12 @@ func ReadAndUpdateConfig(config *viper.Viper, name string, version string) {
 	fileVersion := config.GetString("version")
 	config.SetDefault("version", version)
 	if cmp := VersionCompare(version, fileVersion); cmp != 0 {
-		fmt.Printf("%s configuration file version mismatch.\n", name)
-		fmt.Printf("expect version: %s, but got: %s.\n", version, config.GetString("version"))
+		fmt.Printf("%s configuration file version mismatch. expect version: %s, but got: %s.\n", name, version, config.GetString("version"))
 		if cmp < 0 {
 			fmt.Printf("you may need to update your app vesion.\n")
 		}
 		if cmp > 0 {
-			fmt.Printf("trying to update your %s configuration file.\n conflict entries will not be updated.\n", name)
+			fmt.Printf("updating your %s configuration file. conflict entries will not be updated.\n", name)
 			config.Set("version", version)
 			if err := config.WriteConfig(); err != nil {
 				panic(fmt.Errorf("Failed to write %s configuration file: %v", name, err))
