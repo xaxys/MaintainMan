@@ -59,18 +59,17 @@ func TestUpdateUserRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 
 	for _, user := range users {
-		responseBody := e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated).Body().Raw()
-		fmt.Println(responseBody)
-		u := &model.UserJson{}
-		_ = json.Unmarshal([]byte(responseBody), u)
-		id := u.ID
+		response := e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated)
+		fmt.Println(response.Body().Raw())
+		u := response.JSON().NotNull().Object().Value("data")
+		id := uint(u.Object().Value("id").NotNull().Raw().(float64))
 
-		responseBody = e.PUT("/v1/user/"+cast.ToString(id)).WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.UpdateUserRequest{
+		responseBody := e.PUT("/v1/user/"+cast.ToString(id)).WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.UpdateUserRequest{
 			Name:        user.Name + "_update",
-			Password:    user.Password,
-			DisplayName: user.DisplayName,
-			Phone:       user.Phone,
-			Email:       user.Email,
+			Password:    user.Password + "_update",
+			DisplayName: user.DisplayName + "_update",
+			Phone:       "",
+			Email:       "",
 			RoleName:    "user",
 		}).Expect().Status(httptest.StatusNoContent).Body().Raw()
 		fmt.Println(responseBody)
@@ -94,7 +93,7 @@ func TestCreateUser(t *testing.T) {
 	e := httptest.New(t, app)
 	users := generateRandomUsers("createUser", 10)
 	for _, user := range users {
-		responseBody := e.POST("/v1/user/").WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.CreateUserRequest{
+		responseBody := e.POST("/v1/user").WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.CreateUserRequest{
 			RegisterUserRequest: user,
 			RoleName:            "user",
 		}).Expect().Status(httptest.StatusCreated).Body().Raw()

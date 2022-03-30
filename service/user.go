@@ -86,6 +86,13 @@ func UpdateUser(id uint, aul *model.UpdateUserRequest, auth *model.AuthInfo) *mo
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
+	_, err := dao.GetUserByID(id)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
+		return model.ErrorQueryDatabase(err)
+	}
 	u, err := dao.UpdateUser(id, aul, auth.User)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
