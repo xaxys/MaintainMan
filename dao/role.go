@@ -20,8 +20,8 @@ type RolePersistence struct {
 	data  *viper.Viper
 	roles []model.RoleInfo
 	index util.CoPtrMap[string, model.Role]
-	def   util.AtomValue[*model.Role] // Default role
-	guest util.AtomValue[*model.Role] // Guest role
+	def   util.AtomPtr[model.Role] // Default role
+	guest util.AtomPtr[model.Role] // Guest role
 }
 
 func NewRolePersistence(config *viper.Viper) (s *RolePersistence) {

@@ -50,20 +50,17 @@ func (c *CoPtrMap[K, V]) Range(f func(k K, v *V) error) (err error) {
 	return
 }
 
-type AtomValue[T any] struct {
+type AtomPtr[T any] struct {
 	value atomic.Value
 }
 
-func NewAtomValue[T any](v T) *AtomValue[T] {
-	a := &AtomValue[T]{}
-	a.value.Store(v)
-	return a
+func (a *AtomPtr[T]) Get() *T {
+	if v := a.value.Load(); v != nil {
+		return v.(*T)
+	}
+	return nil
 }
 
-func (a *AtomValue[T]) Get() T {
-	return a.value.Load().(T)
-}
-
-func (a *AtomValue[T]) Set(v T) {
+func (a *AtomPtr[T]) Set(v *T) {
 	a.value.Store(v)
 }
