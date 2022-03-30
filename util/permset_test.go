@@ -5,7 +5,7 @@ import (
 )
 
 func TestPermissionSet(t *testing.T) {
-	perms := []string{"admin.*", "user.update"}
+	perms := []string{"admin.*", "user.update", "tag.view.2"}
 	s := NewPermSet().Add(perms...)
 	if !s.Has("admin.whatever") {
 		t.Error("admin.whatever should be true")
@@ -15,6 +15,15 @@ func TestPermissionSet(t *testing.T) {
 	}
 	if s.Has("user.create") {
 		t.Error("user.create should be false")
+	}
+	if !s.Has("tag.view.1") {
+		t.Error("tag.view.1 should be true")
+	}
+	if !s.Has("tag.view.2") {
+		t.Error("tag.view.2 should be true")
+	}
+	if s.Has("tag.view.3") {
+		t.Error("tag.view.3 should be false")
 	}
 
 	s.Add("-admin.create")
@@ -33,6 +42,17 @@ func TestPermissionSet(t *testing.T) {
 	s.Add("user.create")
 	if !s.Has("user.create") {
 		t.Error("user.create should be true")
+	}
+
+	s.Add("tag.view.3")
+	if !s.Has("tag.view.2") {
+		t.Error("tag.view.2 should be true")
+	}
+	if !s.Has("tag.view.3") {
+		t.Error("tag.view.3 should be true")
+	}
+	if s.Has("tag.view.4") {
+		t.Error("tag.view.4 should be false")
 	}
 
 	s.Delete("user.create")

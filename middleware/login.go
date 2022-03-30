@@ -38,7 +38,9 @@ func init() {
 
 	LoginInterceptor = func(ctx iris.Context) {
 		if ctx.Values().Get("auth").(*model.AuthInfo) == nil {
-			ctx.JSON(model.ErrorUnauthorized(fmt.Errorf("无法获取到登陆用户信息，请重新登陆")))
+			response := model.ErrorUnauthorized(fmt.Errorf("无法获取到登陆用户信息，请重新登陆"))
+			ctx.StatusCode(response.Code)
+			ctx.JSON(response)
 			ctx.StopExecution()
 		}
 		ctx.Next()
@@ -53,7 +55,9 @@ var headerJwtConfig = jwt.Config{
 		return jwtkey, nil
 	},
 	ErrorHandler: func(ctx iris.Context, err error) {
-		ctx.JSON(model.ErrorUnauthorized(err))
+		response := model.ErrorUnauthorized(err)
+		ctx.StatusCode(response.Code)
+		ctx.JSON(response)
 		ctx.StopExecution()
 	},
 }

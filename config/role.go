@@ -1,10 +1,10 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/spf13/viper"
 )
+
+const RoleConfigVersion = "1.0.1"
 
 var (
 	RoleConfig *viper.Viper
@@ -56,7 +56,8 @@ func init() {
 				"order.comment.view",
 				"order.comment.create",
 				"order.comment.delete",
-				"tag.viewall",
+				"tag.view.1",
+				"tag.add.1",
 			},
 			"inheritance": []string{
 				"guest",
@@ -71,6 +72,8 @@ func init() {
 				"order.complete",
 				"item.consume",
 				"item.viewall",
+				"tag.view.2",
+				"tag.add.2",
 			},
 			"inheritance": []string{
 				"user",
@@ -113,15 +116,5 @@ func init() {
 		},
 	})
 
-	if err := RoleConfig.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			fmt.Printf("Role configuration file not found: %v\n", err)
-			if err := RoleConfig.SafeWriteConfig(); err != nil {
-				panic(fmt.Errorf("Failed to write default role configuration: %v", err))
-			}
-			fmt.Println("Default role configuration file created.")
-		} else {
-			panic(fmt.Errorf("Fatal error reading config file: %v", err))
-		}
-	}
+	ReadAndUpdateConfig(RoleConfig, "role", RoleConfigVersion)
 }

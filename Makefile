@@ -8,6 +8,7 @@ ifeq ($(OS),Windows_NT)  # is Windows_NT on XP, 2000, 7, Vista, 10...
 	BUILD_TIME := $(shell echo %date% %time%)
 	GIT_COMMIT := $(shell git rev-parse --short HEAD)
 	GO_VERSION := $(shell go version)
+	RM := del /s /q
 else
 	GO		?= go
     PWD 	:= ${CURDIR}
@@ -16,6 +17,7 @@ else
 	BUILD_TIME := $(shell date --utc)
 	GIT_COMMIT := $(shell git rev-parse --short HEAD)
 	GO_VERSION := $(shell go version)
+	RM := rm -rf
 endif
 
 all: build
@@ -27,9 +29,18 @@ build:
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
 		-o $(TARGET) $(PWD)/main.go
 
-test:
+test: clean
 	@echo "Testing MaintainMan ..."
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) test \
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
 		-coverprofile=coverage.out ./...
+
+clean:
+	@echo "Cleaning MaintainMan ..."
+	@$(RM) $(TARGET)
+	@$(RM) coverage.out
+	@$(RM) *.db
+	@$(RM) *.exe
+	@$(RM) *.out
+	@$(RM) *.yaml

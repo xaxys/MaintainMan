@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"fmt"
 	"maintainman/dao"
 	"maintainman/model"
 	"maintainman/util"
@@ -16,6 +17,10 @@ func GetTagByID(id uint, auth *model.AuthInfo) *model.ApiJson {
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorQueryDatabase(err)
+	}
+	role := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string { return v.Role }, "")
+	if err := dao.CheckPermission(role, fmt.Sprintf("tag.view.%d", tag.Level)); err != nil {
+		return model.ErrorNoPermissions(err)
 	}
 	return model.Success(TagToJson(tag), "获取成功")
 }
@@ -33,7 +38,13 @@ func GetAllTagsBySort(sort string, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		return model.ErrorQueryDatabase(err)
 	}
-	ts := util.TransSlice(tags, TagToJson)
+	role := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string { return v.Role }, "")
+	ts := util.TransSlice(tags, func(t *model.Tag) *model.TagJson {
+		if dao.HasPermission(role, fmt.Sprintf("tag.view.%d", t.Level)) {
+			return TagToJson(t)
+		}
+		return nil
+	})
 	return model.Success(ts, "获取成功")
 }
 

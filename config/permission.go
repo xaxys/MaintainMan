@@ -1,10 +1,10 @@
 package config
 
 import (
-	"fmt"
-
 	"github.com/spf13/viper"
 )
+
+const PermConfigVersion = "1.0.1"
 
 var (
 	PermConfig *viper.Viper
@@ -79,9 +79,10 @@ func init() {
 			"deleteall": "删除所有评论",
 		},
 		"tag": map[string]any{
-			"create":  "创建标签",
-			"delete":  "删除标签",
-			"viewall": "查看所有标签",
+			"create": "创建标签",
+			"delete": "删除标签",
+			"view":   "查看标签",
+			"add":    "添加标签",
 		},
 		"item": map[string]any{
 			"create":  "创建零件",
@@ -92,15 +93,5 @@ func init() {
 		},
 	})
 
-	if err := PermConfig.ReadInConfig(); err != nil {
-		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			fmt.Printf("Permission configuration file not found: %v\n", err)
-			if err := PermConfig.SafeWriteConfig(); err != nil {
-				panic(fmt.Errorf("Failed to write permission configuration file: %v", err))
-			}
-			fmt.Println("Default permission configuration file created.")
-		} else {
-			panic(fmt.Errorf("Fatal error reading config file: %v", err))
-		}
-	}
+	ReadAndUpdateConfig(PermConfig, "permission", PermConfigVersion)
 }

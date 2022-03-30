@@ -39,7 +39,10 @@ func NewPermissionPersistence(config *viper.Viper) (s *PermissionPersistence) {
 
 // GetPermissionName 获取权限名称
 func GetPermissionName(name string) string {
-	return PermPO.data[name]
+	if v, ok := PermPO.data[name]; ok {
+		return v
+	}
+	return name
 }
 
 // GetPermission 获取权限Json

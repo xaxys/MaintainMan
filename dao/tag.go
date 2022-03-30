@@ -1,7 +1,6 @@
 package dao
 
 import (
-	"fmt"
 	"maintainman/database"
 	"maintainman/logger"
 	"maintainman/model"
@@ -20,9 +19,7 @@ func GetTagByID(id uint) (*model.Tag, error) {
 	return tag, nil
 }
 
-func GetTagsByIDs(ids []uint) ([]*model.Tag, error) {
-	tags := []*model.Tag{}
-	errs := []error{}
+func GetTagsByIDs(ids []uint) (tags []*model.Tag, errs []error) {
 	for _, id := range ids {
 		tag, err := GetTagByID(id)
 		if err != nil {
@@ -31,14 +28,11 @@ func GetTagsByIDs(ids []uint) ([]*model.Tag, error) {
 			tags = append(tags, tag)
 		}
 	}
-	if len(errs) > 0 {
-		return tags, fmt.Errorf("%v", errs)
-	}
-	return tags, nil
+	return tags, errs
 }
 
 func GetAllTagSorts() (sorts []string, err error) {
-	if err = database.DB.Model(&model.Tag{}).Distinct().Pluck("sort", &sorts).Error; err != nil {
+	if err = database.DB.Model(&model.Tag{}).Distinct().Pluck("Sort", &sorts).Error; err != nil {
 		logger.Logger.Debugf("GetAllTagSortsErr: %v\n", err)
 	}
 	return
@@ -57,7 +51,11 @@ func GetAllTagsBySort(sort string) (tags []*model.Tag, err error) {
 func CreateTag(aul *model.CreateTagRequest, operator uint) (tag *model.Tag, err error) {
 	tag = JsonToTag(aul)
 	tag.CreatedBy = operator
-	if err = database.DB.Create(tag).Error; err != nil {
+	cond := &model.Tag{
+		Sort: tag.Sort,
+		Name: tag.Name,
+	}
+	if err = database.DB.Where(cond).Attrs(tag).FirstOrCreate(tag).Error; err != nil {
 		logger.Logger.Debugf("CreateTagErr: %v\n", err)
 	}
 	return
@@ -67,14 +65,14 @@ func UpdateTag(id uint, aul *model.CreateTagRequest, operator uint) (tag *model.
 	tag = JsonToTag(aul)
 	tag.ID = id
 	tag.UpdatedBy = operator
-	if err = database.DB.Model(tag).Updates(tag).Error; err != nil {
+	if err = database.DB.Where(tag).Updates(tag).Error; err != nil {
 		logger.Logger.Debugf("UpdateTagErr: %v\n", err)
 	}
 	return
 }
 
 func DeleteTag(id uint) (err error) {
-	if err = database.DB.Select(clause.Associations).Delete(&model.Tag{}).Error; err != nil {
+	if err = database.DB.Select(clause.Associations).Delete(&model.Tag{}, id).Error; err != nil {
 		logger.Logger.Debugf("DeleteTagErr: %v\n", err)
 	}
 	return

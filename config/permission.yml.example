@@ -1,3 +1,4 @@
+version: 1.0.1
 permission:
   user:
     view: "查看当前用户"
@@ -54,7 +55,8 @@ permission:
   tag:
     create: "创建标签"
     delete: "删除标签"
-    viewall: "查看所有标签"
+    view: "查看标签"
+    add: "添加标签"
   item:
     create: "创建零件"
     update: "更新零件"

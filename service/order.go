@@ -66,6 +66,16 @@ func CreateOrder(aul *model.CreateOrderRequest, auth *model.AuthInfo) *model.Api
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
+	role := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string { return v.Role }, "")
+	tags, errs := dao.GetTagsByIDs(aul.Tags)
+	if len(errs) > 0 {
+		return model.ErrorQueryDatabase(errs...)
+	}
+	for _, t := range tags {
+		if err := dao.CheckPermission(role, fmt.Sprintf("tag.view.%d", t.Level)); err != nil {
+			return model.ErrorNoPermissions(err)
+		}
+	}
 	order, err := dao.CreateOrder(aul, auth.User)
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
@@ -80,6 +90,25 @@ func UpdateOrder(id uint, aul *model.UpdateOrderRequest, auth *model.AuthInfo) *
 	}
 	if order.UserID != auth.User {
 		return model.ErrorUpdateDatabase(fmt.Errorf("操作人不是订单创建者"))
+	}
+	role := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string { return v.Role }, "")
+	addTags, errs := dao.GetTagsByIDs(aul.AddTags)
+	if len(errs) > 0 {
+		return model.ErrorQueryDatabase(errs...)
+	}
+	for _, t := range addTags {
+		if err := dao.CheckPermission(role, fmt.Sprintf("tag.view.%d", t.Level)); err != nil {
+			return model.ErrorNoPermissions(err)
+		}
+	}
+	delTags, errs := dao.GetTagsByIDs(aul.DelTags)
+	if len(errs) > 0 {
+		return model.ErrorQueryDatabase(errs...)
+	}
+	for _, t := range delTags {
+		if err := dao.CheckPermission(role, fmt.Sprintf("tag.view.%d", t.Level)); err != nil {
+			return model.ErrorNoPermissions(err)
+		}
 	}
 	return ForceUpdateOrder(id, aul, auth)
 }
