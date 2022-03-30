@@ -106,38 +106,53 @@ func ConsumeItem(aul *model.ConsumeItemRequest, auth *model.AuthInfo) *model.Api
 }
 
 func ItemToJson(item *model.Item) *model.ItemJson {
-	return util.NilOrValue(item, &model.ItemJson{
-		ID:          item.ID,
-		Name:        item.Name,
-		Description: item.Description,
-		Count:       item.Count,
-	})
+	if item == nil {
+		return nil
+	} else {
+		return &model.ItemJson{
+			ID:          item.ID,
+			Name:        item.Name,
+			Description: item.Description,
+			Count:       item.Count,
+		}
+	}
+
 }
 
 func ItemToInfoJson(item *model.Item) *model.ItemInfoJson {
-	return util.NilOrValue(item, &model.ItemInfoJson{
-		ID:          item.ID,
-		Name:        item.Name,
-		Description: item.Description,
-		Price:       item.Price,
-		Income:      item.Income,
-		Count:       item.Count,
-		ItemLogs:    util.TransSlice(item.ItemLogs, ItemLogToJson),
-		CreatedAt:   item.CreatedAt.Unix(),
-		UpdatedAt:   item.UpdatedAt.Unix(),
-		CreatedBy:   item.CreatedBy,
-		UpdatedBy:   item.UpdatedBy,
-	})
+	if item == nil {
+		return nil
+	} else {
+		return &model.ItemInfoJson{
+			ID:          item.ID,
+			Name:        item.Name,
+			Description: item.Description,
+			Price:       item.Price,
+			Income:      item.Income,
+			Count:       item.Count,
+			ItemLogs:    util.TransSlice(item.ItemLogs, ItemLogToJson),
+			CreatedAt:   item.CreatedAt.Unix(),
+			UpdatedAt:   item.UpdatedAt.Unix(),
+			CreatedBy:   item.CreatedBy,
+			UpdatedBy:   item.UpdatedBy,
+		}
+	}
+
 }
 
 func ItemLogToJson(itemLog *model.ItemLog) *model.ItemLogJson {
-	return util.NilOrValue(itemLog, &model.ItemLogJson{
-		ID:          itemLog.ID,
-		ItemID:      itemLog.ItemID,
-		OrderID:     itemLog.OrderID,
-		ChangeNum:   itemLog.ChangeNum,
-		ChangePrice: itemLog.ChangePrice,
-		CreatedAt:   itemLog.CreatedAt.Unix(),
-		CreatedBy:   itemLog.CreatedBy,
-	})
+	if itemLog == nil {
+		return nil
+	} else {
+		return &model.ItemLogJson{
+			ID:          itemLog.ID,
+			ItemID:      itemLog.ItemID,
+			OrderID:     itemLog.OrderID,
+			ChangeNum:   itemLog.ChangeNum,
+			ChangePrice: itemLog.ChangePrice,
+			CreatedAt:   itemLog.CreatedAt.Unix(),
+			CreatedBy:   itemLog.CreatedBy,
+		}
+	}
+
 }

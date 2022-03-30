@@ -1,13 +1,13 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"maintainman/model"
 	"maintainman/service"
 	"maintainman/util"
 	"math/rand"
 	"net"
+	"net/http"
 	"regexp"
 	"strconv"
 	"strings"
@@ -17,6 +17,7 @@ import (
 	"github.com/spf13/cast"
 )
 
+//Test User Router
 func TestRegisterAndLoginRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
@@ -24,14 +25,14 @@ func TestRegisterAndLoginRouter(t *testing.T) {
 
 	for _, user := range users {
 		responseBody := e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated).Body()
-		fmt.Println(responseBody)
+		t.Log(responseBody)
 	}
 	for _, user := range users {
 		responseBody := e.POST("/v1/login").WithJSON(model.LoginRequest{
 			Account:  user.Name,
 			Password: user.Password,
 		}).Expect().Status(httptest.StatusOK).Body()
-		fmt.Println(responseBody)
+		t.Log(responseBody)
 	}
 }
 
@@ -40,16 +41,25 @@ func TestUserReNewRouter(t *testing.T) {
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 
-	responseBody := e.GET("/v1/renew").WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusOK).Body()
-	fmt.Println(responseBody)
+	responseBody := e.GET("/v1/renew").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/renew").WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusOK).Body().Raw()
+	t.Log(responseBody)
 }
 
 func TestUserViewRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	responseBody := e.GET("/v1/user").WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusOK).Body()
-	fmt.Println(responseBody)
+
+	responseBody := e.GET("/v1/user").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/user").WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusOK).Body().Raw()
+	t.Log(responseBody)
 }
 
 func TestUpdateUserRouter(t *testing.T) {
@@ -58,13 +68,29 @@ func TestUpdateUserRouter(t *testing.T) {
 	users := generateRandomUsers("updateUser", 10)
 	superAdminToken := getSuperAdminToken()
 
-	for _, user := range users {
-		response := e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated)
-		fmt.Println(response.Body().Raw())
-		u := response.JSON().NotNull().Object().Value("data")
-		id := uint(u.Object().Value("id").NotNull().Raw().(float64))
+	testUser := generateRandomUsers("forbidUser", 1)
+	response := e.POST("/v1/register").WithJSON(testUser[0]).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	u := response.JSON().NotNull().Object().Value("data")
+	id := uint(u.Object().Value("id").NotNull().Raw().(float64))
 
-		responseBody := e.PUT("/v1/user/"+cast.ToString(id)).WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.UpdateUserRequest{
+	responseBody := e.PUT("/v1/user/" + cast.ToString(id)).WithJSON(model.UpdateUserRequest{
+		Name:        testUser[0].Name + "_update",
+		Password:    testUser[0].Password + "_update",
+		DisplayName: testUser[0].DisplayName + "_update",
+		Phone:       "",
+		Email:       "",
+		RoleName:    "user",
+	}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	for _, user := range users {
+		response = e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated)
+		fmt.Println(response.Body().Raw())
+		u = response.JSON().NotNull().Object().Value("data")
+		id = uint(u.Object().Value("id").NotNull().Raw().(float64))
+
+		responseBody = e.PUT("/v1/user/"+cast.ToString(id)).WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.UpdateUserRequest{
 			Name:        user.Name + "_update",
 			Password:    user.Password + "_update",
 			DisplayName: user.DisplayName + "_update",
@@ -72,7 +98,7 @@ func TestUpdateUserRouter(t *testing.T) {
 			Email:       "",
 			RoleName:    "user",
 		}).Expect().Status(httptest.StatusNoContent).Body().Raw()
-		fmt.Println(responseBody)
+		t.Log(responseBody)
 	}
 
 }
@@ -82,63 +108,87 @@ func TestGetAllUsersRouter(t *testing.T) {
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	responseBody := e.GET("/v1/user/all").WithHeader("Authorization", "Bearer "+superAdminToken).WithQuery("offset", 0).WithQuery("limit", 50).Expect().Status(httptest.StatusOK).Body().Raw()
+	t.Log(responseBody)
 
-	fmt.Println(responseBody)
+	responseBody = e.GET("/v1/user/all").WithQuery("offset", 0).WithQuery("limit", 50).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
 }
 
-//FIXME:
-func TestCreateUser(t *testing.T) {
+func TestCreateUserRouter(t *testing.T) {
 	app := newApp()
 	superAdminToken := getSuperAdminToken()
 	e := httptest.New(t, app)
 	users := generateRandomUsers("createUser", 10)
+	testUser := generateRandomUsers("forbidUser", 1)
+	responseBody := e.POST("/v1/user").WithJSON(model.CreateUserRequest{
+		RegisterUserRequest: testUser[0],
+		RoleName:            "user",
+	}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
 	for _, user := range users {
-		responseBody := e.POST("/v1/user").WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.CreateUserRequest{
-			RegisterUserRequest: user,
-			RoleName:            "user",
-		}).Expect().Status(httptest.StatusCreated).Body().Raw()
-		fmt.Println(responseBody)
+		responseBody = e.POST("/v1/user").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(model.CreateUserRequest{
+				RegisterUserRequest: user,
+				RoleName:            "user",
+			}).Expect().Status(httptest.StatusCreated).Body().Raw()
+		t.Log(responseBody)
 	}
+
 }
 
-func TestForceDeleteUser(t *testing.T) {
+func TestForceDeleteUserRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	users := generateRandomUsers("deleteUser", 10)
 	superAdminToken := getSuperAdminToken()
 
+	testUser := generateRandomUsers("forbidUser", 1)
+	response := e.POST("/v1/register").WithJSON(testUser[0]).Expect().Status(httptest.StatusCreated)
+	fmt.Println(response.Body().Raw())
+	u := response.JSON().NotNull().Object().Value("data")
+	id := uint(u.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.DELETE("/v1/user/" + cast.ToString(id)).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
 	for _, user := range users {
-		responseBody := e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated).Body().Raw()
-		fmt.Println(responseBody)
-		u := &model.UserJson{}
-		_ = json.Unmarshal([]byte(responseBody), u)
-		id := u.ID
+		response = e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated)
+		fmt.Println(response.Body().Raw())
+		u = response.JSON().NotNull().Object().Value("data")
+		id = uint(u.Object().Value("id").NotNull().Raw().(float64))
 
 		responseBody = e.DELETE("/v1/user/"+cast.ToString(id)).WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusNoContent).Body().Raw()
-		fmt.Println(responseBody)
+		t.Log(responseBody)
 	}
 }
 
-func TestGetUserById(t *testing.T) {
+func TestGetUserByIdRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	users := generateRandomUsers("getUser", 10)
 	superAdminToken := getSuperAdminToken()
 
-	for _, user := range users {
-		responseBody := e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated).Body().Raw()
-		fmt.Println(responseBody)
-		u := &model.UserJson{}
-		_ = json.Unmarshal([]byte(responseBody), u)
-		id := u.ID
+	testUser := generateRandomUsers("forbidUser", 1)
+	response := e.POST("/v1/register").WithJSON(testUser[0]).Expect().Status(httptest.StatusCreated)
+	fmt.Println(response.Body().Raw())
+	u := response.JSON().NotNull().Object().Value("data")
+	id := uint(u.Object().Value("id").NotNull().Raw().(float64))
+	responseBody := e.GET("/v1/user/" + cast.ToString(id)).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
 
+	for _, user := range users {
+		response = e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated)
+		fmt.Println(response.Body().Raw())
+		u = response.JSON().NotNull().Object().Value("data")
+		id = uint(u.Object().Value("id").NotNull().Raw().(float64))
 		responseBody = e.GET("/v1/user/"+cast.ToString(id)).WithHeader("Authorization", "Bearer "+superAdminToken).Expect().Status(httptest.StatusOK).Body().Raw()
-		fmt.Println(responseBody)
+		t.Log(responseBody)
 	}
 }
 
-// Tag Router
-
+//Test Tag Router
 func TestTagCreateRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
@@ -146,15 +196,16 @@ func TestTagCreateRouter(t *testing.T) {
 
 	tags := getTestTags()
 
-	e.POST("/v1/tag").
-		WithJSON(tags[0]).
-		Expect().Status(httptest.StatusForbidden)
+	responseBody := e.POST("/v1/tag").WithJSON(tags[0]).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
 
 	for _, tag := range tags {
-		e.POST("/v1/tag").
+		responseBody = e.POST("/v1/tag").
 			WithJSON(tag).
 			WithHeader("Authorization", "Bearer "+superAdminToken).
-			Expect().Status(httptest.StatusCreated)
+			Expect().Status(httptest.StatusCreated).Body().Raw()
+		t.Log(responseBody)
 	}
 }
 
@@ -166,8 +217,9 @@ func TestTagSortsRouter(t *testing.T) {
 		service.CreateTag(&tag, getSuperAdminAuthInfo())
 	}
 
-	e.GET("/v1/tag/sort").
-		Expect().Status(httptest.StatusForbidden)
+	responseBody := e.GET("/v1/tag/sort").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
 
 	response := e.GET("/v1/tag/sort").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -225,8 +277,155 @@ func TestTagDeleteRouter(t *testing.T) {
 	}
 }
 
-// Test Utils
+//Test Order Router
+func TestCreateOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	orders := generateRandomOrders("Add Order", "admin", 6)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
 
+	responseBody := e.POST("/v1/order").
+		WithJSON(initOrder("Test", "Test", "Earth", "Admin", 5)).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	for _, order := range orders {
+		responseBody = e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(order).Expect().Status(httptest.StatusCreated).Body().Raw()
+		t.Log(responseBody)
+	}
+
+}
+
+func TestGetUserOrdersRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	responseBody := e.GET("/v1/order/user").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/order/user").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestGetAllOrdersRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	responseBody := e.GET("/v1/order/all").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/order/all").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestGetRepairerOrdersRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+
+	response := e.POST("/v1/user").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateUserRequest{
+			RegisterUserRequest: initUser("Test Repairer "+strconv.Itoa(rand.Intn(10000)), "12345678", "Test Repairer "+strconv.Itoa(rand.Intn(10000))),
+			RoleName:            "maintainer",
+		}).Expect().Status(httptest.StatusCreated)
+
+	t.Log(response.Body().Raw())
+
+	responseBody := e.GET("/v1/order/repairer").WithJSON(model.RepairerOrderRequest{
+		Current:   true,
+		PageParam: model.PageParam{},
+	}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/order/repairer").WithJSON(model.RepairerOrderRequest{
+		Current:   true,
+		PageParam: model.PageParam{},
+	}).WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestGetRepairerOrdersByIDRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+
+	response := e.POST("/v1/user").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateUserRequest{
+			RegisterUserRequest: initUser("Test Repairer "+strconv.Itoa(rand.Intn(10000)), "12345678", "Test Repairer "+strconv.Itoa(rand.Intn(10000))),
+			RoleName:            "maintainer",
+		}).Expect().Status(httptest.StatusCreated)
+	u := response.JSON().NotNull().Object().Value("data")
+	id := uint(u.Object().Value("id").NotNull().Raw().(float64))
+
+	t.Log(response.Body().Raw())
+
+	responseBody := e.GET("/v1/order/repairer/" + cast.ToString(id)).WithJSON(model.RepairerOrderRequest{
+		Current:   true,
+		PageParam: model.PageParam{},
+	}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/order/repairer/"+cast.ToString(id)).WithJSON(model.RepairerOrderRequest{
+		Current:   true,
+		PageParam: model.PageParam{},
+	}).WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestGetOrderByIdRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	responseBody := e.GET("/v1/order/1").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+
+	responseBody = e.GET("/v1/order/1").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestGetOrderByUserRouter(t *testing.T) {
+
+}
+
+// Test Utils
 func getSuperAdminToken() string {
 	token, _ := util.GetJwtString(1, "super_admin")
 	return token
@@ -242,7 +441,7 @@ func getSuperAdminAuthInfo() *model.AuthInfo {
 
 func generateRandomUsers(prefix string, num uint) (usersRegister []model.RegisterUserRequest) {
 	for i := uint(1); i <= num; i++ {
-		usersRegister = append(usersRegister, initUser(prefix+strconv.Itoa(int(i))+util.RandomString(5), "12345678", "disp name user"+strconv.Itoa(int(i))))
+		usersRegister = append(usersRegister, initUser(prefix+strconv.Itoa(int(i))+util.RandomString(5), "12345678", "Random name user"+strconv.Itoa(int(i))))
 	}
 	return
 }
@@ -287,6 +486,13 @@ func getTestTags() []model.CreateTagRequest {
 	}
 }
 
+func generateRandomOrders(baseTitle string, baseName string, num uint) (orders []model.CreateOrderRequest) {
+	for i := uint(1); i <= num; i++ {
+		orders = append(orders, initOrder(baseTitle, "Content:"+strconv.Itoa(rand.Intn(100000)), "Address:"+strconv.Itoa(rand.Intn(100000)), baseName, uint(rand.Int63n(7))))
+	}
+	return
+}
+
 func initUser(name string, password string, displayName string) model.RegisterUserRequest {
 	return model.RegisterUserRequest{
 		Name:        name,
@@ -294,6 +500,21 @@ func initUser(name string, password string, displayName string) model.RegisterUs
 		DisplayName: displayName,
 		Phone:       strconv.Itoa(rand.Intn(100000)),
 		Email:       strconv.Itoa(rand.Intn(100000)) + "@qq.com",
+	}
+}
+
+func initOrder(title string, content string, address string, name string, maxTagID uint) model.CreateOrderRequest {
+	tags := make([]uint, 0)
+	for i := uint(1); i <= maxTagID; i++ {
+		tags = append(tags, i)
+	}
+	return model.CreateOrderRequest{
+		Title:        title,
+		Content:      content,
+		Address:      address,
+		ContactName:  name,
+		ContactPhone: strconv.Itoa(rand.Intn(100000)),
+		Tags:         tags,
 	}
 }
 

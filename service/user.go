@@ -239,10 +239,15 @@ func UserRenew(id uint, ip string, auth *model.AuthInfo) *model.ApiJson {
 }
 
 func UserToJson(user *model.User) *model.UserJson {
-	return util.NilOrValue(user, &model.UserJson{
-		ID:          user.ID,
-		Name:        user.Name,
-		DisplayName: user.DisplayName,
-		RoleName:    user.RoleName,
-	})
+	if user == nil {
+		return nil
+	} else {
+		return &model.UserJson{
+			ID:          user.ID,
+			Name:        user.Name,
+			DisplayName: user.DisplayName,
+			RoleName:    user.RoleName,
+		}
+	}
+
 }

@@ -67,10 +67,15 @@ func DeleteTag(id uint, auth *model.AuthInfo) *model.ApiJson {
 }
 
 func TagToJson(tag *model.Tag) *model.TagJson {
-	return util.NilOrValue(tag, &model.TagJson{
-		ID:    tag.ID,
-		Sort:  tag.Sort,
-		Name:  tag.Name,
-		Level: tag.Level,
-	})
+	if tag == nil {
+		return nil
+	} else {
+		return &model.TagJson{
+			ID:    tag.ID,
+			Sort:  tag.Sort,
+			Name:  tag.Name,
+			Level: tag.Level,
+		}
+	}
+
 }
