@@ -119,17 +119,18 @@ func TestRoleConcurrency(t *testing.T) {
 
 	roles := GetAllRoles()
 	fmt.Printf("all %d roles: %v\n", len(roles), roles)
+	defRole := GetDefaultRole()
+	guestRole := GetGuestRole()
 
-	random := func(i int) int {
-		if i == 0 {
-			return 0
-		}
-		return rand.Intn(i)
+	random2 := func(n int) (a int, b int) {
+		b = rand.Intn(n-1) + 1
+		a = rand.Intn(b)
+		return
 	}
 
-	createFunc := func(prefix string, i int) error {
+	createFunc := func(prefix string, i, n int) error {
 		Role1 := fmt.Sprintf("%s role %d", prefix, i)
-		Perm1 := fmt.Sprintf("%s perm %d", prefix, random(i))
+		Perm1 := fmt.Sprintf("%s perm %d", prefix, rand.Intn(n))
 		aul := model.CreateRoleRequest{
 			Name:        Role1,
 			DisplayName: Role1,
@@ -148,14 +149,11 @@ func TestRoleConcurrency(t *testing.T) {
 		roles := GetAllRoles()
 		fmt.Printf("[%d] all %d roles: %v\n", index, len(roles), roles)
 
-		a, b := random(n), random(n)
-		if a > b {
-			a, b = b, a
-		}
+		a, b := random2(n)
 		Role1 := fmt.Sprintf("%s role %d", prefix, a)
 		Role2 := fmt.Sprintf("%s role %d", prefix, b)
-		Perm1 := fmt.Sprintf("%s perm %d", prefix, random(n))
-		Perm2 := fmt.Sprintf("%s perm %d", prefix, random(n))
+		Perm1 := fmt.Sprintf("%s perm %d", prefix, rand.Intn(n))
+		Perm2 := fmt.Sprintf("%s perm %d", prefix, rand.Intn(n))
 
 		// test get defRole
 		role := GetRole(Role1)
@@ -176,7 +174,7 @@ func TestRoleConcurrency(t *testing.T) {
 		}
 		fmt.Printf("[INFO] [TEST] [%d] UpdateRole(%s): Add:%v Del:%v\n", index, Role1, aul3.AddPermissions, aul3.DelPermissions)
 
-		if random(n)%2 == 0 {
+		if rand.Intn(n)%2 == 0 {
 			aul4 := model.UpdateRoleRequest{
 				DelInheritance: []string{Role1},
 			}
@@ -248,8 +246,8 @@ func TestRoleConcurrency(t *testing.T) {
 		index := i
 		wg.Add(1)
 		go func() {
-			fmt.Printf("index [%d]\n", index)
-			err := createFunc(prefix, index)
+			fmt.Printf("[INFO] [CREATE] [%d] start\n", index)
+			err := createFunc(prefix, index, n)
 			if err != nil {
 				t.Error(err)
 				fmt.Printf("[ERR] [CREATE] [%d]: %s\n", index, err)
@@ -265,7 +263,7 @@ func TestRoleConcurrency(t *testing.T) {
 		index := i
 		wg.Add(1)
 		go func() {
-			fmt.Printf("index [%d]\n", index)
+			fmt.Printf("[INFO] [TEST] [%d] start\n", index)
 			err := testFunc(prefix, index, n)
 			if err != nil {
 				t.Error(err)
@@ -277,12 +275,14 @@ func TestRoleConcurrency(t *testing.T) {
 	wg.Wait()
 	fmt.Println("[INFO] [TEST] all test done")
 
+	SetDefaultRole(defRole.Name)
+	SetGuestRole(guestRole.Name)
 	fmt.Println("[INFO] [DELETE] start delete")
-	for i := 0; i < n; i++ {
+	for i := n - 1; i >= 0; i-- {
 		index := i
 		wg.Add(1)
 		go func() {
-			fmt.Printf("index [%d]\n", index)
+			fmt.Printf("[INFO] [DELETE] [%d] start\n", index)
 			err := deleteFunc(prefix, index)
 			if err != nil {
 				fmt.Printf("[ERR] [DELETE] [%d]: %s\n", index, err)
@@ -292,4 +292,16 @@ func TestRoleConcurrency(t *testing.T) {
 	}
 	wg.Wait()
 	fmt.Println("[INFO] [DELETE] all delete done")
+
+	for i := n - 1; i >= 0; i-- {
+		index := i
+		fmt.Printf("[INFO] [SEQ_DELETE] [%d] start\n", index)
+		err := deleteFunc(prefix, index)
+		if err != nil {
+			fmt.Printf("[ERR] [SEQ_DELETE] [%d]: %s\n", index, err)
+		}
+	}
+	if len(GetAllRoles()) != len(roles) {
+		t.Errorf("[ERR] [SEQ_DELETE] not all created roles deleted")
+	}
 }
