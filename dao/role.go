@@ -343,7 +343,6 @@ func DeleteRole(name string) error {
 		return fmt.Errorf("Role %s does not exist", name)
 	}
 	if RolePO.def.Get() == RolePO.index.Get(name) {
-		RolePO.RUnlock()
 		return fmt.Errorf("Cannot delete default role")
 	}
 	err := RolePO.index.Range(func(k string, role *model.Role) error {
