@@ -246,8 +246,8 @@ func TestRoleConcurrency(t *testing.T) {
 	fmt.Println("[INFO] [CREATE] start create")
 	for i := 0; i < n; i++ {
 		index := i
+		wg.Add(1)
 		go func() {
-			wg.Add(1)
 			fmt.Printf("index [%d]\n", index)
 			err := createFunc(prefix, index)
 			if err != nil {
@@ -263,8 +263,8 @@ func TestRoleConcurrency(t *testing.T) {
 	fmt.Println("[INFO] [TEST] start test")
 	for i := 0; i < n*5; i++ {
 		index := i
+		wg.Add(1)
 		go func() {
-			wg.Add(1)
 			fmt.Printf("index [%d]\n", index)
 			err := testFunc(prefix, index, n)
 			if err != nil {
@@ -280,8 +280,8 @@ func TestRoleConcurrency(t *testing.T) {
 	fmt.Println("[INFO] [DELETE] start delete")
 	for i := 0; i < n; i++ {
 		index := i
+		wg.Add(1)
 		go func() {
-			wg.Add(1)
 			fmt.Printf("index [%d]\n", index)
 			err := deleteFunc(prefix, index)
 			if err != nil {
