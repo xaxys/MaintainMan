@@ -122,7 +122,7 @@ func UpdateUser(id uint, json *model.UpdateUserRequest, operator uint) (*model.U
 func AttachOpenIDToUser(id uint, openid string) error {
 	user := &model.User{}
 	user.ID = id
-	if err := database.DB.Where(user).Update("openid", openid).Error; err != nil {
+	if err := database.DB.Model(user).Where(user).Update("open_id", openid).Error; err != nil {
 		logger.Logger.Debugf("AttachOpenIDToUserErr: %v\n", err)
 		return err
 	}
