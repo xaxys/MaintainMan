@@ -13,7 +13,7 @@ func HttpRequest(url string, method string, params map[string]string, resjson an
 		kvset = append(kvset, k+"="+v)
 	}
 	param := strings.Join(kvset, "&")
-	url = url + param
+	url = url + "?" + param
 
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, nil)

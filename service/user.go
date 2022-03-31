@@ -144,14 +144,14 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 		return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
 	}
 
+	id := uint(0)
 	user, err := dao.GetUserByOpenID(wxres.OpenID)
-	id := user.ID
 	if err != nil {
 		// If user related to openid not found, attach openid to current user OR create a new one
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorQueryDatabase(err)
 		}
-		if auth.User != 0 {
+		if auth != nil {
 			// If already login, attach openid to current user
 			if err := dao.AttachOpenIDToUser(auth.User, wxres.OpenID); err != nil {
 				return model.ErrorUpdateDatabase(err)
@@ -165,7 +165,8 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 					Password: util.RandomString(32),
 				},
 			}
-			user, err = dao.CreateUser(aul, auth.User)
+			operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
+			user, err = dao.CreateUser(aul, operator)
 			if err != nil {
 				return model.ErrorInsertDatabase(err)
 			}
@@ -174,6 +175,8 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 			}
 			id = user.ID
 		}
+	} else {
+		id = user.ID
 	}
 
 	if err := dao.ForceLogin(id, ip); err != nil {

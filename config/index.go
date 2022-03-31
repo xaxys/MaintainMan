@@ -44,8 +44,8 @@ func init() {
 
 	AppConfig.SetDefault("admin.name", "admin")
 	AppConfig.SetDefault("admin.display_name", "maintainman default admin")
-	AppConfig.SetDefault("admin.password", "123456")
-	AppConfig.SetDefault("admin.role_name", "admin")
+	AppConfig.SetDefault("admin.password", "12345678")
+	AppConfig.SetDefault("admin.role_name", "super_admin")
 
 	ReadAndUpdateConfig(AppConfig, "app", AppConfigVersion)
 }
