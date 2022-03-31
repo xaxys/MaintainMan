@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"maintainman/util"
 	"sync"
 )
@@ -19,6 +20,11 @@ type Role struct {
 	Permissions *util.PermSet
 	Inheritance []*Role
 	sync.RWMutex
+}
+
+func (r *Role) String() string {
+	b, _ := json.Marshal(r)
+	return string(b)
 }
 
 type CreateRoleRequest struct {

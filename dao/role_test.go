@@ -130,15 +130,17 @@ func TestRoleConcurrency(t *testing.T) {
 	createFunc := func(prefix string, i int) error {
 		Role1 := fmt.Sprintf("%s role %d", prefix, i)
 		Perm1 := fmt.Sprintf("%s perm %d", prefix, random(i))
-		aul := *&model.CreateRoleRequest{
+		aul := model.CreateRoleRequest{
 			Name:        Role1,
 			DisplayName: Role1,
 			Permissions: []string{Perm1},
 		}
+		fmt.Printf("[INFO] [CREATE] create role %s\n", Role1)
 		err := CreateRole(&aul)
 		if err != nil {
 			return err
 		}
+		fmt.Printf("[INFO] [CREATE] role %s created\n", Role1)
 		return nil
 	}
 
@@ -158,12 +160,12 @@ func TestRoleConcurrency(t *testing.T) {
 		// test get defRole
 		role := GetRole(Role1)
 		if role == nil {
-			return fmt.Errorf("[%d] %s not found", index, Role1)
+			return fmt.Errorf("%s not found", Role1)
 		}
-		fmt.Printf("[%d] %s: %v\n", index, Role1, *role)
+		fmt.Printf("[INFO] [TEST] [%d] GetRole(%s): %v\n", index, Role1, *role)
 
 		// test update role
-		aul3 := *&model.UpdateRoleRequest{
+		aul3 := model.UpdateRoleRequest{
 			DisplayName:    fmt.Sprintf("%s (update by %d)", Role1, index),
 			AddPermissions: []string{Perm2},
 			DelPermissions: []string{Perm1},
@@ -172,48 +174,68 @@ func TestRoleConcurrency(t *testing.T) {
 		if err != nil {
 			return err
 		}
+		fmt.Printf("[INFO] [TEST] [%d] UpdateRole(%s): Add:%v Del:%v\n", index, Role1, aul3.AddPermissions, aul3.DelPermissions)
 
-		aul4 := *&model.UpdateRoleRequest{
-			DelInheritance: []string{Role1},
-		}
-		err = UpdateRole(Role2, &aul4)
-		if err != nil {
-			return err
+		if random(n)%2 == 0 {
+			aul4 := model.UpdateRoleRequest{
+				DelInheritance: []string{Role1},
+			}
+			err = UpdateRole(Role2, &aul4)
+			if err != nil {
+				return fmt.Errorf("update role %s, del %v failed: %v", Role2, aul3.DelPermissions, err)
+			}
+			fmt.Printf("[INFO] [TEST] [%d] UpdateRole(%s): Del:%v\n", index, Role2, aul3.DelPermissions)
+		} else {
+			aul4 := model.UpdateRoleRequest{
+				AddInheritance: []string{Role1},
+			}
+			err = UpdateRole(Role2, &aul4)
+			if err != nil {
+				return fmt.Errorf("update role %s, add %v failed: %v", Role2, aul3.AddPermissions, err)
+			}
+			fmt.Printf("[INFO] [TEST] [%d] UpdateRole(%s): Add:%v\n", index, Role2, aul3.AddPermissions)
 		}
 
 		// test get default role
 		defRole := GetDefaultRole()
 		if defRole == nil {
-			return fmt.Errorf("[%d] default role not found", index)
+			return fmt.Errorf("default role not found")
 		}
-		fmt.Printf("[%d] role default role: %v\n", index, *defRole)
+		fmt.Printf("[INFO] [TEST] [%d] GetDefaultRole: %v\n", index, *defRole)
 
 		// test set default role
 		err = SetDefaultRole(Role1)
 		if err != nil {
 			return err
 		}
+		fmt.Printf("[INFO] [TEST] [%d] SetDefaultRole to: %s\n", index, Role1)
+
 		role = GetDefaultRole()
 		if role == nil {
-			return fmt.Errorf("[%d] default role not set", index)
+			return fmt.Errorf("default role not set")
 		}
+		fmt.Printf("[INFO] [TEST] [%d] after set, GetDefaultRole: %v\n", index, *role)
+
 		err = SetDefaultRole(defRole.Name)
 		if err != nil {
 			return err
 		}
+		fmt.Printf("[INFO] [TEST] [%d] set back SetDefaultRole to: %s\n", index, defRole.Name)
 
 		// test get all roles
 		roles = GetAllRoles()
-		fmt.Printf("[%d] all %d roles: %v\n", index, len(roles), roles)
+		fmt.Printf("[INFO] [TEST] [%d] all %d roles: %v\n", index, len(roles), roles)
 		return nil
 	}
 
 	deleteFunc := func(prefix string, i int) error {
 		Role1 := fmt.Sprintf("%s role %d", prefix, i)
 		err := DeleteRole(Role1)
+		fmt.Printf("[INFO] [DELETE] delete role %s\n", Role1)
 		if err != nil {
 			return err
 		}
+		fmt.Printf("[INFO] [DELETE] role %s deleted\n", Role1)
 		return nil
 	}
 
@@ -221,7 +243,7 @@ func TestRoleConcurrency(t *testing.T) {
 	n := 20
 	wg := sync.WaitGroup{}
 
-	fmt.Println("[INFO] start create")
+	fmt.Println("[INFO] [CREATE] start create")
 	for i := 0; i < n; i++ {
 		index := i
 		go func() {
@@ -230,15 +252,15 @@ func TestRoleConcurrency(t *testing.T) {
 			err := createFunc(prefix, index)
 			if err != nil {
 				t.Error(err)
-				fmt.Printf("[ERR] [CREATE] [%d] %s", index, err)
+				fmt.Printf("[ERR] [CREATE] [%d]: %s\n", index, err)
 			}
 			wg.Done()
 		}()
 	}
 	wg.Wait()
-	fmt.Println("[INFO] all create done")
+	fmt.Println("[INFO] [CREATE] all create done")
 
-	fmt.Println("[INFO] start test")
+	fmt.Println("[INFO] [TEST] start test")
 	for i := 0; i < n*5; i++ {
 		index := i
 		go func() {
@@ -247,15 +269,15 @@ func TestRoleConcurrency(t *testing.T) {
 			err := testFunc(prefix, index, n)
 			if err != nil {
 				t.Error(err)
-				fmt.Printf("[ERR] [TEST] [%d] %s", index, err)
+				fmt.Printf("[ERR] [TEST] [%d]: %s\n", index, err)
 			}
 			wg.Done()
 		}()
 	}
 	wg.Wait()
-	fmt.Println("[INFO] all test done")
+	fmt.Println("[INFO] [TEST] all test done")
 
-	fmt.Println("[INFO] start delete")
+	fmt.Println("[INFO] [DELETE] start delete")
 	for i := 0; i < n; i++ {
 		index := i
 		go func() {
@@ -263,11 +285,11 @@ func TestRoleConcurrency(t *testing.T) {
 			fmt.Printf("index [%d]\n", index)
 			err := deleteFunc(prefix, index)
 			if err != nil {
-				fmt.Printf("[ERR] [DELETE] [%d] %s", index, err)
+				fmt.Printf("[ERR] [DELETE] [%d]: %s\n", index, err)
 			}
 			wg.Done()
 		}()
 	}
 	wg.Wait()
-	fmt.Println("[INFO] all delete done")
+	fmt.Println("[INFO] [DELETE] all delete done")
 }
