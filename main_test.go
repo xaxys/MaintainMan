@@ -917,7 +917,7 @@ func TestCreateRoleRouter(t *testing.T) {
 				"order.create",
 			},
 			Inheritance: []string{
-				"admin",
+				"repairer",
 			},
 		}).
 		Expect().Status(httptest.StatusCreated).
