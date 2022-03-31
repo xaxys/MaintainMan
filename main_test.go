@@ -86,7 +86,7 @@ func TestUpdateUserRouter(t *testing.T) {
 
 	for _, user := range users {
 		response = e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated)
-		fmt.Println(response.Body().Raw())
+		t.Log(response.Body().Raw())
 		u = response.JSON().NotNull().Object().Value("data")
 		id = uint(u.Object().Value("id").NotNull().Raw().(float64))
 
@@ -421,8 +421,454 @@ func TestGetOrderByIdRouter(t *testing.T) {
 	t.Log(responseBody)
 }
 
-func TestGetOrderByUserRouter(t *testing.T) {
+func TestUpdateOrderByUserRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
 
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.PUT("/v1/order/1/update").
+		WithJSON(model.UpdateOrderRequest{
+			Title:        "TestUpdateOrder " + randomNumToString,
+			Content:      testOrder.Content + "_updated",
+			Address:      testOrder.Address,
+			ContactName:  testOrder.ContactName,
+			ContactPhone: testOrder.ContactPhone,
+			AddTags:      testOrder.Tags,
+			DelTags:      testOrder.Tags,
+		}).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.PUT("/v1/order/"+cast.ToString(id)+"/update").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.UpdateOrderRequest{
+			Title:        "TestUpdateOrder " + randomNumToString,
+			Content:      testOrder.Content + "_updated",
+			Address:      testOrder.Address,
+			ContactName:  testOrder.ContactName,
+			ContactPhone: testOrder.ContactPhone,
+			AddTags:      testOrder.Tags,
+			DelTags:      testOrder.Tags,
+		}).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestForceUpdateOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.PUT("/v1/order/1/update/force").
+		WithJSON(model.UpdateOrderRequest{
+			Title:        "TestUpdateOrder " + randomNumToString,
+			Content:      testOrder.Content + "_updated",
+			Address:      testOrder.Address,
+			ContactName:  testOrder.ContactName,
+			ContactPhone: testOrder.ContactPhone,
+			AddTags:      testOrder.Tags,
+			DelTags:      testOrder.Tags,
+		}).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.PUT("/v1/order/"+cast.ToString(id)+"/update/force").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.UpdateOrderRequest{
+			Title:        "TestUpdateOrder " + randomNumToString,
+			Content:      testOrder.Content + "_updated",
+			Address:      testOrder.Address,
+			ContactName:  testOrder.ContactName,
+			ContactPhone: testOrder.ContactPhone,
+			AddTags:      testOrder.Tags,
+			DelTags:      testOrder.Tags,
+		}).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+//TODO:需要先测试item路由
+func TestConsumeItemRouter(t *testing.T) {
+
+}
+
+func TestReleaseOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	testOrder := initOrder("TestReleaseOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/order/" + cast.ToString(id) + "/release").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestAssignOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	repairerCreated := initUser("repairerCreated "+randomNumToString, "12345678", "repairer")
+	response := e.POST("/v1/register").WithJSON(repairerCreated).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+
+	u := response.JSON().NotNull().Object().Value("data")
+	repairerId := uint(u.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.PUT("/v1/user/"+cast.ToString(repairerId)).WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.UpdateUserRequest{
+		Name:        repairerCreated.Name + "_update",
+		Password:    repairerCreated.Password + "_update",
+		DisplayName: repairerCreated.DisplayName + "_update",
+		Phone:       "",
+		Email:       "",
+		RoleName:    "repairer",
+	}).Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	testOrder := initOrder("TestAssignOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	response = e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/assign").
+		WithQuery("repairer", repairerId).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/assign").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithQuery("repairer", repairerId).
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/assign").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithQuery("repairer", repairerId).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestSelfAssignOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	testOrder := initOrder("TestSelfAssignOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/order/" + cast.ToString(id) + "/selfassign").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestCompleteOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	testOrder := initOrder("TestCompleteOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/order/" + cast.ToString(id) + "/complete").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/complete").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestCancelOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	testOrder := initOrder("TestCancelOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/order/" + cast.ToString(id) + "/cancel").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/cancel").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestRejectOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	testOrder := initOrder("TestRejectOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/order/" + cast.ToString(id) + "/reject").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/reject").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestReportOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	testOrder := initOrder("TestReportOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/order/" + cast.ToString(id) + "/report").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/report").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestHoldOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	testOrder := initOrder("TestHoldOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/order/" + cast.ToString(id) + "/hold").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/report").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/hold").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestAppraiseOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	testOrder := initOrder("TestAppriseOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/order/"+cast.ToString(id)+"/appraise").
+		WithQuery("appraisal", 5).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/complete").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/appraise").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithQuery("appraisal", 5).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
 }
 
 // Test Utils

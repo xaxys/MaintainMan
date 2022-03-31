@@ -61,6 +61,8 @@ func CreateOrder(aul *model.CreateOrderRequest, operator uint) (*model.Order, er
 	copier.Copy(order, aul)
 	order.CreatedBy = operator
 
+	//XXX: 此处增加将auth中的用户id赋值给user_id的逻辑
+	order.UserID = operator
 	tags, errs := GetTagsByIDs(aul.Tags)
 	if len(errs) > 0 {
 		logger.Logger.Debugf("CreateOrderErr: %v\n", errs)
