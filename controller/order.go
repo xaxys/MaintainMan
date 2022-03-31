@@ -194,7 +194,7 @@ func CreateOrder(ctx iris.Context) {
 // @Router /v1/order/{id} [put]
 func UpdateOrder(ctx iris.Context) {
 	aul := &model.UpdateOrderRequest{}
-	if err := ctx.ReadJSON(&aul); err != nil {
+	if err := ctx.ReadJSON(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
@@ -222,7 +222,7 @@ func UpdateOrder(ctx iris.Context) {
 // @Router /v1/order/{id}/force [put]
 func ForceUpdateOrder(ctx iris.Context) {
 	aul := &model.UpdateOrderRequest{}
-	if err := ctx.ReadJSON(&aul); err != nil {
+	if err := ctx.ReadJSON(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
