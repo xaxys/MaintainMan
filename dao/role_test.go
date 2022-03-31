@@ -209,7 +209,7 @@ func TestRoleConcurrency(t *testing.T) {
 	}
 
 	deleteFunc := func(prefix string, i int) error {
-		Role1 := fmt.Sprint(prefix, "role", i)
+		Role1 := fmt.Sprintf("%s role %d", prefix, i)
 		err := DeleteRole(Role1)
 		if err != nil {
 			return err
