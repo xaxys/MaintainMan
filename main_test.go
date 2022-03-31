@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cast"
 )
 
-//Test User Router
+// Test User Router
 func TestRegisterAndLoginRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
@@ -188,7 +188,7 @@ func TestGetUserByIdRouter(t *testing.T) {
 	}
 }
 
-//Test Tag Router
+// Test Tag Router
 func TestTagCreateRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
@@ -868,6 +868,76 @@ func TestAppraiseOrderRouter(t *testing.T) {
 		WithHeader("Authorization", "Bearer "+superAdminToken).
 		WithQuery("appraisal", 5).
 		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+// Test Role Router
+func TestGetRoleRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	responseBody := e.GET("/v1/role").
+		Expect().Status(httptest.StatusForbidden).
+		Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/role").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusOK).
+		Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestCreateRoleRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	superAdminToken := getSuperAdminToken()
+	responseBody := e.POST("/v1/role").
+		WithJSON(model.CreateRoleRequest{
+			Name:        "Test Role " + randomNumToString,
+			DisplayName: "test_role",
+			Permissions: []string{
+				"order.create",
+			},
+			Inheritance: []string{
+				"admin",
+			},
+		}).
+		Expect().Status(httptest.StatusForbidden).
+		Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/role").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateRoleRequest{
+			Name:        "Test Role " + randomNumToString,
+			DisplayName: "test_role",
+			Permissions: []string{
+				"order.create",
+			},
+			Inheritance: []string{
+				"admin",
+			},
+		}).
+		Expect().Status(httptest.StatusCreated).
+		Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestGetAllRoles(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	responseBody := e.GET("/v1/role/all").
+		Expect().Status(httptest.StatusForbidden).
+		Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/role/all").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusOK).
+		Body().Raw()
 	t.Log(responseBody)
 }
 
