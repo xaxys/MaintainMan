@@ -9,8 +9,12 @@ import (
 )
 
 func GetItemByID(id uint) (*model.Item, error) {
+	return TxGetItemByID(database.DB, id)
+}
+
+func TxGetItemByID(tx *gorm.DB, id uint) (*model.Item, error) {
 	item := &model.Item{}
-	if err := database.DB.First(item, id).Error; err != nil {
+	if err := tx.First(item, id).Error; err != nil {
 		logger.Logger.Debugf("GetItemByIDErr: %v\n", err)
 		return nil, err
 	}
@@ -18,8 +22,12 @@ func GetItemByID(id uint) (*model.Item, error) {
 }
 
 func GetItemByName(name string) (*model.Item, error) {
+	return TxGetItemByName(database.DB, name)
+}
+
+func TxGetItemByName(tx *gorm.DB, name string) (*model.Item, error) {
 	item := &model.Item{Name: name}
-	if err := database.DB.Where(item).First(item).Error; err != nil {
+	if err := tx.Where(item).First(item).Error; err != nil {
 		logger.Logger.Debugf("GetItemByNameErr: %v\n", err)
 		return nil, err
 	}
@@ -27,7 +35,11 @@ func GetItemByName(name string) (*model.Item, error) {
 }
 
 func GetItemsByFuzzyName(name string) (items []*model.Item, err error) {
-	if err = Filter("", 0, 0).Where("name like (?)", name).Find(&items).Error; err != nil {
+	return TxGetItemsByFuzzyName(database.DB, name)
+}
+
+func TxGetItemsByFuzzyName(tx *gorm.DB, name string) (items []*model.Item, err error) {
+	if err = TxFilter(tx, "", 0, 0).Where("name like (?)", name).Find(&items).Error; err != nil {
 		logger.Logger.Debugf("GetItemByNameErr: %v\n", err)
 		return nil, err
 	}
@@ -35,7 +47,11 @@ func GetItemsByFuzzyName(name string) (items []*model.Item, err error) {
 }
 
 func GetAllItems(param *model.PageParam) (items []*model.Item, err error) {
-	if err = PageFilter(param).Find(&items).Error; err != nil {
+	return TxGetAllItems(database.DB, param)
+}
+
+func TxGetAllItems(tx *gorm.DB, param *model.PageParam) (items []*model.Item, err error) {
+	if err = TxPageFilter(tx, param).Find(&items).Error; err != nil {
 		logger.Logger.Debugf("GetAllItemsErr: %v\n", err)
 		return
 	}
@@ -43,9 +59,13 @@ func GetAllItems(param *model.PageParam) (items []*model.Item, err error) {
 }
 
 func CreateItem(aul *model.CreateItemRequest, operator uint) (*model.Item, error) {
+	return TxCreateItem(database.DB, aul, operator)
+}
+
+func TxCreateItem(tx *gorm.DB, aul *model.CreateItemRequest, operator uint) (*model.Item, error) {
 	item := JsonToItem(aul)
 	item.CreatedBy = operator
-	if err := database.DB.Create(item).Error; err != nil {
+	if err := tx.Create(item).Error; err != nil {
 		logger.Logger.Debugf("CreateItemErr: %v\n", err)
 		return nil, err
 	}
@@ -53,63 +73,73 @@ func CreateItem(aul *model.CreateItemRequest, operator uint) (*model.Item, error
 }
 
 func DeleteItem(id uint) error {
-	if err := database.DB.Delete(&model.Item{}, id).Error; err != nil {
+	return TxDeleteItem(database.DB, id)
+}
+
+func TxDeleteItem(tx *gorm.DB, id uint) error {
+	if err := tx.Delete(&model.Item{}, id).Error; err != nil {
 		logger.Logger.Debugf("DeleteItemErr: %v\n", err)
 		return err
 	}
 	return nil
 }
 
-func AddItem(itemlog *model.ItemLog, operator uint) (*model.ItemLog, error) {
-	itemlog.CreatedBy = operator
-	if err := database.DB.Transaction(func(tx *gorm.DB) error {
-		item, err := GetItemByID(itemlog.ItemID)
-		if err != nil {
-			return err
+func AddItem(itemlog *model.ItemLog, operator uint) (item *model.Item, err error) {
+	database.DB.Transaction(func(tx *gorm.DB) error {
+		if item, err = TxAddItem(tx, itemlog, operator); err != nil {
+			logger.Logger.Debugf("AddItemErr: %v\n", err)
 		}
-		item.Count += itemlog.ChangeNum
-		item.Price += itemlog.ChangePrice
-		item.UpdatedBy = operator
-		if err := tx.Create(itemlog).Error; err != nil {
-			return err
-		}
-		if err := tx.Save(item).Error; err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		logger.Logger.Debugf("AddItemErr: %v\n", err)
-		return nil, err
-	}
-	return itemlog, nil
+		return err
+	})
+	return
 }
 
-func ConsumeItem(itemlog *model.ItemLog, operator uint) (*model.ItemLog, error) {
+func TxAddItem(tx *gorm.DB, itemlog *model.ItemLog, operator uint) (item *model.Item, err error) {
 	itemlog.CreatedBy = operator
-	if err := database.DB.Transaction(func(tx *gorm.DB) error {
-		item, err := GetItemByID(itemlog.ItemID)
-		if err != nil {
-			return err
-		}
-		// TODO: 考虑到实际情况，是否应该允许消耗的数量大于库存数量?
-		// if item.Count < itemlog.ChangeNum {
-		// 	return fmt.Errorf("item count is not enough")
-		// }
-		item.Count -= itemlog.ChangeNum
-		item.Income += -itemlog.ChangePrice
-		item.UpdatedBy = operator
-		if err := tx.Create(itemlog).Error; err != nil {
-			return err
-		}
-		if err := tx.Save(item).Error; err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		logger.Logger.Debugf("ConsumeItemErr: %v\n", err)
-		return nil, err
+	if item, err = GetItemByID(itemlog.ItemID); err != nil {
+		return
 	}
-	return itemlog, nil
+	item.Count += itemlog.ChangeNum
+	item.Price += itemlog.ChangePrice
+	item.UpdatedBy = operator
+	if err = tx.Create(itemlog).Error; err != nil {
+		return
+	}
+	if err = tx.Save(item).Error; err != nil {
+		return
+	}
+	return
+}
+
+func ConsumeItem(itemlog *model.ItemLog, operator uint) (item *model.Item, err error) {
+	database.DB.Transaction(func(tx *gorm.DB) error {
+		if item, err = TxConsumeItem(tx, itemlog, operator); err != nil {
+			logger.Logger.Debugf("ConsumeItemErr: %v\n", err)
+		}
+		return err
+	})
+	return
+}
+
+func TxConsumeItem(tx *gorm.DB, itemlog *model.ItemLog, operator uint) (item *model.Item, err error) {
+	itemlog.CreatedBy = operator
+	if item, err = GetItemByID(itemlog.ItemID); err != nil {
+		return
+	}
+	// TODO: 考虑到实际情况，是否应该允许消耗的数量大于库存数量?
+	// if item.Count < itemlog.ChangeNum {
+	// 	return fmt.Errorf("item count is not enough")
+	// }
+	item.Count -= itemlog.ChangeNum
+	item.Income += -itemlog.ChangePrice
+	item.UpdatedBy = operator
+	if err = tx.Create(itemlog).Error; err != nil {
+		return
+	}
+	if err = tx.Save(item).Error; err != nil {
+		return
+	}
+	return
 }
 
 func JsonToItem(item *model.CreateItemRequest) *model.Item {

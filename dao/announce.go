@@ -9,26 +9,38 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetAnnounceByID(id uint) (*model.Announce, error) {
+func GetAnnounceByID(id uint) (announce *model.Announce, err error) {
+	return TxGetAnnounceByID(database.DB, id)
+}
+
+func TxGetAnnounceByID(tx *gorm.DB, id uint) (*model.Announce, error) {
 	announce := &model.Announce{}
-	if err := database.DB.First(announce, id).Error; err != nil {
+	if err := tx.First(announce, id).Error; err != nil {
 		logger.Logger.Debugf("GetAnnounceByIDErr: %v\n", err)
 		return nil, err
 	}
 	return announce, nil
 }
 
-func GetAnnounceByTitle(title string) (*model.Announce, error) {
+func GetAnnounceByTitle(title string) (announce *model.Announce, err error) {
+	return TxGetAnnounceByTitle(database.DB, title)
+}
+
+func TxGetAnnounceByTitle(tx *gorm.DB, title string) (*model.Announce, error) {
 	announce := &model.Announce{Title: title}
-	if err := database.DB.Where(announce).First(announce).Error; err != nil {
-		logger.Logger.Debugf("GetAnnounceByNameErr: %v\n", err)
+	if err := tx.Where(announce).First(announce).Error; err != nil {
+		logger.Logger.Debugf("GetAnnounceByTitleErr: %v\n", err)
 		return nil, err
 	}
 	return announce, nil
 }
 
 func GetAllAnnouncesWithParam(aul *model.AllAnnounceRequest) (announces []*model.Announce, err error) {
-	db := Filter(aul.OrderBy, aul.Offset, aul.Limit)
+	return TxGetAllAnnounceWithParam(database.DB, aul)
+}
+
+func TxGetAllAnnounceWithParam(tx *gorm.DB, aul *model.AllAnnounceRequest) (announces []*model.Announce, err error) {
+	db := TxFilter(tx, aul.OrderBy, aul.Offset, aul.Limit)
 	if aul.Title != "" {
 		db = db.Where("title like ?", aul.Title)
 	}
@@ -55,6 +67,10 @@ func GetAllAnnouncesWithParam(aul *model.AllAnnounceRequest) (announces []*model
 }
 
 func CreateAnnounce(json *model.ModifyAnnounceRequest, operator uint) (*model.Announce, error) {
+	return TxCreateAnnounce(database.DB, json, operator)
+}
+
+func TxCreateAnnounce(tx *gorm.DB, json *model.ModifyAnnounceRequest, operator uint) (*model.Announce, error) {
 	announce := JsonToAnnounce(json)
 	if announce.StartTime == nil {
 		now := time.Now()
@@ -66,29 +82,35 @@ func CreateAnnounce(json *model.ModifyAnnounceRequest, operator uint) (*model.An
 	}
 	announce.CreatedBy = operator
 
-	if err := database.DB.Create(announce).Error; err != nil {
+	if err := tx.Create(announce).Error; err != nil {
 		logger.Logger.Debugf("CreateAnnounceErr: %v\n", err)
 		return nil, err
 	}
-
 	return announce, nil
 }
 
 func UpdateAnnounce(id uint, json *model.ModifyAnnounceRequest, operator uint) (*model.Announce, error) {
+	return TxUpdateAnnounce(database.DB, id, json, operator)
+}
+
+func TxUpdateAnnounce(tx *gorm.DB, id uint, json *model.ModifyAnnounceRequest, operator uint) (*model.Announce, error) {
 	announce := JsonToAnnounce(json)
 	announce.ID = id
 	announce.UpdatedBy = operator
 
-	if err := database.DB.Model(announce).Updates(announce).Error; err != nil {
+	if err := tx.Model(announce).Updates(announce).Error; err != nil {
 		logger.Logger.Debugf("UpdateAnnounceErr: %v\n", err)
 		return nil, err
 	}
-
 	return announce, nil
 }
 
 func DeleteAnnounce(id uint) error {
-	if err := database.DB.Delete(&model.Announce{}, id).Error; err != nil {
+	return TxDeleteAnnounce(database.DB, id)
+}
+
+func TxDeleteAnnounce(tx *gorm.DB, id uint) error {
+	if err := tx.Delete(&model.Announce{}, id).Error; err != nil {
 		logger.Logger.Debugf("DeleteAnnounceErr: %v\n", err)
 		return err
 	}
@@ -96,9 +118,13 @@ func DeleteAnnounce(id uint) error {
 }
 
 func HitAnnounce(id uint) error {
+	return TxHitAnnounce(database.DB, id)
+}
+
+func TxHitAnnounce(tx *gorm.DB, id uint) error {
 	announce := &model.Announce{}
 	announce.ID = id
-	if err := database.DB.Model(announce).Update("hits", gorm.Expr("hits + ?", 1)).Error; err != nil {
+	if err := tx.Model(announce).Update("hits", gorm.Expr("hits + ?", 1)).Error; err != nil {
 		logger.Logger.Debugf("HitAnnounceErr: %v\n", err)
 		return err
 	}

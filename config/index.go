@@ -27,6 +27,7 @@ func init() {
 	AppConfig.SetDefault("app.hit_expire.announce", "12h")
 	AppConfig.SetDefault("app.appraise.timeout", "72h")
 	AppConfig.SetDefault("app.appraise.purge", "10m")
+	AppConfig.SetDefault("app.appraise.default", 5)
 	AppConfig.SetDefault("wechat.appid", "微信小程序的appid")
 	AppConfig.SetDefault("wechat.secret", "微信小程序的secret")
 	AppConfig.SetDefault("token.key", "xaxys_2022_all_rights_reserved")

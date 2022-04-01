@@ -5,102 +5,121 @@ import (
 	"maintainman/database"
 	"maintainman/logger"
 	"maintainman/model"
+	"maintainman/util"
 	"time"
 
 	"github.com/jameskeane/bcrypt"
 	"github.com/jinzhu/copier"
+	"gorm.io/gorm"
 )
 
 func GetUserByID(id uint) (*model.User, error) {
-	user := &model.User{}
+	return TxGetUserByID(database.DB, id)
+}
 
-	if err := database.DB.First(user, id).Error; err != nil {
+func TxGetUserByID(tx *gorm.DB, id uint) (*model.User, error) {
+	user := &model.User{}
+	if err := tx.First(user, id).Error; err != nil {
 		logger.Logger.Debugf("GetUserByIDErr: %v\n", err)
 		return nil, err
 	}
-
 	return user, nil
 }
 
 func GetUserByName(name string) (*model.User, error) {
-	user := &model.User{Name: name}
+	return TxGetUserByName(database.DB, name)
+}
 
-	if err := database.DB.Where(user).First(user).Error; err != nil {
+func TxGetUserByName(tx *gorm.DB, name string) (*model.User, error) {
+	user := &model.User{Name: name}
+	if err := tx.Where(user).First(user).Error; err != nil {
 		logger.Logger.Debugf("GetUserByNameErr: %v\n", err)
 		return nil, err
 	}
-
 	return user, nil
 }
 
 func GetUserByEmail(email string) (*model.User, error) {
-	user := &model.User{Email: email}
+	return TxGetUserByEmail(database.DB, email)
+}
 
-	if err := database.DB.Where(user).First(user).Error; err != nil {
+func TxGetUserByEmail(tx *gorm.DB, email string) (*model.User, error) {
+	user := &model.User{Email: email}
+	if err := tx.Where(user).First(user).Error; err != nil {
 		logger.Logger.Debugf("GetUserByEmailErr: %v\n", err)
 		return nil, err
 	}
-
 	return user, nil
 }
 
 func GetUserByPhone(phone string) (*model.User, error) {
-	user := &model.User{Phone: phone}
+	return TxGetUserByPhone(database.DB, phone)
+}
 
-	if err := database.DB.Where(user).First(user).Error; err != nil {
+func TxGetUserByPhone(tx *gorm.DB, phone string) (*model.User, error) {
+	user := &model.User{Phone: phone}
+	if err := tx.Where(user).First(user).Error; err != nil {
 		logger.Logger.Debugf("GetUserByPhoneErr: %v\n", err)
 		return nil, err
 	}
-
 	return user, nil
 }
 
 func GetUserByOpenID(openid string) (*model.User, error) {
-	user := &model.User{OpenID: openid}
+	return TxGetUserByOpenID(database.DB, openid)
+}
 
-	if err := database.DB.Where(user).First(user).Error; err != nil {
+func TxGetUserByOpenID(tx *gorm.DB, openid string) (*model.User, error) {
+	user := &model.User{OpenID: openid}
+	if err := tx.Where(user).First(user).Error; err != nil {
 		logger.Logger.Debugf("GetUserByOpenIDErr: %v\n", err)
 		return nil, err
 	}
-
 	return user, nil
 }
 
-func GetAllUsersWithParam(aul *model.AllUserRequest) (users []*model.User, err error) {
+func GetAllUsersWithParam(aul *model.AllUserRequest) ([]*model.User, error) {
+	return TxGetAllUsersWithParam(database.DB, aul)
+}
+
+func TxGetAllUsersWithParam(tx *gorm.DB, aul *model.AllUserRequest) (users []*model.User, err error) {
 	user := &model.User{
 		Name:        aul.Name,
 		DisplayName: aul.DisplayName,
 	}
-	if err = Filter(aul.OrderBy, aul.Offset, aul.Limit).Where(user).Find(&users).Error; err != nil {
+	if err = TxPageFilter(tx, &aul.PageParam).Where(user).Find(&users).Error; err != nil {
 		logger.Logger.Debugf("GetAllUserErr: %v\n", err)
 	}
 	return
 }
 
 func CreateUser(json *model.CreateUserRequest, operator uint) (*model.User, error) {
+	return TxCreateUser(database.DB, json, operator)
+}
+
+func TxCreateUser(tx *gorm.DB, json *model.CreateUserRequest, operator uint) (*model.User, error) {
 	salt, _ := bcrypt.Salt(10)
 	hash, _ := bcrypt.Hash(json.Password, salt)
 	json.Password = string(hash)
-	if json.DisplayName == "" {
-		json.DisplayName = json.Name
-	}
-	if json.RoleName == "" {
-		json.RoleName = GetDefaultRoleName()
-	}
+	json.DisplayName = util.NotEmpty(json.DisplayName, json.Name)
+	json.RoleName = util.NotEmpty(json.RoleName, GetDefaultRoleName())
 
 	user := &model.User{}
 	copier.Copy(user, json)
 	user.CreatedBy = operator
 
-	if err := database.DB.Create(user).Error; err != nil {
+	if err := tx.Create(user).Error; err != nil {
 		logger.Logger.Debugf("CreateUserErr: %v\n", err)
 		return nil, err
 	}
-
 	return user, nil
 }
 
 func UpdateUser(id uint, json *model.UpdateUserRequest, operator uint) (*model.User, error) {
+	return TxUpdateUser(database.DB, id, json, operator)
+}
+
+func TxUpdateUser(tx *gorm.DB, id uint, json *model.UpdateUserRequest, operator uint) (*model.User, error) {
 	if json.Password != "" {
 		salt, _ := bcrypt.Salt(10)
 		hash, _ := bcrypt.Hash(json.Password, salt)
@@ -111,18 +130,21 @@ func UpdateUser(id uint, json *model.UpdateUserRequest, operator uint) (*model.U
 	copier.Copy(user, json)
 	user.ID = id
 	user.UpdatedBy = operator
-	if err := database.DB.Where(user, "id").Updates(user).Error; err != nil {
+	if err := tx.Model(user).Where(user).Updates(user).Error; err != nil {
 		logger.Logger.Debugf("UpdateUserErr: %v\n", err)
 		return nil, err
 	}
-
 	return user, nil
 }
 
 func AttachOpenIDToUser(id uint, openid string) error {
+	return TxAttachOpenIDToUser(database.DB, id, openid)
+}
+
+func TxAttachOpenIDToUser(tx *gorm.DB, id uint, openid string) error {
 	user := &model.User{}
 	user.ID = id
-	if err := database.DB.Model(user).Where(user).Update("open_id", openid).Error; err != nil {
+	if err := tx.Model(user).Where(user).Update("open_id", openid).Error; err != nil {
 		logger.Logger.Debugf("AttachOpenIDToUserErr: %v\n", err)
 		return err
 	}
@@ -130,11 +152,14 @@ func AttachOpenIDToUser(id uint, openid string) error {
 }
 
 func DeleteUser(id uint) error {
-	if err := database.DB.Delete(&model.User{}, id).Error; err != nil {
+	return TxDeleteUser(database.DB, id)
+}
+
+func TxDeleteUser(tx *gorm.DB, id uint) (err error) {
+	if err = tx.Delete(&model.User{}, id).Error; err != nil {
 		logger.Logger.Debugf("DeleteUserByIdErr: %v\n", err)
-		return err
 	}
-	return nil
+	return
 }
 
 func CheckLogin(user *model.User, password string) error {
@@ -145,12 +170,17 @@ func CheckLogin(user *model.User, password string) error {
 }
 
 func ForceLogin(id uint, ip string) error {
-	u := &model.User{
+	return TxForceLogin(database.DB, id, ip)
+}
+
+func TxForceLogin(tx *gorm.DB, id uint, ip string) error {
+	user := &model.User{
 		LoginIP:   ip,
 		LoginTime: time.Now(),
 	}
+	u := &model.User{}
 	u.ID = id
-	if err := database.DB.Model(u).Updates(u).Error; err != nil {
+	if err := tx.Model(u).Where(u).Updates(user).Error; err != nil {
 		logger.Logger.Debugf("ForceLoginErr: %v\n", err)
 		return err
 	}

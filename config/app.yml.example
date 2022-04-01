@@ -11,6 +11,7 @@ app:
   appraise:
     timeout: "72h"
     purge: "10m"
+    default: 5
 
 wechat:
   appid: ""

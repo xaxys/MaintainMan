@@ -2,20 +2,19 @@ package dao
 
 import (
 	"maintainman/config"
-	"maintainman/database"
 	"maintainman/model"
 
 	"gorm.io/gorm"
 )
 
-func PageFilter(param *model.PageParam) *gorm.DB {
-	return Filter(param.OrderBy, param.Offset, param.Limit)
+func TxPageFilter(tx *gorm.DB, param *model.PageParam) (db *gorm.DB) {
+	return TxFilter(tx, param.OrderBy, param.Offset, param.Limit)
 }
 
-func Filter(orderBy string, uoffset, ulimit uint) (db *gorm.DB) {
+func TxFilter(tx *gorm.DB, orderBy string, uoffset, ulimit uint) (db *gorm.DB) {
 	offset := int(uoffset)
 	limit := int(ulimit)
-	db = database.DB
+	db = tx
 	if len(orderBy) > 0 {
 		db = db.Order(orderBy)
 	}

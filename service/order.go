@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"maintainman/config"
 	"maintainman/dao"
 	"maintainman/database"
 	"maintainman/model"
@@ -68,9 +69,9 @@ func CreateOrder(aul *model.CreateOrderRequest, auth *model.AuthInfo) *model.Api
 		return model.ErrorValidation(err)
 	}
 	role := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string { return v.Role }, "")
-	tags, errs := dao.GetTagsByIDs(aul.Tags)
-	if len(errs) > 0 {
-		return model.ErrorQueryDatabase(errs...)
+	tags, err := dao.GetTagsByIDs(aul.Tags)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
 	}
 	for _, t := range tags {
 		if err := dao.CheckPermission(role, fmt.Sprintf("tag.view.%d", t.Level)); err != nil {
@@ -93,18 +94,18 @@ func UpdateOrder(id uint, aul *model.UpdateOrderRequest, auth *model.AuthInfo) *
 		return model.ErrorUpdateDatabase(fmt.Errorf("操作人不是订单创建者"))
 	}
 	role := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string { return v.Role }, "")
-	addTags, errs := dao.GetTagsByIDs(aul.AddTags)
-	if len(errs) > 0 {
-		return model.ErrorQueryDatabase(errs...)
+	addTags, err := dao.GetTagsByIDs(aul.AddTags)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
 	}
 	for _, t := range addTags {
 		if err := dao.CheckPermission(role, fmt.Sprintf("tag.view.%d", t.Level)); err != nil {
 			return model.ErrorNoPermissions(err)
 		}
 	}
-	delTags, errs := dao.GetTagsByIDs(aul.DelTags)
-	if len(errs) > 0 {
-		return model.ErrorQueryDatabase(errs...)
+	delTags, err := dao.GetTagsByIDs(aul.DelTags)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
 	}
 	for _, t := range delTags {
 		if err := dao.CheckPermission(role, fmt.Sprintf("tag.view.%d", t.Level)); err != nil {
@@ -243,11 +244,7 @@ func AppraiseOrder(id, appraisal uint, auth *model.AuthInfo) *model.ApiJson {
 	if order.UserID != auth.User {
 		return model.ErrorUpdateDatabase(fmt.Errorf("您不是订单的创建者，不能评价"))
 	}
-	status := dao.StatusAppraised(auth.User)
-	if err := dao.ChangeOrderStatus(id, status); err != nil {
-		return model.ErrorUpdateDatabase(err)
-	}
-	if err := dao.AppraiseOrder(id, appraisal); err != nil {
+	if err := dao.AppraiseOrder(id, appraisal, auth.User); err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
 	return model.SuccessUpdate(nil, "评价成功")
@@ -294,12 +291,13 @@ func HoldOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
 
 func AutoAppraiseOrder() {
 	database.DB.Transaction(func(tx *gorm.DB) error {
-		orders, err := dao.GetAppraiseTimeoutOrder(tx)
+		orders, err := dao.TxGetAppraiseTimeoutOrder(tx)
 		if err != nil {
 			return err
 		}
 		for _, order := range orders {
-			_ = dao.AppraiseOrder(order, 5)
+			def := util.ToUint(config.AppConfig.GetInt("app.appraise.default"))
+			_ = dao.AppraiseOrder(order, def, 0)
 		}
 		return nil
 	})

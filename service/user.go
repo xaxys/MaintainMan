@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"maintainman/config"
 	"maintainman/dao"
+	"maintainman/database"
 	"maintainman/model"
 	"maintainman/util"
 
@@ -166,14 +167,22 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 				},
 			}
 			operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
-			user, err = dao.CreateUser(aul, operator)
-			if err != nil {
-				return model.ErrorInsertDatabase(err)
+			var response *model.ApiJson
+			if database.DB.Transaction(func(tx *gorm.DB) error {
+				user, err = dao.CreateUser(aul, operator)
+				if err != nil {
+					response = model.ErrorInsertDatabase(err)
+					return err
+				}
+				if err := dao.AttachOpenIDToUser(user.ID, wxres.OpenID); err != nil {
+					response = model.ErrorUpdateDatabase(err)
+					return err
+				}
+				id = user.ID
+				return nil
+			}); err != nil {
+				return response
 			}
-			if err := dao.AttachOpenIDToUser(user.ID, wxres.OpenID); err != nil {
-				return model.ErrorUpdateDatabase(err)
-			}
-			id = user.ID
 		}
 	} else {
 		id = user.ID

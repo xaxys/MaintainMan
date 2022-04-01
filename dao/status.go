@@ -2,6 +2,7 @@ package dao
 
 import (
 	"maintainman/config"
+	"maintainman/database"
 	"maintainman/logger"
 	"maintainman/model"
 	"maintainman/util"
@@ -11,25 +12,24 @@ import (
 )
 
 func GetOrderByRepairer(id uint, json *model.RepairerOrderRequest) (orders []*model.Order, err error) {
+	return TxGetOrderByRepairer(database.DB, id, json)
+}
+
+func TxGetOrderByRepairer(tx *gorm.DB, id uint, json *model.RepairerOrderRequest) (orders []*model.Order, err error) {
 	status := &model.Status{
 		RepairerID: id,
 		Current:    json.Current,
 	}
 	statuses := []*model.Status{}
-
-	if err = PageFilter(&json.PageParam).Preload("Order").Where(status).Find(&statuses).Error; err != nil {
+	if err = TxPageFilter(tx, &json.PageParam).Preload("Order").Where(status).Find(&statuses).Error; err != nil {
 		logger.Logger.Debugf("GetOrderByRepairerErr: %v\n", err)
 		return
 	}
-
-	for _, status := range statuses {
-		orders = append(orders, status.Order)
-	}
-
+	orders = util.TransSlice(statuses, func(status *model.Status) *model.Order { return status.Order })
 	return
 }
 
-func GetAppraiseTimeoutOrder(tx *gorm.DB) (ids []uint, err error) {
+func TxGetAppraiseTimeoutOrder(tx *gorm.DB) (ids []uint, err error) {
 	status := &model.Status{
 		Status:  model.StatusCompleted,
 		Current: true,

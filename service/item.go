@@ -80,7 +80,7 @@ func AddItem(aul *model.AddItemRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 	}
-	return model.SuccessUpdate(ItemLogToJson(log), "添加成功")
+	return model.SuccessUpdate(ItemToJson(log), "添加成功")
 }
 
 func ConsumeItem(aul *model.ConsumeItemRequest, auth *model.AuthInfo) *model.ApiJson {
@@ -102,7 +102,7 @@ func ConsumeItem(aul *model.ConsumeItemRequest, auth *model.AuthInfo) *model.Api
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 	}
-	return model.SuccessUpdate(ItemLogToJson(log), "添加成功")
+	return model.SuccessUpdate(ItemToJson(log), "添加成功")
 }
 
 func ItemToJson(item *model.Item) *model.ItemJson {
