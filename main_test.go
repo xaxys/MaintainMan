@@ -403,7 +403,7 @@ func TestGetRepairerOrdersByIDRouter(t *testing.T) {
 	t.Log(responseBody)
 }
 
-func TestGetOrderByIdRouter(t *testing.T) {
+func TestGetOrderByIDRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
@@ -511,9 +511,75 @@ func TestForceUpdateOrderRouter(t *testing.T) {
 	t.Log(responseBody)
 }
 
-//TODO:需要先测试item路由
 func TestConsumeItemRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
 
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	orderID := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	itemTest := model.CreateItemRequest{
+		Name:        "test_item" + randomNumToString,
+		Discription: "test_item",
+	}
+
+	response = e.POST("/v1/item").
+		WithJSON(itemTest).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusCreated)
+	t.Log(response.Body().Raw())
+
+	item := response.JSON().NotNull().Object().Value("data")
+	itemID := uint(item.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/item/"+cast.ToString(itemID)).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.AddItemRequest{
+			ItemID: itemID,
+			Num:    100,
+			Price:  float64(rand.Intn(100)),
+		}).Expect().Status(http.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/1/consume").
+		WithJSON(model.ConsumeItemRequest{
+			ItemID:  itemID,
+			OrderID: orderID,
+			Num:     uint(rand.Intn(99)),
+			Price:   float64(rand.Intn(100)),
+		}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(orderID)+"/release").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(orderID)+"/assign").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithQuery("repairer", 1).
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(orderID)+"/consume").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.ConsumeItemRequest{
+			ItemID:  itemID,
+			OrderID: orderID,
+			Num:     uint(rand.Intn(99)),
+			Price:   float64(rand.Intn(100)),
+		}).Expect().Status(httptest.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
 }
 
 func TestReleaseOrderRouter(t *testing.T) {
@@ -872,72 +938,505 @@ func TestAppraiseOrderRouter(t *testing.T) {
 }
 
 // Test Role Router
-func TestGetRoleRouter(t *testing.T) {
+//func TestGetRoleRouter(t *testing.T) {
+//	app := newApp()
+//	e := httptest.New(t, app)
+//	superAdminToken := getSuperAdminToken()
+//	responseBody := e.GET("/v1/role").
+//		Expect().Status(httptest.StatusForbidden).
+//		Body().Raw()
+//	t.Log(responseBody)
+//
+//	responseBody = e.GET("/v1/role").
+//		WithHeader("Authorization", "Bearer "+superAdminToken).
+//		Expect().Status(httptest.StatusOK).
+//		Body().Raw()
+//	t.Log(responseBody)
+//}
+//
+//func TestCreateRoleRouter(t *testing.T) {
+//	app := newApp()
+//	e := httptest.New(t, app)
+//	randomNumToString := cast.ToString(rand.Intn(10000))
+//	superAdminToken := getSuperAdminToken()
+//	responseBody := e.POST("/v1/role").
+//		WithJSON(model.CreateRoleRequest{
+//			Name:        "Test Role " + randomNumToString,
+//			DisplayName: "test_role",
+//			Permissions: []string{
+//				"order.create",
+//			},
+//			Inheritance: []string{
+//				"admin",
+//			},
+//		}).
+//		Expect().Status(httptest.StatusForbidden).
+//		Body().Raw()
+//	t.Log(responseBody)
+//
+//	responseBody = e.POST("/v1/role").
+//		WithHeader("Authorization", "Bearer "+superAdminToken).
+//		WithJSON(model.CreateRoleRequest{
+//			Name:        "Test Role " + randomNumToString,
+//			DisplayName: "test_role",
+//			Permissions: []string{
+//				"order.create",
+//			},
+//			Inheritance: []string{
+//				"repairer",
+//			},
+//		}).
+//		Expect().Status(httptest.StatusCreated).
+//		Body().Raw()
+//	t.Log(responseBody)
+//}
+//
+//func TestGetAllRoles(t *testing.T) {
+//	app := newApp()
+//	e := httptest.New(t, app)
+//	superAdminToken := getSuperAdminToken()
+//	responseBody := e.GET("/v1/role/all").
+//		Expect().Status(httptest.StatusForbidden).
+//		Body().Raw()
+//	t.Log(responseBody)
+//
+//	responseBody = e.GET("/v1/role/all").
+//		WithHeader("Authorization", "Bearer "+superAdminToken).
+//		Expect().Status(httptest.StatusOK).
+//		Body().Raw()
+//	t.Log(responseBody)
+//}
+
+// Test Permission Router
+func TestGetAllPermissionRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	responseBody := e.GET("/v1/role").
-		Expect().Status(httptest.StatusForbidden).
-		Body().Raw()
+
+	responseBody := e.GET("/v1/permission/all").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
-	responseBody = e.GET("/v1/role").
+	responseBody = e.GET("/v1/permission/all").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusOK).
-		Body().Raw()
+		Expect().Status(http.StatusOK).Body().Raw()
 	t.Log(responseBody)
 }
 
-func TestCreateRoleRouter(t *testing.T) {
+func TestGetPermissionRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+
+	responseBody := e.GET("/v1/permission/role.viewall").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/permission/viewall").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+// Test Item Router
+func TestCreateItemRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
-	superAdminToken := getSuperAdminToken()
-	responseBody := e.POST("/v1/role").
-		WithJSON(model.CreateRoleRequest{
-			Name:        "Test Role " + randomNumToString,
-			DisplayName: "test_role",
-			Permissions: []string{
-				"order.create",
-			},
-			Inheritance: []string{
-				"admin",
-			},
-		}).
-		Expect().Status(httptest.StatusForbidden).
-		Body().Raw()
+
+	itemTest := model.CreateItemRequest{
+		Name:        "test_item" + randomNumToString,
+		Discription: "test_item",
+	}
+
+	responseBody := e.POST("/v1/item").
+		WithJSON(itemTest).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
-	responseBody = e.POST("/v1/role").
+	responseBody = e.POST("/v1/item").
+		WithJSON(itemTest).
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateRoleRequest{
-			Name:        "Test Role " + randomNumToString,
-			DisplayName: "test_role",
-			Permissions: []string{
-				"order.create",
-			},
-			Inheritance: []string{
-				"repairer",
-			},
-		}).
-		Expect().Status(httptest.StatusCreated).
-		Body().Raw()
+		Expect().Status(http.StatusCreated).Body().Raw()
 	t.Log(responseBody)
 }
 
-func TestGetAllRoles(t *testing.T) {
+func TestGetAllItemRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	responseBody := e.GET("/v1/role/all").
-		Expect().Status(httptest.StatusForbidden).
-		Body().Raw()
+
+	responseBody := e.GET("/v1/item/all").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
-	responseBody = e.GET("/v1/role/all").
+	responseBody = e.GET("/v1/item/all").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusOK).
-		Body().Raw()
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestGetItemByIDRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	itemTest := model.CreateItemRequest{
+		Name:        "test_item" + randomNumToString,
+		Discription: "test_item",
+	}
+
+	response := e.POST("/v1/item").
+		WithJSON(itemTest).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusCreated)
+	t.Log(response.Body().Raw())
+
+	item := response.JSON().NotNull().Object().Value("data")
+	id := uint(item.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.GET("/v1/item/" + cast.ToString(id)).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/item/"+cast.ToString(id)).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestAddItemByIDRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	itemTest := model.CreateItemRequest{
+		Name:        "test_item" + randomNumToString,
+		Discription: "test_item",
+	}
+
+	response := e.POST("/v1/item").
+		WithJSON(itemTest).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusCreated)
+	t.Log(response.Body().Raw())
+
+	item := response.JSON().NotNull().Object().Value("data")
+	id := uint(item.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/item/" + cast.ToString(id)).
+		WithJSON(model.AddItemRequest{
+			ItemID: id,
+			Num:    uint(rand.Intn(100)),
+			Price:  float64(rand.Intn(100)),
+		}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/item/"+cast.ToString(id)).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.AddItemRequest{
+			ItemID: id,
+			Num:    uint(rand.Intn(100)),
+			Price:  float64(rand.Intn(100)),
+		}).Expect().Status(http.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestDeleteItemByIDRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	itemTest := model.CreateItemRequest{
+		Name:        "test_item" + randomNumToString,
+		Discription: "test_item",
+	}
+
+	response := e.POST("/v1/item").
+		WithJSON(itemTest).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusCreated)
+	t.Log(response.Body().Raw())
+
+	item := response.JSON().NotNull().Object().Value("data")
+	id := uint(item.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.DELETE("/v1/item/" + cast.ToString(id)).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.DELETE("/v1/item/"+cast.ToString(id)).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestGetItemByNameRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	itemTest := model.CreateItemRequest{
+		Name:        "test_item" + randomNumToString,
+		Discription: "test_item",
+	}
+
+	response := e.POST("/v1/item").
+		WithJSON(itemTest).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusCreated)
+	t.Log(response.Body().Raw())
+
+	item := response.JSON().NotNull().Object().Value("data")
+	id := item.Object().Value("name").NotNull().Raw().(string)
+
+	responseBody := e.GET("/v1/item/name/" + id).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/item/name/"+id).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestGetItemByNameFuzzyRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	itemTest := model.CreateItemRequest{
+		Name:        "test_item" + randomNumToString,
+		Discription: "test_item",
+	}
+
+	response := e.POST("/v1/item").
+		WithJSON(itemTest).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusCreated)
+	t.Log(response.Body().Raw())
+
+	item := response.JSON().NotNull().Object().Value("data")
+	id := item.Object().Value("name").NotNull().Raw().(string)
+
+	responseBody := e.GET("/v1/item/name/" + id + "/fuzzy").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/item/name/"+id+"/fuzzy").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+// Test Comment Router
+func TestCreateCommentRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	orderID := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/order/" + cast.ToString(orderID) + "/comment").
+		WithJSON(model.CreateCommentRequest{
+			Content: "comment " + randomNumToString,
+		}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(orderID)+"/comment").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateCommentRequest{
+			Content: "comment " + randomNumToString,
+		}).Expect().Status(httptest.StatusCreated).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestGetCommentsByOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	comments := generateRandomComments("test ", 10)
+
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	orderID := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	for _, comment := range comments {
+		responseBody := e.POST("/v1/order/"+cast.ToString(orderID)+"/comment").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(comment).Expect().Status(httptest.StatusCreated).Body().Raw()
+		t.Log(responseBody)
+	}
+
+	response = e.GET("/v1/order/" + cast.ToString(orderID) + "/comment").
+		WithJSON(testOrder).Expect().Status(httptest.StatusForbidden)
+	t.Log(response.Body().Raw())
+
+	response = e.GET("/v1/order/"+cast.ToString(orderID)+"/comment").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusOK)
+	t.Log(response.Body().Raw())
+}
+
+func TestForceCreateCommentRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	orderID := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.POST("/v1/order/" + cast.ToString(orderID) + "/comment/force").
+		WithJSON(model.CreateCommentRequest{
+			Content: "comment " + randomNumToString,
+		}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/order/"+cast.ToString(orderID)+"/comment/force").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateCommentRequest{
+			Content: "comment " + randomNumToString,
+		}).Expect().Status(httptest.StatusCreated).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestForceGetCommentsByOrderRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+	comments := generateRandomComments("test ", 10)
+
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	orderID := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	for _, comment := range comments {
+		responseBody := e.POST("/v1/order/"+cast.ToString(orderID)+"/comment").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(comment).Expect().Status(httptest.StatusCreated).Body().Raw()
+		t.Log(responseBody)
+	}
+
+	response = e.GET("/v1/order/" + cast.ToString(orderID) + "/comment/force").
+		WithJSON(testOrder).Expect().Status(httptest.StatusForbidden)
+	t.Log(response.Body().Raw())
+
+	response = e.GET("/v1/order/"+cast.ToString(orderID)+"/comment/force").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusOK)
+	t.Log(response.Body().Raw())
+}
+
+func TestDeleteComment(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	orderID := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	response = e.POST("/v1/order/"+cast.ToString(orderID)+"/comment").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateCommentRequest{
+			Content: "comment " + randomNumToString,
+		}).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	commentCreated := response.JSON().NotNull().Object().Value("data")
+	commentID := uint(commentCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.DELETE("/v1/comment/" + cast.ToString(commentID)).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.DELETE("/v1/comment/"+cast.ToString(commentID)).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestForceDeleteComment(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
+	tags := getTestTags()
+	for _, tag := range tags {
+		service.CreateTag(&tag, getSuperAdminAuthInfo())
+	}
+
+	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(testOrder).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	orderCreated := response.JSON().NotNull().Object().Value("data")
+	orderID := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	response = e.POST("/v1/order/"+cast.ToString(orderID)+"/comment").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateCommentRequest{
+			Content: "comment " + randomNumToString,
+		}).Expect().Status(httptest.StatusCreated)
+	t.Log(response.Body().Raw())
+	commentCreated := response.JSON().NotNull().Object().Value("data")
+	commentID := uint(commentCreated.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.DELETE("/v1/comment/" + cast.ToString(commentID) + "/force").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.DELETE("/v1/comment/"+cast.ToString(commentID)+"/force").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusNoContent).Body().Raw()
 	t.Log(responseBody)
 }
 
@@ -953,13 +1452,6 @@ func getSuperAdminAuthInfo() *model.AuthInfo {
 		Role: "super_admin",
 		IP:   getMyIPV6(),
 	}
-}
-
-func generateRandomUsers(prefix string, num uint) (usersRegister []model.RegisterUserRequest) {
-	for i := uint(1); i <= num; i++ {
-		usersRegister = append(usersRegister, initUser(prefix+strconv.Itoa(int(i))+util.RandomString(5), "12345678", "Random name user"+strconv.Itoa(int(i))))
-	}
-	return
 }
 
 func getTestTags() []model.CreateTagRequest {
@@ -1000,6 +1492,20 @@ func getTestTags() []model.CreateTagRequest {
 			Level: 2,
 		},
 	}
+}
+
+func generateRandomUsers(prefix string, num uint) (usersRegister []model.RegisterUserRequest) {
+	for i := uint(1); i <= num; i++ {
+		usersRegister = append(usersRegister, initUser(prefix+strconv.Itoa(int(i))+util.RandomString(5), "12345678", "Random name user"+strconv.Itoa(int(i))))
+	}
+	return
+}
+
+func generateRandomComments(prefix string, num uint) (comments []model.CreateCommentRequest) {
+	for i := uint(1); i <= num; i++ {
+		comments = append(comments, initComment(prefix))
+	}
+	return
 }
 
 func generateRandomTags(baseSort, baseName string, num uint) (tags []model.CreateTagRequest) {
@@ -1046,6 +1552,12 @@ func initOrder(title string, content string, address string, name string, maxTag
 		ContactName:  name,
 		ContactPhone: strconv.Itoa(rand.Intn(100000)),
 		Tags:         tags,
+	}
+}
+
+func initComment(baseContent string) model.CreateCommentRequest {
+	return model.CreateCommentRequest{
+		Content: baseContent + strconv.Itoa(rand.Intn(100000)),
 	}
 }
 

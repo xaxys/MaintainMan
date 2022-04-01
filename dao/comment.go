@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"errors"
 	"maintainman/database"
 	"maintainman/logger"
 	"maintainman/model"
@@ -27,10 +28,13 @@ func GetCommentsByOrder(id uint, param *model.PageParam) (comments []*model.Comm
 }
 
 func CreateComment(oid, uid uint, aul *model.CreateCommentRequest) (comment *model.Comment, err error) {
+	seqNum := uint(0)
+	cmt := &model.Comment{OrderID: oid}
 	if err = database.DB.Transaction(func(tx *gorm.DB) error {
-		cmt := &model.Comment{OrderID: oid}
-		if err := tx.Where(cmt).Order("id desc").First(cmt).Error; err != nil {
-			return err
+		if err := tx.Where(cmt).Order("id desc").First(cmt).Error; err == nil {
+			seqNum = cmt.SequenceNum
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil
 		}
 		user := &model.User{}
 		if err := tx.First(user, uid).Error; err != nil {
@@ -41,7 +45,7 @@ func CreateComment(oid, uid uint, aul *model.CreateCommentRequest) (comment *mod
 			UserID:      uid,
 			UserName:    user.Name,
 			Content:     aul.Content,
-			SequenceNum: cmt.SequenceNum + 1,
+			SequenceNum: seqNum + 1,
 			BaseModel: model.BaseModel{
 				CreatedBy: uid,
 				UpdatedBy: uid,
