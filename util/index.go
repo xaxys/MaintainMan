@@ -89,6 +89,23 @@ func In[T comparable](key T, values ...T) bool {
 	return false
 }
 
+func Insert[T any](slice []T, elem T, index uint) []T {
+	return append(slice[:index], append([]T{elem}, slice[index:]...)...)
+}
+
+func Move[T comparable](slice []T, elem T, to uint) []T {
+	if int(to) >= len(slice) {
+		return slice
+	}
+	for i, v := range slice {
+		if v == elem {
+			slice[i], slice[to] = slice[to], slice[i]
+			break
+		}
+	}
+	return slice
+}
+
 func Remove[T comparable](slice []T, elems ...T) []T {
 	for _, e := range elems {
 		for i, v := range slice {
