@@ -1368,7 +1368,7 @@ func TestForceGetCommentsByOrderRouter(t *testing.T) {
 	t.Log(response.Body().Raw())
 }
 
-func TestDeleteComment(t *testing.T) {
+func TestDeleteCommentRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
@@ -1404,7 +1404,7 @@ func TestDeleteComment(t *testing.T) {
 	t.Log(responseBody)
 }
 
-func TestForceDeleteComment(t *testing.T) {
+func TestForceDeleteCommentRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
