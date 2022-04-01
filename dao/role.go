@@ -46,13 +46,13 @@ func NewRolePersistence(config *viper.Viper) (s *RolePersistence) {
 			}
 			s.guest.Set(role)
 		}
-		role.Permissions = util.NewPermSet().Add(role.RawPermissions...)
+		role.PermSet = util.NewPermSet().Add(role.Permissions...)
 		s.index.Set(role.Name, role)
-		for _, inhe := range role.RawInheritance {
+		for _, inhe := range role.Inheritance {
 			if !s.index.Has(inhe) {
 				panic(fmt.Sprintf("Role %s can not be inherited by %s. Only buttom-up inheritance is valid (latter roles are superior)", inhe, role.Name))
 			}
-			role.Inheritance = append(role.Inheritance, s.index.Get(inhe))
+			role.InheRole = append(role.InheRole, s.index.Get(inhe))
 		}
 	}
 	if s.def.Get() == nil {
@@ -88,8 +88,8 @@ func AddPermission(role string, perms ...string) error {
 
 func addPermission(role *model.Role, perms ...string) {
 	role.Lock()
-	role.RawPermissions = append(role.RawPermissions, perms...)
-	role.Permissions.Add(perms...)
+	role.Permissions = append(role.Permissions, perms...)
+	role.PermSet.Add(perms...)
 	role.Unlock()
 }
 
@@ -105,8 +105,8 @@ func DeletePermission(role string, permission ...string) error {
 
 func deletePermission(role *model.Role, permission ...string) {
 	role.Lock()
-	role.RawPermissions = util.Remove(role.RawPermissions, permission...)
-	role.Permissions.Delete(permission...)
+	role.Permissions = util.Remove(role.Permissions, permission...)
+	role.PermSet.Delete(permission...)
 	role.Unlock()
 }
 
@@ -121,11 +121,11 @@ func HasPermission(role, permission string) bool {
 func hasPermission(role *model.Role, permission string) bool {
 	role.RLock()
 	defer role.RUnlock()
-	if has, ok := role.Permissions.Find(permission); ok {
+	if has, ok := role.PermSet.Find(permission); ok {
 		return has
 	}
-	for _, v := range role.Inheritance {
-		if has, ok := v.Permissions.Find(permission); ok {
+	for _, v := range role.InheRole {
+		if has, ok := v.PermSet.Find(permission); ok {
 			return has
 		}
 	}
@@ -166,13 +166,13 @@ func AddInheritance(role string, inherit ...string) error {
 func addInheritance(role *model.Role, inherit ...string) error {
 	role.Lock()
 	nonexist := []string{}
-	role.RawInheritance = append(role.RawInheritance, inherit...)
+	role.Inheritance = append(role.Inheritance, inherit...)
 	for _, inhe := range inherit {
 		inheRole := RolePO.index.Get(inhe)
 		if inheRole == nil {
 			nonexist = append(nonexist, inhe)
 		} else {
-			role.Inheritance = append(role.Inheritance, inheRole)
+			role.InheRole = append(role.InheRole, inheRole)
 		}
 	}
 	role.Unlock()
@@ -196,13 +196,13 @@ func DeleteInheritance(role string, inherit ...string) error {
 func deleteInheritance(role *model.Role, inherit ...string) error {
 	role.Lock()
 	nonexist := []string{}
-	role.RawInheritance = util.Remove(role.RawInheritance, inherit...)
+	role.Inheritance = util.Remove(role.Inheritance, inherit...)
 	for _, inhe := range inherit {
 		inheRole := RolePO.index.Get(inhe)
 		if inheRole == nil {
 			nonexist = append(nonexist, inhe)
 		} else {
-			role.Inheritance = util.Remove(role.Inheritance, inheRole)
+			role.InheRole = util.Remove(role.InheRole, inheRole)
 		}
 	}
 	role.Unlock()
@@ -294,13 +294,14 @@ func CreateRole(aul *model.CreateRoleRequest) (err error) {
 	}
 
 	role := &model.Role{
-		RoleInfo:    &info,
-		Permissions: util.NewPermSet(),
+		RoleInfo: &info,
+		PermSet:  util.NewPermSet(),
 	}
 	addPermission(role, aul.Permissions...)
 	err = addInheritance(role, aul.Inheritance...)
 
 	RolePO.Lock()
+	// TODO: Allow insert position be specified
 	RolePO.roles = append(RolePO.roles, info)
 	RolePO.Unlock()
 
@@ -316,6 +317,7 @@ func UpdateRole(name string, aul *model.UpdateRoleRequest) error {
 		return fmt.Errorf("Role %s does not exist", name)
 	}
 
+	// TODO: Allow role position be adjusted
 	if aul.DisplayName != "" {
 		r.Lock()
 		r.DisplayName = aul.DisplayName
@@ -347,7 +349,7 @@ func DeleteRole(name string) error {
 	}
 	err := RolePO.index.Range(func(k string, role *model.Role) error {
 		role.RLock()
-		for _, inhe := range role.Inheritance {
+		for _, inhe := range role.InheRole {
 			if inhe.Name == name {
 				return fmt.Errorf("Cannot delete role %s, it is inherited by %s", name, role.Name)
 			}
@@ -436,7 +438,7 @@ func RoleToJson(role *model.Role) *model.RoleJson {
 		DisplayName: role.DisplayName,
 		Default:     role.Default,
 		Guest:       role.Guest,
-		Inheritance: role.RawInheritance,
-		Permissions: util.TransSlice(role.RawPermissions, GetPermission),
+		Inheritance: role.Inheritance,
+		Permissions: util.TransSlice(role.Permissions, GetPermission),
 	}
 }

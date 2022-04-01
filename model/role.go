@@ -7,18 +7,18 @@ import (
 )
 
 type RoleInfo struct {
-	Name           string   `mapstructure:"name"`
-	DisplayName    string   `mapstructure:"display_name"`
-	Default        bool     `mapstructure:"default"`
-	Guest          bool     `mapstructure:"guest"`
-	RawPermissions []string `mapstructure:"permissions"`
-	RawInheritance []string `mapstructure:"inheritance"`
+	Name        string   `mapstructure:"name"`
+	DisplayName string   `mapstructure:"display_name"`
+	Default     bool     `mapstructure:"default"`
+	Guest       bool     `mapstructure:"guest"`
+	Permissions []string `mapstructure:"permissions"`
+	Inheritance []string `mapstructure:"inheritance"`
 }
 
 type Role struct {
 	*RoleInfo
-	Permissions *util.PermSet
-	Inheritance []*Role
+	PermSet  *util.PermSet
+	InheRole []*Role
 	sync.RWMutex
 }
 
@@ -30,12 +30,14 @@ func (r *Role) String() string {
 type CreateRoleRequest struct {
 	Name        string   `json:"name" validate:"required,gte=2,lte=50"`
 	DisplayName string   `json:"display_name" validate:"required,lte=191"`
+	Position    uint     `json:"position"`
 	Permissions []string `json:"permissions"`
 	Inheritance []string `json:"inheritance"`
 }
 
 type UpdateRoleRequest struct {
 	DisplayName    string   `json:"display_name" validate:"required,lte=191"`
+	Position       uint     `json:"position"`
 	AddPermissions []string `json:"add_permissions"`
 	DelPermissions []string `json:"del_permissions"`
 	AddInheritance []string `json:"add_inheritance"`
