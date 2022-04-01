@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const AppConfigVersion = "1.0.0"
+const AppConfigVersion = "1.0.1"
 
 var (
 	AppConfig *viper.Viper
@@ -24,7 +24,9 @@ func init() {
 	AppConfig.SetDefault("app.loglevel", "info")
 	AppConfig.SetDefault("app.page.limit", 100)
 	AppConfig.SetDefault("app.page.default", 50)
-	AppConfig.SetDefault("app.hit_expire_time", "12h")
+	AppConfig.SetDefault("app.hit_expire.announce", "12h")
+	AppConfig.SetDefault("app.appraise.timeout", "72h")
+	AppConfig.SetDefault("app.appraise.purge", "10m")
 	AppConfig.SetDefault("wechat.appid", "微信小程序的appid")
 	AppConfig.SetDefault("wechat.secret", "微信小程序的secret")
 	AppConfig.SetDefault("token.key", "xaxys_2022_all_rights_reserved")

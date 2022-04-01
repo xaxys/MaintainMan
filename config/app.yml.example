@@ -8,6 +8,9 @@ app:
     default: 50
   hit_expire:
     announce: "12h"
+  appraise:
+    timeout: "72h"
+    purge: "10m"
 
 wechat:
   appid: ""

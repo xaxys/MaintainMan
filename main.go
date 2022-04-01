@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/kataras/iris/v12"
 
 	"maintainman/config"
 	"maintainman/initialize"
 	"maintainman/logger"
 	"maintainman/route"
+	"maintainman/service"
 )
 
 var (
@@ -46,5 +48,6 @@ func newApp() *iris.Application {
 	logger.Logger = app.Logger()
 	initialize.InitDefaultData()
 	route.Route(app)
+	service.Scheduler.StartAsync()
 	return app
 }

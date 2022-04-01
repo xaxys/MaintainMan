@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"maintainman/dao"
+	"maintainman/database"
 	"maintainman/model"
 	"maintainman/util"
 
@@ -289,6 +290,19 @@ func HoldOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
 		return model.ErrorUpdateDatabase(err)
 	}
 	return model.SuccessUpdate(nil, "挂单成功")
+}
+
+func AutoAppraiseOrder() {
+	database.DB.Transaction(func(tx *gorm.DB) error {
+		orders, err := dao.GetAppraiseTimeoutOrder(tx)
+		if err != nil {
+			return err
+		}
+		for _, order := range orders {
+			_ = dao.AppraiseOrder(order, 5)
+		}
+		return nil
+	})
 }
 
 func OrderToJson(order *model.Order) *model.OrderJson {

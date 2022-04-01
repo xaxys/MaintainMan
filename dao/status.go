@@ -1,8 +1,13 @@
 package dao
 
 import (
+	"maintainman/config"
 	"maintainman/logger"
 	"maintainman/model"
+	"maintainman/util"
+	"time"
+
+	"gorm.io/gorm"
 )
 
 func GetOrderByRepairer(id uint, json *model.RepairerOrderRequest) (orders []*model.Order, err error) {
@@ -21,6 +26,25 @@ func GetOrderByRepairer(id uint, json *model.RepairerOrderRequest) (orders []*mo
 		orders = append(orders, status.Order)
 	}
 
+	return
+}
+
+func GetAppraiseTimeoutOrder(tx *gorm.DB) (ids []uint, err error) {
+	status := &model.Status{
+		Status:  model.StatusCompleted,
+		Current: true,
+	}
+	statuses := []*model.Status{}
+
+	timeout := config.AppConfig.GetDuration("app.appraise.timeout")
+	exp := time.Now().Add(-timeout)
+
+	if err = tx.Where(status).Where("created_at <= (?)", exp).Find(&statuses).Error; err != nil {
+		logger.Logger.Debugf("GetAppraiseTimeoutOrderErr: %v\n", err)
+		return
+	}
+
+	ids = util.TransSlice(statuses, func(t *model.Status) uint { return t.OrderID })
 	return
 }
 
