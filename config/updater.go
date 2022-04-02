@@ -13,6 +13,7 @@ func ReadAndUpdateConfig(config *viper.Viper, name string, version string) {
 	if err := config.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 			fmt.Printf("%s configuration file not found: %v\n", name, err)
+			config.SetDefault("version", version)
 			if err := config.SafeWriteConfig(); err != nil {
 				panic(fmt.Errorf("Failed to write %s configuration file: %v", name, err))
 			}
