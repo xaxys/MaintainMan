@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"fmt"
 	"maintainman/database"
 	"maintainman/logger"
 	"maintainman/model"
@@ -104,10 +105,24 @@ func TxDeleteTag(tx *gorm.DB, id uint) (err error) {
 	return
 }
 
+func CheckTagsCongener(tags []*model.Tag) error {
+	count := map[string]uint{}
+	min := map[string]uint{}
+	for _, t := range tags {
+		count[t.Sort]++
+		min[t.Sort] = t.Congener
+		if min[t.Sort] != 0 && count[t.Sort] > min[t.Sort] {
+			return fmt.Errorf("[%s] 标签超过最大数量", t.Sort)
+		}
+	}
+	return nil
+}
+
 func JsonToTag(aul *model.CreateTagRequest) *model.Tag {
 	return &model.Tag{
-		Name:  aul.Name,
-		Sort:  aul.Sort,
-		Level: aul.Level,
+		Name:     aul.Name,
+		Sort:     aul.Sort,
+		Level:    aul.Level,
+		Congener: aul.Congener,
 	}
 }

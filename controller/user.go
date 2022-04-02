@@ -1,10 +1,11 @@
 package controller
 
 import (
-	"github.com/kataras/iris/v12"
 	"maintainman/model"
 	"maintainman/service"
 	"maintainman/util"
+
+	"github.com/kataras/iris/v12"
 )
 
 // GetUser godoc
@@ -127,6 +128,32 @@ func WxUserLogin(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// WxUserRegister godoc
+// @Summary 微信注册并登陆
+// @Description 微信注册并登陆
+// @Tags user
+// @Accept  json
+// @Produce  json
+// @Param body body model.WxRegisterRequest true "登录信息"
+// @Success 200 {object} model.ApiJson{data=string} "JWT Token"
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/wxregister [post]
+func WxUserRegister(ctx iris.Context) {
+	aul := &model.WxRegisterRequest{}
+	if err := ctx.ReadJSON(&aul); err != nil {
+		ctx.Values().Set("response", model.ErrorInvalidData(err))
+		return
+	}
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.WxUserRegister(aul, ctx.Request().RemoteAddr, auth)
+	ctx.Values().Set("response", response)
+}
+
 // UserRenew godoc
 // @Summary 用户登录续期
 // @Description 用户登录续期
@@ -140,7 +167,7 @@ func WxUserLogin(ctx iris.Context) {
 // @Failure 404 {object} model.ApiJson{data=[]string}
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
-// @Router /v1/renew [post]
+// @Router /v1/renew [get]
 func UserRenew(ctx iris.Context) {
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
 	id := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)

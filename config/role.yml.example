@@ -1,5 +1,5 @@
 # Only buttom-up inheritance is valid (latter roles are superior)
-version: 1.0.1
+version: 1.0.2
 role:
   - name: banned
     display_name: "封停用户"
@@ -9,8 +9,10 @@ role:
     display_name: "访客"
     guest: true
     permissions:
-      - "user.register"
-      - "user.login"
+        - "user.register"
+        - "user.login"
+        - "user.wxlogin"
+        - "user.wxregister"
     inheritance:
   - name: user
     display_name: "普通用户"

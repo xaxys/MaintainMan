@@ -15,14 +15,14 @@ type Announce struct {
 
 type CreateAnnounceRequest struct {
 	Title     string `json:"title" validate:"required,lte=191"`
-	Content   string `json:"content" validate:"required"`
+	Content   string `json:"content" validate:"required,lte=65535"`
 	StartTime int64  `json:"start_time" validate:"required,gte=-1,lte=253370764799"`                // unix timestamp in seconds (UTC); -1代表不限; 含本数
 	EndTime   int64  `json:"end_time" validate:"required,eq=-1|gtfield=StartTime,lte=253370764799"` // unix timestamp in seconds (UTC); -1代表不限; 含本数; 必须大于start
 }
 
 type UpdateAnnounceRequest struct {
 	Title     string `json:"title" validate:"lte=191"`
-	Content   string `json:"content"`
+	Content   string `json:"content" validate:"lte=65535"`
 	StartTime int64  `json:"start_time" validate:"required,gte=-1,lte=253370764799"`                // unix timestamp in seconds (UTC); -1代表不限; 含本数
 	EndTime   int64  `json:"end_time" validate:"required,eq=-1|gtfield=StartTime,lte=253370764799"` // unix timestamp in seconds (UTC); -1代表不限; 含本数
 }

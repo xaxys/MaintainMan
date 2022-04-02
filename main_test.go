@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/kataras/iris/v12/httptest"
+	"github.com/spf13/cast"
 	"maintainman/model"
 	"maintainman/service"
 	"maintainman/util"
@@ -12,9 +14,6 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-
-	"github.com/kataras/iris/v12/httptest"
-	"github.com/spf13/cast"
 )
 
 // Test User Router
@@ -293,7 +292,13 @@ func TestCreateOrderRouter(t *testing.T) {
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
+	responseBody = e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(initWrongOrder("Test", "Test", "Earth", "Admin", 5)).
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
+	t.Log(responseBody)
+
 	for _, order := range orders {
+		t.Log(order.Tags)
 		responseBody := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
 			WithJSON(order).Expect().Status(httptest.StatusCreated).Body().Raw()
 		t.Log(responseBody)
@@ -438,7 +443,7 @@ func TestUpdateOrderByUserRouter(t *testing.T) {
 	orderCreated := response.JSON().NotNull().Object().Value("data")
 	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
 
-	responseBody := e.PUT("/v1/order/1/update").
+	responseBody := e.PUT("/v1/order/" + cast.ToString(id) + "/update").
 		WithJSON(model.UpdateOrderRequest{
 			Title:        "TestUpdateOrder " + randomNumToString,
 			Content:      testOrder.Content + "_updated",
@@ -451,6 +456,8 @@ func TestUpdateOrderByUserRouter(t *testing.T) {
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
+	addWrongBuildingTag := 4 - testOrder.Tags[0]
+	addWrongEmergencyTag := 9 - testOrder.Tags[1]
 	responseBody = e.PUT("/v1/order/"+cast.ToString(id)+"/update").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
 		WithJSON(model.UpdateOrderRequest{
@@ -459,8 +466,31 @@ func TestUpdateOrderByUserRouter(t *testing.T) {
 			Address:      testOrder.Address,
 			ContactName:  testOrder.ContactName,
 			ContactPhone: testOrder.ContactPhone,
-			AddTags:      testOrder.Tags,
-			DelTags:      testOrder.Tags,
+			AddTags:      []uint{addWrongBuildingTag, addWrongEmergencyTag},
+			DelTags:      []uint{},
+		}).
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/order/"+cast.ToString(id)).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+
+	addBuildingTag := 4 - testOrder.Tags[0]
+	delBuildingTag := testOrder.Tags[0]
+	addEmergencyTag := 9 - testOrder.Tags[1]
+	delEmergencyTag := testOrder.Tags[1]
+	responseBody = e.PUT("/v1/order/"+cast.ToString(id)+"/update").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.UpdateOrderRequest{
+			Title:        "TestUpdateOrder " + randomNumToString,
+			Content:      testOrder.Content + "_updated",
+			Address:      testOrder.Address,
+			ContactName:  testOrder.ContactName,
+			ContactPhone: testOrder.ContactPhone,
+			AddTags:      []uint{addBuildingTag, addEmergencyTag},
+			DelTags:      []uint{delBuildingTag, delEmergencyTag},
 		}).
 		Expect().Status(httptest.StatusNoContent).Body().Raw()
 	t.Log(responseBody)
@@ -1457,39 +1487,76 @@ func getSuperAdminAuthInfo() *model.AuthInfo {
 func getTestTags() []model.CreateTagRequest {
 	return []model.CreateTagRequest{
 		{
-			Sort:  "楼名",
-			Name:  "一舍",
-			Level: 1,
+			Sort:     "楼名",
+			Name:     "一舍",
+			Level:    1,
+			Congener: 1,
 		},
 		{
-			Sort:  "楼名",
-			Name:  "二舍",
-			Level: 1,
+			Sort:     "楼名",
+			Name:     "二舍",
+			Level:    1,
+			Congener: 1,
 		},
 		{
-			Sort:  "楼名",
-			Name:  "三舍",
-			Level: 1,
+			Sort:     "楼名",
+			Name:     "三舍",
+			Level:    1,
+			Congener: 1,
 		},
 		{
-			Sort:  "紧急程度",
-			Name:  "一般",
-			Level: 1,
+			Sort:     "紧急程度",
+			Name:     "一般",
+			Level:    1,
+			Congener: 1,
 		},
 		{
-			Sort:  "紧急程度",
-			Name:  "紧急",
-			Level: 1,
+			Sort:     "紧急程度",
+			Name:     "紧急",
+			Level:    1,
+			Congener: 1,
 		},
 		{
-			Sort:  "故障类型",
-			Name:  "漏水",
-			Level: 2,
+			Sort:     "故障类型",
+			Name:     "漏水",
+			Level:    2,
+			Congener: 0,
 		},
 		{
-			Sort:  "故障类型",
-			Name:  "电线",
-			Level: 2,
+			Sort:     "故障类型",
+			Name:     "漏电",
+			Level:    2,
+			Congener: 0,
+		},
+		{
+			Sort:     "故障类型",
+			Name:     "外墙脱落",
+			Level:    2,
+			Congener: 0,
+		},
+		{
+			Sort:     "故障类型",
+			Name:     "锁坏了",
+			Level:    2,
+			Congener: 0,
+		},
+		{
+			Sort:     "故障类型",
+			Name:     "灯坏了",
+			Level:    2,
+			Congener: 0,
+		},
+		{
+			Sort:     "故障类型",
+			Name:     "插头没电",
+			Level:    2,
+			Congener: 0,
+		},
+		{
+			Sort:     "故障类型",
+			Name:     "撤硕没水",
+			Level:    2,
+			Congener: 0,
 		},
 	}
 }
@@ -1540,9 +1607,30 @@ func initTag(sort, name string, level uint) model.CreateTagRequest {
 	}
 }
 
+func initWrongOrder(title string, content string, address string, name string, maxTagID uint) model.CreateOrderRequest {
+	tags := make([]uint, 0)
+	tags = append(tags, 1, 2)
+	tags = append(tags, 4, 5)
+	for i := uint(1 + 5); i <= maxTagID+5; i++ {
+		tags = append(tags, i)
+	}
+	return model.CreateOrderRequest{
+		Title:        title,
+		Content:      content,
+		Address:      address,
+		ContactName:  name,
+		ContactPhone: strconv.Itoa(rand.Intn(100000)),
+		Tags:         tags,
+	}
+}
+
 func initOrder(title string, content string, address string, name string, maxTagID uint) model.CreateOrderRequest {
 	tags := make([]uint, 0)
-	for i := uint(1); i <= maxTagID; i++ {
+	building := rand.Intn(3) + 1
+	tags = append(tags, uint(building))
+	emergency := rand.Intn(2) + 4
+	tags = append(tags, uint(emergency))
+	for i := uint(1 + 5); i <= maxTagID+5; i++ {
 		tags = append(tags, i)
 	}
 	return model.CreateOrderRequest{

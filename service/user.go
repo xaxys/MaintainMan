@@ -130,6 +130,9 @@ func GetAllUsers(aul *model.AllUserRequest, auth *model.AuthInfo) *model.ApiJson
 }
 
 func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *model.ApiJson {
+	if err := util.Validator.Struct(aul); err != nil {
+		return model.ErrorValidation(err)
+	}
 	const wxURL = "https://api.weixin.qq.com/sns/jscode2session"
 	params := map[string]string{
 		"appid":      config.AppConfig.GetString("wechat.appid"),
@@ -137,8 +140,8 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 		"js_code":    aul.Code,
 		"grant_type": "authorization_code",
 	}
-	wxres := &model.WxLoginResponse{}
-	if err := util.HttpRequest(wxURL, "GET", params, wxres); err != nil {
+	wxres, err := util.HTTPRequest[model.WxLoginResponse](wxURL, "GET", params)
+	if err != nil {
 		return model.ErrorVerification(err)
 	}
 	if wxres.ErrCode != 0 {
@@ -158,7 +161,7 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 				return model.ErrorUpdateDatabase(err)
 			}
 			id = auth.User
-		} else {
+		} else if config.AppConfig.GetBool("wechat.fastlogin") {
 			// If not login, create a new user
 			aul := &model.CreateUserRequest{
 				RegisterUserRequest: model.RegisterUserRequest{
@@ -183,6 +186,8 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 			}); err != nil {
 				return response
 			}
+		} else {
+			return model.ErrorVerification(fmt.Errorf("未绑定微信，请先绑定微信"))
 		}
 	} else {
 		id = user.ID
@@ -192,6 +197,59 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 		return model.ErrorUpdateDatabase(fmt.Errorf("登录失败"))
 	}
 	token, err := util.GetJwtString(id, user.RoleName)
+	if err != nil {
+		return model.ErrorBuildJWT(err)
+	}
+	return model.Success(token, "登陆成功")
+}
+
+func WxUserRegister(aul *model.WxRegisterRequest, ip string, auth *model.AuthInfo) *model.ApiJson {
+	if err := util.Validator.Struct(aul); err != nil {
+		return model.ErrorValidation(err)
+	}
+	if util.EmailRegex.MatchString(aul.Name) || util.PhoneRegex.MatchString(aul.Name) {
+		return model.ErrorValidation(errors.New("用户名不能为邮箱或手机号"))
+	}
+	const wxURL = "https://api.weixin.qq.com/sns/jscode2session"
+	params := map[string]string{
+		"appid":      config.AppConfig.GetString("wechat.appid"),
+		"secret":     config.AppConfig.GetString("wechat.secret"),
+		"js_code":    aul.Code,
+		"grant_type": "authorization_code",
+	}
+	wxres, err := util.HTTPRequest[model.WxLoginResponse](wxURL, "GET", params)
+	if err != nil {
+		return model.ErrorVerification(err)
+	}
+	if wxres.ErrCode != 0 {
+		return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
+	}
+
+	req := &model.CreateUserRequest{
+		RegisterUserRequest: aul.RegisterUserRequest,
+	}
+	operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
+	var response *model.ApiJson
+	var user *model.User
+	if database.DB.Transaction(func(tx *gorm.DB) error {
+		user, err = dao.CreateUser(req, operator)
+		if err != nil {
+			response = model.ErrorInsertDatabase(err)
+			return err
+		}
+		if err := dao.AttachOpenIDToUser(user.ID, wxres.OpenID); err != nil {
+			response = model.ErrorUpdateDatabase(err)
+			return err
+		}
+		return nil
+	}); err != nil {
+		return response
+	}
+
+	if err := dao.ForceLogin(user.ID, ip); err != nil {
+		return model.ErrorUpdateDatabase(fmt.Errorf("登录失败"))
+	}
+	token, err := util.GetJwtString(user.ID, user.RoleName)
 	if err != nil {
 		return model.ErrorBuildJWT(err)
 	}

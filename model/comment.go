@@ -11,7 +11,7 @@ type Comment struct {
 }
 
 type CreateCommentRequest struct {
-	Content string `json:"content" validate:"required"`
+	Content string `json:"content" validate:"required,lte=65535"`
 }
 
 type CommentJson struct {

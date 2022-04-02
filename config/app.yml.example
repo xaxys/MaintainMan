@@ -1,4 +1,4 @@
-version: 1.0.0
+version: 1.0.2
 app:
   name: "maintainman"
   listen: ":8080"
@@ -16,6 +16,7 @@ app:
 wechat:
   appid: ""
   secret: ""
+  fastlogin: true
 
 token:
   key: "xaxys_2022_all_rights_reserved"

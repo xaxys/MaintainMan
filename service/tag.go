@@ -56,8 +56,6 @@ func CreateTag(aul *model.CreateTagRequest, auth *model.AuthInfo) *model.ApiJson
 	return model.SuccessCreate(TagToJson(tag), "创建成功")
 }
 
-// TODO: Add func UpdateTag ?
-
 func DeleteTag(id uint, auth *model.AuthInfo) *model.ApiJson {
 	err := dao.DeleteTag(id)
 	if err != nil {
@@ -66,15 +64,29 @@ func DeleteTag(id uint, auth *model.AuthInfo) *model.ApiJson {
 	return model.SuccessUpdate(nil, "删除成功")
 }
 
+func CheckTags(tagIDs []uint, perm, role string) *model.ApiJson {
+	tags, err := dao.GetTagsByIDs(tagIDs)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	for _, t := range tags {
+		if err := dao.CheckPermission(role, fmt.Sprintf("%s.%d", perm, t.Level)); err != nil {
+			return model.ErrorNoPermissions(err)
+		}
+	}
+	return nil
+}
+
 func TagToJson(tag *model.Tag) *model.TagJson {
 	if tag == nil {
 		return nil
 	} else {
 		return &model.TagJson{
-			ID:    tag.ID,
-			Sort:  tag.Sort,
-			Name:  tag.Name,
-			Level: tag.Level,
+			ID:       tag.ID,
+			Sort:     tag.Sort,
+			Name:     tag.Name,
+			Level:    tag.Level,
+			Congener: tag.Congener,
 		}
 	}
 

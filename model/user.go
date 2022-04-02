@@ -41,7 +41,12 @@ type RegisterUserRequest struct {
 	DisplayName string `json:"display_name" validate:"required,lte=191"`
 	Phone       string `json:"phone" validate:"omitempty,alphanum,lte=191"`
 	Email       string `json:"email" validate:"omitempty,email,lte=191"`
-	RealName    string `json:"real_name" validate:"lte=191"`
+	RealName    string `json:"real_name" validate:"omitempty,lte=191"`
+}
+
+type WxRegisterRequest struct {
+	WxLoginRequest
+	RegisterUserRequest
 }
 
 type CreateUserRequest struct {

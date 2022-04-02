@@ -10,6 +10,21 @@ import (
 	"gorm.io/gorm"
 )
 
+// GetSimpleOrderByID return no relative info
+func GetSimpleOrderByID(id uint) (*model.Order, error) {
+	return TxGetSimpleOrderByID(database.DB, id)
+}
+
+// TxGetSimpleOrderByID return no relative info
+func TxGetSimpleOrderByID(tx *gorm.DB, id uint) (*model.Order, error) {
+	order := &model.Order{}
+	if err := tx.First(order, id).Error; err != nil {
+		logger.Logger.Debugf("TxGetOrderByIDErr: %v\n", err)
+		return nil, err
+	}
+	return order, nil
+}
+
 func GetOrderByID(id uint) (*model.Order, error) {
 	return TxGetOrderByID(database.DB, id)
 }
@@ -83,6 +98,9 @@ func TxCreateOrder(tx *gorm.DB, aul *model.CreateOrderRequest, operator uint) (o
 	if err != nil {
 		return
 	}
+	if err = CheckTagsCongener(tags); err != nil {
+		return
+	}
 	if err = tx.Create(order).Error; err != nil {
 		return
 	}
@@ -121,16 +139,23 @@ func TxUpdateOrder(tx *gorm.DB, id uint, aul *model.UpdateOrderRequest, operator
 	if err != nil {
 		return
 	}
-	if err := tx.Model(order).Updates(order).Error; err != nil {
-		return nil, err
+
+	if err = tx.Model(order).Updates(order).Error; err != nil {
+		return
 	}
-	if err := tx.Model(order).Association("Tags").Append(addTags); err != nil {
-		return nil, err
+	if err = tx.Model(order).Association("Tags").Append(addTags); err != nil {
+		return
 	}
-	if err := tx.Model(order).Association("Tags").Delete(delTags); err != nil {
-		return nil, err
+	if err = tx.Model(order).Association("Tags").Delete(delTags); err != nil {
+		return
 	}
-	return order, nil
+	if err = tx.Preload("Tags").First(order, id).Error; err != nil {
+		return
+	}
+	if err = CheckTagsCongener(order.Tags); err != nil {
+		return
+	}
+	return
 }
 
 func DeleteOrder(id uint) error {

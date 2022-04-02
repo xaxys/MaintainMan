@@ -60,7 +60,7 @@ func GetAllAnnounces(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
-// GetLatestAnnounces GetLatestAnnounce godoc
+// GetLatestAnnounces godoc
 // @Summary 获取最新公告
 // @Description 获取最新公告 分页 强制逆序 开始时间 结束时间 之内
 // @Tags announce
@@ -88,7 +88,7 @@ func GetLatestAnnounces(ctx iris.Context) {
 // @Tags announce
 // @Accept  json
 // @Produce  json
-// @Param body model.CreateAnnounceRequest true "创建公告请求"
+// @Param body body model.CreateAnnounceRequest true "创建公告请求"
 // @Success 201 {object} model.ApiJson{data=model.AnnounceJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}

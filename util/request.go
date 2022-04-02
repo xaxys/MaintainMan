@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func HttpRequest(url string, method string, params map[string]string, resjson any) error {
+func HTTPRequest[T any](url string, method string, params map[string]string) (response *T, err error) {
 	kvset := []string{}
 	for k, v := range params {
 		kvset = append(kvset, k+"="+v)
@@ -18,18 +18,19 @@ func HttpRequest(url string, method string, params map[string]string, resjson an
 	client := &http.Client{}
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
-		return err
+		return
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		return err
+		return
 	}
 	defer res.Body.Close()
 
 	body, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return err
+		return
 	}
-	json.Unmarshal(body, &resjson)
-	return nil
+	response = new(T)
+	err = json.Unmarshal(body, response)
+	return
 }

@@ -12,7 +12,7 @@ type Item struct {
 
 type CreateItemRequest struct {
 	Name        string `json:"name" validate:"required,lte=191"`
-	Discription string `json:"discription"`
+	Discription string `json:"discription" validate:"lte=65535"`
 }
 
 type ItemInfoJson struct {

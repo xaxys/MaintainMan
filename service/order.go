@@ -69,14 +69,8 @@ func CreateOrder(aul *model.CreateOrderRequest, auth *model.AuthInfo) *model.Api
 		return model.ErrorValidation(err)
 	}
 	role := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string { return v.Role }, "")
-	tags, err := dao.GetTagsByIDs(aul.Tags)
-	if err != nil {
-		return model.ErrorQueryDatabase(err)
-	}
-	for _, t := range tags {
-		if err := dao.CheckPermission(role, fmt.Sprintf("tag.view.%d", t.Level)); err != nil {
-			return model.ErrorNoPermissions(err)
-		}
+	if errResp := CheckTags(aul.Tags, "tag.view", role); errResp != nil {
+		return errResp
 	}
 	order, err := dao.CreateOrder(aul, auth.User)
 	if err != nil {
@@ -86,31 +80,22 @@ func CreateOrder(aul *model.CreateOrderRequest, auth *model.AuthInfo) *model.Api
 }
 
 func UpdateOrder(id uint, aul *model.UpdateOrderRequest, auth *model.AuthInfo) *model.ApiJson {
-	order, err := dao.GetOrderByID(id)
+	order, err := dao.GetSimpleOrderByID(id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
 		return model.ErrorQueryDatabase(err)
 	}
 	if order.UserID != auth.User {
 		return model.ErrorUpdateDatabase(fmt.Errorf("操作人不是订单创建者"))
 	}
 	role := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string { return v.Role }, "")
-	addTags, err := dao.GetTagsByIDs(aul.AddTags)
-	if err != nil {
-		return model.ErrorQueryDatabase(err)
+	if errResp := CheckTags(aul.AddTags, "tag.add", role); errResp != nil {
+		return errResp
 	}
-	for _, t := range addTags {
-		if err := dao.CheckPermission(role, fmt.Sprintf("tag.view.%d", t.Level)); err != nil {
-			return model.ErrorNoPermissions(err)
-		}
-	}
-	delTags, err := dao.GetTagsByIDs(aul.DelTags)
-	if err != nil {
-		return model.ErrorQueryDatabase(err)
-	}
-	for _, t := range delTags {
-		if err := dao.CheckPermission(role, fmt.Sprintf("tag.view.%d", t.Level)); err != nil {
-			return model.ErrorNoPermissions(err)
-		}
+	if errResp := CheckTags(aul.DelTags, "tag.add", role); errResp != nil {
+		return errResp
 	}
 	return ForceUpdateOrder(id, aul, auth)
 }
@@ -135,8 +120,11 @@ func ForceUpdateOrder(id uint, aul *model.UpdateOrderRequest, auth *model.AuthIn
 // }
 
 func ReleaseOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
-	order, err := dao.GetOrderByID(id)
+	order, err := dao.GetSimpleOrderByID(id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
 		return model.ErrorQueryDatabase(err)
 	}
 	if order.Status == model.StatusWaiting {
@@ -156,8 +144,11 @@ func AssignOrder(id, repairer uint, auth *model.AuthInfo) *model.ApiJson {
 	if repairer == 0 {
 		return model.ErrorUpdateDatabase(fmt.Errorf("维修人不能为空"))
 	}
-	order, err := dao.GetOrderByID(id)
+	order, err := dao.GetSimpleOrderByID(id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
 		return model.ErrorQueryDatabase(err)
 	}
 	if order.Status == model.StatusAssigned {
@@ -174,8 +165,11 @@ func AssignOrder(id, repairer uint, auth *model.AuthInfo) *model.ApiJson {
 }
 
 func CompleteOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
-	order, err := dao.GetOrderByID(id)
+	order, err := dao.GetSimpleOrderByID(id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
 		return model.ErrorQueryDatabase(err)
 	}
 	if order.Status == model.StatusCompleted {
@@ -195,8 +189,11 @@ func CompleteOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
 }
 
 func CancelOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
-	order, err := dao.GetOrderByID(id)
+	order, err := dao.GetSimpleOrderByID(id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
 		return model.ErrorQueryDatabase(err)
 	}
 	if order.Status == model.StatusCanceled {
@@ -213,8 +210,11 @@ func CancelOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
 }
 
 func RejectOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
-	order, err := dao.GetOrderByID(id)
+	order, err := dao.GetSimpleOrderByID(id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
 		return model.ErrorQueryDatabase(err)
 	}
 	if order.Status == model.StatusRejected {
@@ -231,8 +231,11 @@ func RejectOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
 }
 
 func AppraiseOrder(id, appraisal uint, auth *model.AuthInfo) *model.ApiJson {
-	order, err := dao.GetOrderByID(id)
+	order, err := dao.GetSimpleOrderByID(id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
 		return model.ErrorQueryDatabase(err)
 	}
 	if order.Status == model.StatusAppraised {
@@ -253,6 +256,9 @@ func AppraiseOrder(id, appraisal uint, auth *model.AuthInfo) *model.ApiJson {
 func ReportOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
 	order, err := dao.GetOrderWithLastStatus(id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
 		return model.ErrorQueryDatabase(err)
 	}
 	if order.Status == model.StatusReported {
@@ -272,8 +278,11 @@ func ReportOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
 }
 
 func HoldOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
-	order, err := dao.GetOrderByID(id)
+	order, err := dao.GetSimpleOrderByID(id)
 	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
 		return model.ErrorQueryDatabase(err)
 	}
 	if order.Status == model.StatusHold {

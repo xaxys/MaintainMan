@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const PermConfigVersion = "1.0.1"
+const PermConfigVersion = "1.0.2"
 
 var (
 	PermConfig *viper.Viper
@@ -21,17 +21,19 @@ func init() {
 
 	PermConfig.SetDefault("permission", map[string]any{
 		"user": map[string]any{
-			"view":      "查看当前用户",
-			"create":    "创建用户",
-			"update":    "更新用户",
-			"updateall": "更新所有用户",
-			"role":      "修改角色",
-			"division":  "修改部门",
-			"delete":    "删除用户",
-			"viewall":   "查看所有用户",
-			"login":     "登录",
-			"register":  "注册",
-			"renew":     "更新Token",
+			"view":       "查看当前用户",
+			"create":     "创建用户",
+			"update":     "更新用户",
+			"updateall":  "更新所有用户",
+			"role":       "修改角色",
+			"division":   "修改部门",
+			"delete":     "删除用户",
+			"viewall":    "查看所有用户",
+			"login":      "登录",
+			"register":   "注册",
+			"wxlogin":    "微信登录",
+			"wxregister": "微信注册",
+			"renew":      "更新Token",
 		},
 		"role": map[string]any{
 			"view":    "查看当前角色",

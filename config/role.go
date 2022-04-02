@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const RoleConfigVersion = "1.0.1"
+const RoleConfigVersion = "1.0.2"
 
 var (
 	RoleConfig *viper.Viper
@@ -33,6 +33,8 @@ func init() {
 			"permissions": []string{
 				"user.register",
 				"user.login",
+				"user.wxlogin",
+				"user.wxregister",
 			},
 			"inheritance": []string{},
 		},

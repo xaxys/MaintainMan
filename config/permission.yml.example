@@ -1,4 +1,4 @@
-version: 1.0.1
+version: 1.0.2
 permission:
   user:
     view: "查看当前用户"
@@ -11,6 +11,8 @@ permission:
     viewall: "查看所有用户"
     login: "登录"
     register: "注册"
+    wxlogin: "微信登录"
+    wxregister: "微信注册"
     renew: "更新Token"
   role:
     view: "查看当前角色"

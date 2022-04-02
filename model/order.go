@@ -25,19 +25,19 @@ type Order struct {
 
 type CreateOrderRequest struct {
 	Title        string `json:"title" validate:"required,lte=191"`
-	Content      string `json:"content" validate:"required"`
-	Address      string `json:"address" validate:"required"`
+	Content      string `json:"content" validate:"omitempty,lte=65535"`
+	Address      string `json:"address" validate:"required,lte=65535"`
 	ContactName  string `json:"contact_name" validate:"required,lte=191"`
 	ContactPhone string `json:"contact_phone" validate:"required,lte=191"`
 	Tags         []uint `json:"tags"` // 若干 Tag 的 ID
 }
 
 type UpdateOrderRequest struct {
-	Title        string `json:"title" validate:"lte=191"`
-	Content      string `json:"content"`
-	Address      string `json:"address"`
-	ContactName  string `json:"contact_name" validate:"lte=191"`
-	ContactPhone string `json:"contact_phone" validate:"lte=191"`
+	Title        string `json:"title" validate:"omitempty,lte=191"`
+	Content      string `json:"content" validate:"omitempty,lte=65535"`
+	Address      string `json:"address" validate:"omitempty,lte=65535"`
+	ContactName  string `json:"contact_name" validate:"omitempty,lte=191"`
+	ContactPhone string `json:"contact_phone" validate:"omitempty,lte=191"`
 	AddTags      []uint `json:"add_tags"` // 若干需要添加的 Tag 的 ID
 	DelTags      []uint `json:"del_tags"` // 若干需要删除的 Tag 的 ID
 }

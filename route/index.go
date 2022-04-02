@@ -30,8 +30,9 @@ func Route(app *iris.Application) {
 			v1.SetExecutionRules(iris.ExecutionRules{Done: iris.ExecutionOptions{Force: true}})
 
 			v1.Post("/login", middleware.PermInterceptor("user.login"), controller.UserLogin)
-			v1.Post("/wxlogin", middleware.PermInterceptor("user.login"), controller.WxUserLogin)
+			v1.Post("/wxlogin", middleware.PermInterceptor("user.wxlogin"), controller.WxUserLogin)
 			v1.Post("/register", middleware.PermInterceptor("user.register"), controller.UserRegister)
+			v1.Post("/wxregister", middleware.PermInterceptor("user.wxregister"), controller.WxUserRegister)
 			v1.PartyFunc("/", func(api router.Party) {
 				api.Get("/renew", middleware.PermInterceptor("user.renew"), controller.UserRenew)
 
