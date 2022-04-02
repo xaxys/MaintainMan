@@ -36,6 +36,9 @@ func CreateComment(id uint, aul *model.CreateCommentRequest, auth *model.AuthInf
 	if order.UserID != auth.User && util.LastElem(order.StatusList).RepairerID != auth.User {
 		return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能创建评论"))
 	}
+	if order.AllowComment == model.CommentDisallow {
+		return model.ErrorNoPermissions(fmt.Errorf("该订单不允许评论"))
+	}
 	return ForceCreateComment(id, aul, auth)
 }
 
@@ -56,7 +59,7 @@ func DeleteComment(id uint, auth *model.AuthInfo) *model.ApiJson {
 		return model.ErrorNotFound(err)
 	}
 	if comment.UserID != auth.User {
-		return model.ErrorUpdateDatabase(fmt.Errorf("操作人不是评论创建者"))
+		return model.ErrorNoPermissions(fmt.Errorf("操作人不是评论创建者"))
 	}
 	return ForceDeleteComment(id, auth)
 }
@@ -64,19 +67,23 @@ func DeleteComment(id uint, auth *model.AuthInfo) *model.ApiJson {
 func ForceDeleteComment(id uint, auth *model.AuthInfo) *model.ApiJson {
 	err := dao.DeleteComment(id)
 	if err != nil {
-		return model.ErrorQueryDatabase(err)
+		return model.ErrorDeleteDatabase(err)
 	}
 	return model.SuccessUpdate(nil, "删除成功")
 }
 
 func CommentToJson(comment *model.Comment) *model.CommentJson {
-	return &model.CommentJson{
-		ID:          comment.ID,
-		OrderID:     comment.OrderID,
-		UserID:      comment.UserID,
-		UserName:    comment.UserName,
-		SequenceNum: comment.SequenceNum,
-		Content:     comment.Content,
-		CreatedAt:   comment.CreatedAt.Unix(),
+	if comment == nil {
+		return nil
+	} else {
+		return &model.CommentJson{
+			ID:          comment.ID,
+			OrderID:     comment.OrderID,
+			UserID:      comment.UserID,
+			UserName:    comment.UserName,
+			SequenceNum: comment.SequenceNum,
+			Content:     comment.Content,
+			CreatedAt:   comment.CreatedAt.Unix(),
+		}
 	}
 }

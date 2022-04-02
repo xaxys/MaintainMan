@@ -1,5 +1,10 @@
 package model
 
+const (
+	CommentAllow = iota + 1
+	CommentDisallow
+)
+
 type Comment struct {
 	BaseModel
 	OrderID     uint   `gorm:"not null; index:idx_comment_order_seqnum,priority:1; comment:订单ID"`

@@ -235,6 +235,7 @@ func TxAppraiseOrder(tx *gorm.DB, id, appraisal, operator uint) (err error) {
 	order.ID = id
 	order.Appraisal = appraisal
 	order.UpdatedBy = order.UserID
+	order.AllowComment = model.CommentDisallow
 
 	if err = tx.Model(order).Updates(order).Error; err != nil {
 		return
