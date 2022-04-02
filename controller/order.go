@@ -155,7 +155,7 @@ func GetOrderByID(ctx iris.Context) {
 // @Tags order
 // @Accept json
 // @Produce json
-// @Param body model.CreateOrderRequest true "请求参数"
+// @Param body body model.CreateOrderRequest true "请求参数"
 // @Success 201 {object} model.ApiJson{data=model.OrderJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
