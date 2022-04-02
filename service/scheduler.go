@@ -13,5 +13,5 @@ var (
 
 func init() {
 	duration := config.AppConfig.GetDuration("app.appraise.purge")
-	Scheduler.SingletonMode().Every(duration).Do(AutoAppraiseOrder)
+	Scheduler.Every(duration).SingletonMode().Do(AutoAppraiseOrder)
 }
