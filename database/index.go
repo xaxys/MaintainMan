@@ -38,12 +38,12 @@ func initSqlite() *gorm.DB {
 
 func initMysql() *gorm.DB {
 	dbHost := config.AppConfig.GetString("database.mysql.host")
-	dbPort := config.AppConfig.GetString("database.mysql.port")
+	dbPort := config.AppConfig.GetInt("database.mysql.port")
 	dbName := config.AppConfig.GetString("database.mysql.name")
 	dbParams := config.AppConfig.GetString("database.mysql.params")
 	dbUser := config.AppConfig.GetString("database.mysql.user")
 	dbPasswd := config.AppConfig.GetString("database.mysql.password")
-	dbURL := fmt.Sprintf("%s:%s@(%s:%s)/%s?%s", dbUser, dbPasswd, dbHost, dbPort, dbName, dbParams)
+	dbURL := fmt.Sprintf("%s:%s@(%s:%d)/%s?%s", dbUser, dbPasswd, dbHost, dbPort, dbName, dbParams)
 
 	db, err := gorm.Open(mysql.Open(dbURL))
 	if err != nil {
