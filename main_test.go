@@ -1596,6 +1596,7 @@ func initUser(name string, password string, displayName string) model.RegisterUs
 		DisplayName: displayName,
 		Phone:       strconv.Itoa(rand.Intn(100000)),
 		Email:       strconv.Itoa(rand.Intn(100000)) + "@qq.com",
+		RealName:    name,
 	}
 }
 
