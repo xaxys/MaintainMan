@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 )
 
 // Test User Router
@@ -1465,6 +1466,245 @@ func TestForceDeleteCommentRouter(t *testing.T) {
 	t.Log(responseBody)
 
 	responseBody = e.DELETE("/v1/comment/"+cast.ToString(commentID)+"/force").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+// Test Announce Router
+
+func TestGetLatestAnnouncesRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	responseBody := e.POST("/v1/announce").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateAnnounceRequest{
+			Title:     randomNumToString,
+			Content:   randomNumToString,
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}).Expect().Status(http.StatusCreated).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/announce").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/announce").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestCreateAnnounceRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	responseBody := e.POST("/v1/announce").
+		WithJSON(model.CreateAnnounceRequest{
+			Title:     randomNumToString,
+			Content:   randomNumToString,
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.POST("/v1/announce").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateAnnounceRequest{
+			Title:     randomNumToString,
+			Content:   randomNumToString,
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}).Expect().Status(http.StatusCreated).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestGetAnnounceByIDRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	response := e.POST("/v1/announce").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateAnnounceRequest{
+			Title:     randomNumToString,
+			Content:   randomNumToString,
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}).Expect().Status(http.StatusCreated)
+	t.Log(response.Body().Raw())
+
+	item := response.JSON().NotNull().Object().Value("data")
+	id := uint(item.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.GET("/v1/announce/" + cast.ToString(id)).
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/announce/"+cast.ToString(id)).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+
+}
+
+func TestGetAllAnnouncesRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+	responseBody := e.POST("/v1/announce").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateAnnounceRequest{
+			Title:     randomNumToString,
+			Content:   randomNumToString,
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 200000,
+		}).Expect().Status(http.StatusCreated).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/announce/all").
+		WithQueryObject(model.AllAnnounceRequest{
+			Title:     randomNumToString,
+			StartTime: cast.ToInt64(time.Now().Unix()) - 100000,
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 100000,
+			Inclusive: true,
+			PageParam: model.PageParam{},
+		}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/announce/all").
+		WithQueryObject(model.AllAnnounceRequest{
+			Title:     "",
+			StartTime: cast.ToInt64(time.Now().Unix()) - 100000,
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 100000,
+			Inclusive: true,
+			PageParam: model.PageParam{},
+		}).WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/announce/all").
+		WithQueryObject(model.AllAnnounceRequest{
+			Title:     "",
+			StartTime: -1,
+			EndTime:   -1,
+			Inclusive: true,
+			PageParam: model.PageParam{},
+		}).WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestUpdateAnnounceRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	response := e.POST("/v1/announce").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateAnnounceRequest{
+			Title:     randomNumToString,
+			Content:   randomNumToString,
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}).Expect().Status(http.StatusCreated)
+	t.Log(response.Body().Raw())
+
+	item := response.JSON().NotNull().Object().Value("data")
+	id := uint(item.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.PUT("/v1/announce/" + cast.ToString(id)).
+		WithJSON(model.UpdateAnnounceRequest{
+			Title:     randomNumToString + "_updated",
+			Content:   randomNumToString + "_updated",
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.PUT("/v1/announce/"+cast.ToString(id)).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.UpdateAnnounceRequest{
+			Title:     randomNumToString + "_updated",
+			Content:   randomNumToString + "_updated",
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}).Expect().Status(http.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestDeleteAnnounceRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	response := e.POST("/v1/announce").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateAnnounceRequest{
+			Title:     randomNumToString,
+			Content:   randomNumToString,
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}).Expect().Status(http.StatusCreated)
+	t.Log(response.Body().Raw())
+
+	item := response.JSON().NotNull().Object().Value("data")
+	id := uint(item.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.DELETE("/v1/announce/" + cast.ToString(id)).
+		WithJSON(model.UpdateAnnounceRequest{
+			Title:     randomNumToString + "_updated",
+			Content:   randomNumToString + "_updated",
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}).Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.DELETE("/v1/announce/"+cast.ToString(id)).
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.UpdateAnnounceRequest{
+			Title:     randomNumToString + "_updated",
+			Content:   randomNumToString + "_updated",
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}).Expect().Status(http.StatusNoContent).Body().Raw()
+	t.Log(responseBody)
+}
+
+func TestHitAnnounceRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	randomNumToString := cast.ToString(rand.Intn(10000))
+
+	response := e.POST("/v1/announce").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		WithJSON(model.CreateAnnounceRequest{
+			Title:     randomNumToString,
+			Content:   randomNumToString,
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}).Expect().Status(http.StatusCreated)
+	t.Log(response.Body().Raw())
+
+	item := response.JSON().NotNull().Object().Value("data")
+	id := uint(item.Object().Value("id").NotNull().Raw().(float64))
+
+	responseBody := e.GET("/v1/announce/" + cast.ToString(id) + "/hit").
+		Expect().Status(httptest.StatusForbidden).Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/announce/"+cast.ToString(id)+"/hit").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
 		Expect().Status(http.StatusNoContent).Body().Raw()
 	t.Log(responseBody)

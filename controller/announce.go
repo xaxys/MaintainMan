@@ -51,7 +51,7 @@ func GetAnnounce(ctx iris.Context) {
 // @Router /v1/announce/all [get]
 func GetAllAnnounces(ctx iris.Context) {
 	aul := &model.AllAnnounceRequest{}
-	if err := ctx.ReadQuery(&aul); err != nil {
+	if err := ctx.ReadQuery(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
@@ -126,7 +126,7 @@ func CreateAnnounce(ctx iris.Context) {
 // @Router /v1/announce/{id} [put]
 func UpdateAnnounce(ctx iris.Context) {
 	aul := &model.UpdateAnnounceRequest{}
-	if err := ctx.ReadJSON(&aul); err != nil {
+	if err := ctx.ReadJSON(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
