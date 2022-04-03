@@ -60,6 +60,21 @@ func GetUserInfoByName(name string, auth *model.AuthInfo) *model.ApiJson {
 	return model.Success(json, "获取成功")
 }
 
+func GetUserByDivision(id uint, param *model.PageParam, auth *model.AuthInfo) *model.ApiJson {
+	if err := util.Validator.Struct(param); err != nil {
+		return model.ErrorValidation(err)
+	}
+	users, err := dao.GetUserByDivision(id, param)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
+		return model.ErrorQueryDatabase(err)
+	}
+	us := util.TransSlice(users, UserToJson)
+	return model.Success(us, "获取成功")
+}
+
 func RegisterUser(aul *model.RegisterUserRequest, auth *model.AuthInfo) *model.ApiJson {
 	req := &model.CreateUserRequest{
 		RegisterUserRequest: *aul,
@@ -72,7 +87,16 @@ func CreateUser(aul *model.CreateUserRequest, auth *model.AuthInfo) *model.ApiJs
 		return model.ErrorValidation(err)
 	}
 	if util.EmailRegex.MatchString(aul.Name) || util.PhoneRegex.MatchString(aul.Name) {
-		return model.ErrorValidation(errors.New("用户名不能为邮箱或手机号"))
+		return model.ErrorValidation(fmt.Errorf("用户名不能为邮箱或手机号"))
+	}
+	if aul.DivisionID != 0 {
+		_, err := dao.GetDivisionByID(aul.DivisionID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return model.ErrorNotFound(fmt.Errorf("分组不存在: %v", err))
+			}
+			return model.ErrorQueryDatabase(err)
+		}
 	}
 	operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
 	u, err := dao.CreateUser(aul, operator)
@@ -93,6 +117,15 @@ func UpdateUser(id uint, aul *model.UpdateUserRequest, auth *model.AuthInfo) *mo
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorQueryDatabase(err)
+	}
+	if aul.DivisionID != 0 {
+		_, err := dao.GetDivisionByID(aul.DivisionID)
+		if err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return model.ErrorNotFound(fmt.Errorf("分组不存在: %v", err))
+			}
+			return model.ErrorQueryDatabase(err)
+		}
 	}
 	u, err := dao.UpdateUser(id, aul, auth.User)
 	if err != nil {
@@ -317,7 +350,11 @@ func UserToJson(user *model.User) *model.UserJson {
 			Name:        user.Name,
 			DisplayName: user.DisplayName,
 			RoleName:    user.RoleName,
+			Division:    DivisionToJson(user.Division),
+			Phone:       user.Phone,
+			Email:       user.Email,
+			RealName:    user.RealName,
+			LoginTime:   user.LoginTime.Unix(),
 		}
 	}
-
 }

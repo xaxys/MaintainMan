@@ -73,7 +73,7 @@ func ForceGetCommentsByOrder(ctx iris.Context) {
 // @Failure 404 {object} model.ApiJson{data=[]string}
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
-// @Router /v1/order/{id}/comment [post]
+// @Router /v1/order/{id}/comment/force [post]
 func ForceCreateComment(ctx iris.Context) {
 	aul := &model.CreateCommentRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {

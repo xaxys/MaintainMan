@@ -44,6 +44,7 @@ func Route(app *iris.Application) {
 					user.Get("/{id:uint}", middleware.PermInterceptor("user.viewall"), controller.GetUserByID)
 					user.Put("/{id:uint}", middleware.PermInterceptor("user.updateall"), controller.ForceUpdateUser)
 					user.Delete("/{id:uint}", middleware.PermInterceptor("user.delete"), controller.ForceDeleteUser)
+					user.Get("/division/{id:uint}", middleware.PermInterceptor("user.viewall"), controller.GetUserByDivision)
 				})
 
 				api.PartyFunc("/role", func(role router.Party) {
@@ -60,6 +61,13 @@ func Route(app *iris.Application) {
 				api.PartyFunc("/permission", func(perm router.Party) {
 					perm.Get("/all", middleware.PermInterceptor("permission.viewall"), controller.GetAllPermissions)
 					perm.Get("/{name:string}", middleware.PermInterceptor("permission.viewall"), controller.GetPermission)
+				})
+
+				api.PartyFunc("/division", func(division router.Party) {
+					division.Get("/{id:uint}", middleware.PermInterceptor("division.viewall"), controller.GetDivision)
+					division.Post("/", middleware.PermInterceptor("division.create"), controller.CreateDivision)
+					division.Put("/{id:uint}", middleware.PermInterceptor("division.update"), controller.UpdateDivision)
+					division.Delete("/{id:uint}", middleware.PermInterceptor("division.delete"), controller.DeleteDivision)
 				})
 
 				api.PartyFunc("/announce", func(announce router.Party) {

@@ -78,6 +78,19 @@ func TxGetUserByOpenID(tx *gorm.DB, openid string) (*model.User, error) {
 	return user, nil
 }
 
+func GetUserByDivision(id uint, param *model.PageParam) ([]*model.User, error) {
+	return TxGetUserByDivision(database.DB, id, param)
+}
+
+func TxGetUserByDivision(tx *gorm.DB, id uint, param *model.PageParam) (users []*model.User, err error) {
+	user := &model.User{}
+	user.DivisionID = id
+	if err = TxPageFilter(tx, param).Where(user).Find(&users).Error; err != nil {
+		logger.Logger.Debugf("GetUserByDivisionErr: %v\n", err)
+	}
+	return
+}
+
 func GetAllUsersWithParam(aul *model.AllUserRequest) ([]*model.User, error) {
 	return TxGetAllUsersWithParam(database.DB, aul)
 }

@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const PermConfigVersion = "1.0.2"
+const PermConfigVersion = "1.0.3"
 
 var (
 	PermConfig *viper.Viper
@@ -25,8 +25,6 @@ func init() {
 			"create":     "创建用户",
 			"update":     "更新用户",
 			"updateall":  "更新所有用户",
-			"role":       "修改角色",
-			"division":   "修改部门",
 			"delete":     "删除用户",
 			"viewall":    "查看所有用户",
 			"login":      "登录",
@@ -44,6 +42,12 @@ func init() {
 		},
 		"permission": map[string]any{
 			"viewall": "查看所有权限",
+		},
+		"division": map[string]any{
+			"viewall": "查看所有分组",
+			"create":  "创建分组",
+			"update":  "更新分组",
+			"delete":  "删除分组",
 		},
 		"announce": map[string]any{
 			"view":    "查看公告",
@@ -67,8 +71,6 @@ func init() {
 			"report":     "上报订单",
 			"hold":       "挂起订单",
 			"complete":   "完成订单",
-			"defect":     "修改故障分类",
-			"urgence":    "修改紧急程度",
 			"appraise":   "评分",
 			"viewall":    "查看所有订单",
 		},

@@ -42,8 +42,38 @@ func GetUser(ctx iris.Context) {
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/user/{id} [get]
 func GetUserByID(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.GetUserByID(auth.User, auth)
+	response := service.GetUserInfoByID(id, auth)
+	ctx.Values().Set("response", response)
+}
+
+// GetUserByDivision godoc
+// @Summary 获取某分组下的所有用户信息
+// @Description 获取某分组下的所有用户信息 分页
+// @Tags user
+// @Produce  json
+// @Param id path uint true "分组ID"
+// @Param order_by query string false "排序字段 (默认为ID正序) 只接受"{field} {asc|desc}"格式 (e.g. "id desc")"
+// @Param offset query uint false "偏移量 (默认为0)"
+// @Param limit query uint false "每页数据量 (默认为50)"
+// @Success 200 {object} model.ApiJson{data=[]model.UserJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/user/division/{id} [get]
+func GetUserByDivision(ctx iris.Context) {
+	param := &model.PageParam{}
+	if err := ctx.ReadQuery(param); err != nil {
+		ctx.Values().Set("response", model.ErrorInvalidData(err))
+		return
+	}
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetUserByDivision(id, param, auth)
 	ctx.Values().Set("response", response)
 }
 
@@ -197,7 +227,6 @@ func UserRegister(ctx iris.Context) {
 		return
 	}
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-
 	response := service.RegisterUser(aul, auth)
 	ctx.Values().Set("response", response)
 }

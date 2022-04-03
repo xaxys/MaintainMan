@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const RoleConfigVersion = "1.0.2"
+const RoleConfigVersion = "1.0.3"
 
 var (
 	RoleConfig *viper.Viper
@@ -96,7 +96,7 @@ func init() {
 			"name":         "admin",
 			"display_name": "管理员",
 			"permissions": []string{
-				"user.division",
+				"division.*",
 				"announce.*",
 				"order.*",
 				"tag.*",

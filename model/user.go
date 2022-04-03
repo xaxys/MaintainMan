@@ -9,6 +9,7 @@ type User struct {
 	DisplayName string    `gorm:"not null; size:191; comment:昵称"`
 	RoleName    string    `gorm:"not null; size:50; index; comment:所属角色"`
 	DivisionID  uint      `gorm:"not null; default:0; comment:所属分组id"`
+	Division    *Division `gorm:"foreignkey:DivisionID"`
 	Phone       string    `gorm:"not null; size:191; index; comment:手机号"`
 	Email       string    `gorm:"not null; size:191; index; comment:邮箱"`
 	LoginIP     string    `gorm:"not null; size:40; default:0.0.0.0; comment:最后登录IP"`
@@ -73,13 +74,14 @@ type AllUserRequest struct {
 }
 
 type UserJson struct {
-	ID          uint      `json:"id"`
-	Name        string    `json:"name"`
-	DisplayName string    `json:"display_name"` // 昵称
-	RoleName    string    `json:"user_role"`
-	Role        *RoleJson `json:"role,omitempty"`
-	Phone       string    `json:"phone"`
-	Email       string    `json:"email"`
-	RealName    string    `json:"real_name"`
-	LoginTime   int64     `json:"login_time"` // unix timestamp in seconds (UTC)
+	ID          uint          `json:"id"`
+	Name        string        `json:"name"`
+	DisplayName string        `json:"display_name"` // 昵称
+	Division    *DivisionJson `json:"division"`
+	RoleName    string        `json:"user_role"`
+	Role        *RoleJson     `json:"role,omitempty"`
+	Phone       string        `json:"phone"`
+	Email       string        `json:"email"`
+	RealName    string        `json:"real_name"`
+	LoginTime   int64         `json:"login_time"` // unix timestamp in seconds (UTC)
 }
