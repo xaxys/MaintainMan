@@ -1,4 +1,4 @@
-version: 1.0.2
+version: 1.0.3
 app:
   name: "maintainman"
   listen: ":8080"
@@ -26,7 +26,7 @@ database:
   driver: "mysql"
   mysql:
     host: "localhost"
-    port: "3306"
+    port: 3306
     name: "maintainman"
     params: "parseTime=true&loc=Local&charset=utf8mb4"
     user: "root"
@@ -35,6 +35,11 @@ database:
     path: "maintainman.db"
 
 cache:
+  driver: "go-cache"
+  redis:
+    host: "localhost"
+    port: 6379
+    password: ""
   expire: "24h"
   purge: "10m"
 

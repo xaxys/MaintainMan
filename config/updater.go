@@ -15,12 +15,12 @@ func ReadAndUpdateConfig(config *viper.Viper, name string, version string) {
 			fmt.Printf("%s configuration file not found: %v\n", name, err)
 			config.SetDefault("version", version)
 			if err := config.SafeWriteConfig(); err != nil {
-				panic(fmt.Errorf("Failed to write %s configuration file: %v", name, err))
+				panic(fmt.Errorf("failed to write %s configuration file: %v", name, err))
 			}
 			fmt.Printf("default %s configuration file created.\n", name)
 			created = true
 		} else {
-			panic(fmt.Errorf("Fatal error reading %s configuration: %v", name, err))
+			panic(fmt.Errorf("fatal error reading %s configuration: %v", name, err))
 		}
 	}
 	if created {
@@ -37,7 +37,7 @@ func ReadAndUpdateConfig(config *viper.Viper, name string, version string) {
 			fmt.Printf("updating your %s configuration file. conflict entries will not be updated.\n", name)
 			config.Set("version", version)
 			if err := config.WriteConfig(); err != nil {
-				panic(fmt.Errorf("Failed to write %s configuration file: %v", name, err))
+				panic(fmt.Errorf("failed to write %s configuration file: %v", name, err))
 			}
 			fmt.Printf("%s configuration file updated to version %s.\n", name, version)
 		}

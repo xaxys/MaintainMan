@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const AppConfigVersion = "1.0.2"
+const AppConfigVersion = "1.0.3"
 
 var (
 	AppConfig *viper.Viper
@@ -37,12 +37,16 @@ func init() {
 	AppConfig.SetDefault("database.driver", "sqlite")
 	AppConfig.SetDefault("database.sqlite.path", "maintainman.db")
 	AppConfig.SetDefault("database.mysql.host", "localhost")
-	AppConfig.SetDefault("database.mysql.port", "3306")
+	AppConfig.SetDefault("database.mysql.port", 3306)
 	AppConfig.SetDefault("database.mysql.name", "maintainman")
 	AppConfig.SetDefault("database.mysql.params", "parseTime=true&loc=Local&charset=utf8mb4")
 	AppConfig.SetDefault("database.mysql.user", "root")
 	AppConfig.SetDefault("database.mysql.password", "123456")
 
+	AppConfig.SetDefault("cache.driver", "go-cache")
+	AppConfig.SetDefault("cache.redis.host", "localhost")
+	AppConfig.SetDefault("cache.redis.port", 6379)
+	AppConfig.SetDefault("cache.redis.password", "")
 	AppConfig.SetDefault("cache.expire", "24h")
 	AppConfig.SetDefault("cache.purge", "10m")
 
