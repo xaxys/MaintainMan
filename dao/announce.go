@@ -44,22 +44,25 @@ func TxGetAllAnnounceWithParam(tx *gorm.DB, aul *model.AllAnnounceRequest) (anno
 	if aul.Title != "" {
 		db = db.Where("title like ?", aul.Title)
 	}
+
 	if aul.StartTime != -1 {
-		time := time.Unix(aul.StartTime, 0)
+		unix := time.Unix(aul.StartTime, 0)
 		if aul.Inclusive {
-			db = db.Where("start_time >= ?", time)
+			db = db.Where("start_time >= ?", unix)
 		} else {
-			db = db.Where("start_time <= ?", time)
+			db = db.Where("start_time <= ?", unix)
 		}
 	}
+
 	if aul.EndTime != -1 {
-		time := time.Unix(aul.EndTime, 0)
+		unix := time.Unix(aul.EndTime, 0)
 		if aul.Inclusive {
-			db = db.Where("end_time <= ?", time)
+			db = db.Where("end_time <= ?", unix)
 		} else {
-			db = db.Where("end_time >= ?", time)
+			db = db.Where("end_time >= ?", unix)
 		}
 	}
+
 	if err = db.Find(&announces).Error; err != nil {
 		logger.Logger.Debugf("GetAllAnnounceErr: %v\n", err)
 	}
