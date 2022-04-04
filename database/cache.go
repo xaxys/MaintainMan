@@ -84,12 +84,14 @@ func (client *RedisClient) Get(key string) (any, bool) {
 	ctx := context.Background()
 	value, err := client.rdb.Get(ctx, key).Result()
 	if err != nil && err != redis.Nil {
-		logger.Logger.Debugf("%+v", err)
+		logger.Logger.Warnf("Redis error: %+v", err)
 	}
 	return value, err == nil
 }
 
 func (client *RedisClient) Set(key string, value any, expire time.Duration) {
 	ctx := context.Background()
-	client.rdb.Set(ctx, key, value, expire)
+	if _, err := client.rdb.Set(ctx, key, value, expire).Result(); err != nil {
+		logger.Logger.Warnf("Redis error: %+v", err)
+	}
 }
