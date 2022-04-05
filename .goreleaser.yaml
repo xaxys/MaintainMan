@@ -11,7 +11,6 @@ builds:
     env:
       - -extldflags '-static'
       - CGO_ENABLED=1
-      - GOVERSION=$(go version)
       - CC=o64-clang
       - CXX=o64-clang++
     goos:
@@ -23,13 +22,12 @@ builds:
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
-      - -X "main.GoVersion={{.Env.GOVERSION}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
 
   - id: darwin_arm64
     env:
       - -extldflags '-static'
       - CGO_ENABLED=1
-      - GOVERSION=$(go version)
       - CC=oa64-clang
       - CXX=oa64-clang++
     goos:
@@ -41,13 +39,12 @@ builds:
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
-      - -X "main.GoVersion={{.Env.GOVERSION}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
 
   - id: linux_amd64
     env:
       - -extldflags '-static'
       - CGO_ENABLED=1
-      - GOVERSION=$(go version)
       - CC=gcc
       - CXX=g++
     goos:
@@ -59,13 +56,12 @@ builds:
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
-      - -X "main.GoVersion={{.Env.GOVERSION}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
 
   - id: linux_arm64
     env:
       - -extldflags '-static'
       - CGO_ENABLED=1
-      - GOVERSION=$(go version)
       - CC=aarch64-linux-gnu-gcc
       - CXX=aarch64-linux-gnu-g++ 
     goos:
@@ -77,12 +73,11 @@ builds:
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
-      - -X "main.GoVersion={{.Env.GOVERSION}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
 
   - id: windows_i686
     env:
       - CGO_ENABLED=1
-      - GOVERSION=$(go version)
       - CC=i686-w64-mingw32-gcc
       - CXX=i686-w64-mingw32-g++
     goos:
@@ -95,12 +90,11 @@ builds:
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
-      - -X "main.GoVersion={{.Env.GOVERSION}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
 
   - id: windows_amd64
     env:
       - CGO_ENABLED=1
-      - GOVERSION=$(go version)
       - CC=x86_64-w64-mingw32-gcc
       - CXX=x86_64-w64-mingw32-g++
     goos:
@@ -113,7 +107,7 @@ builds:
     - -X "main.BuildTags={{.Tag}}"
     - -X "main.BuildTime={{.Date}}"
     - -X "main.GitCommit={{.FullCommit}}"
-    - -X "main.GoVersion={{.Env.GOVERSION}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
 
 archives:
   - id: default
