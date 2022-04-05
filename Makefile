@@ -1,9 +1,10 @@
-# Copyright (C) 2019-2020 xaxys. All rights reserved.
+# Copyright (C) 2022 xaxys. All rights reserved.
+PACKAGE_NAME          := maintainman
 
 ifeq ($(OS),Windows_NT)  # is Windows_NT on XP, 2000, 7, Vista, 10...
 	GO		?= go.exe
     PWD 	:= ${CURDIR}
-	TARGET	:= maintainman.exe
+	TARGET	:= $(PACKAGE_NAME).exe
 	BUILD_TAGS := $(shell git describe --tags --always --dirty="-dev")
 	BUILD_TIME := $(shell echo %date% %time%)
 	GIT_COMMIT := $(shell git rev-parse --short HEAD)
@@ -12,7 +13,7 @@ ifeq ($(OS),Windows_NT)  # is Windows_NT on XP, 2000, 7, Vista, 10...
 else
 	GO		?= go
     PWD 	:= ${CURDIR}
-	TARGET	:= maintainman
+	TARGET	:= $(PACKAGE_NAME)
 	BUILD_TAGS := $(shell git describe --tags --always --dirty="-dev")
 	BUILD_TIME := $(shell date --utc)
 	GIT_COMMIT := $(shell git rev-parse --short HEAD)

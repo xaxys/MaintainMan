@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const PermConfigVersion = "1.0.3"
+const PermConfigVersion = "1.1.0"
 
 var (
 	PermConfig *viper.Viper

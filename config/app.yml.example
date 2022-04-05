@@ -1,4 +1,4 @@
-version: 1.0.3
+version: 1.1.0
 app:
   name: "maintainman"
   listen: ":8080"
@@ -20,7 +20,7 @@ wechat:
 
 token:
   key: "xaxys_2022_all_rights_reserved"
-  exp: "30m"
+  expire: "30m"
 
 database:
   driver: "mysql"

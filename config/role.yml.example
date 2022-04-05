@@ -1,5 +1,5 @@
 # Only buttom-up inheritance is valid (latter roles are superior)
-version: 1.0.3
+version: 1.1.0
 role:
   - name: banned
     display_name: "封停用户"

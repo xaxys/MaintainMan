@@ -13,7 +13,7 @@ var (
 )
 
 func init() {
-	exp, err := time.ParseDuration(config.AppConfig.GetString("token.exp"))
+	exp, err := time.ParseDuration(config.AppConfig.GetString("token.expire"))
 	if err != nil {
 		panic(err)
 	}

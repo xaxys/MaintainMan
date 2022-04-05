@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const AppConfigVersion = "1.0.3"
+const AppConfigVersion = "1.1.0"
 
 var (
 	AppConfig *viper.Viper
@@ -32,7 +32,7 @@ func init() {
 	AppConfig.SetDefault("wechat.secret", "微信小程序的secret")
 	AppConfig.SetDefault("wechat.fastlogin", true)
 	AppConfig.SetDefault("token.key", "xaxys_2022_all_rights_reserved")
-	AppConfig.SetDefault("token.exp", "30m")
+	AppConfig.SetDefault("token.expire", "30m")
 
 	AppConfig.SetDefault("database.driver", "sqlite")
 	AppConfig.SetDefault("database.sqlite.path", "maintainman.db")

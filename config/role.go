@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const RoleConfigVersion = "1.0.3"
+const RoleConfigVersion = "1.1.0"
 
 var (
 	RoleConfig *viper.Viper

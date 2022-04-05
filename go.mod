@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/go-co-op/gocron v1.13.0
+	github.com/go-redis/redis/v8 v8.11.5
 	github.com/jinzhu/copier v0.3.5
 	github.com/kataras/golog v0.1.7
 	github.com/spf13/cast v1.4.1
@@ -26,7 +27,6 @@ require (
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
-	github.com/go-redis/redis/v8 v8.11.5 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/goccy/go-json v0.9.4 // indirect
 	github.com/golang-jwt/jwt/v4 v4.3.0 // indirect
@@ -90,7 +90,6 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.66.4 // indirect
-	gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b // indirect
 	moul.io/http2curl v1.0.0 // indirect

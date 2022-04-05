@@ -18,3 +18,5 @@ app.yml
 role.yml
 permission.yml
 maintainman
+
+dist/
