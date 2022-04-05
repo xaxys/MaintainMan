@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"database/sql"
 	"fmt"
 	"maintainman/database"
 	"maintainman/logger"
@@ -12,6 +13,19 @@ import (
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 )
+
+func GetUserCount() (int, error) {
+	return TxGetUserCount(database.DB)
+}
+
+func TxGetUserCount(tx *gorm.DB) (int, error) {
+	count := int64(0)
+	if err := tx.Model(&model.User{}).Count(&count).Error; err != nil {
+		logger.Logger.Debugf("GetUserCountErr: %v\n", err)
+		return 0, err
+	}
+	return int(count), nil
+}
 
 func GetUserByID(id uint) (*model.User, error) {
 	return TxGetUserByID(database.DB, id)
@@ -84,8 +98,12 @@ func GetUserByDivision(id uint, param *model.PageParam) ([]*model.User, error) {
 
 func TxGetUserByDivision(tx *gorm.DB, id uint, param *model.PageParam) (users []*model.User, err error) {
 	user := &model.User{}
-	user.DivisionID = id
-	if err = TxPageFilter(tx, param).Where(user).Find(&users).Error; err != nil {
+	user.DivisionID = sql.NullInt64{Int64: int64(id), Valid: id != 0}
+	tx = TxPageFilter(tx, param).Where(user)
+	if id == 0 {
+		tx = tx.Where("division_id is null")
+	}
+	if err = tx.Find(&users).Error; err != nil {
 		logger.Logger.Debugf("GetUserByDivisionErr: %v\n", err)
 	}
 	return
@@ -119,6 +137,7 @@ func TxCreateUser(tx *gorm.DB, json *model.CreateUserRequest, operator uint) (*m
 
 	user := &model.User{}
 	copier.Copy(user, json)
+	user.DivisionID = sql.NullInt64{Int64: int64(json.DivisionID), Valid: json.DivisionID != 0}
 	user.CreatedBy = operator
 
 	if err := tx.Create(user).Error; err != nil {
@@ -142,8 +161,9 @@ func TxUpdateUser(tx *gorm.DB, id uint, json *model.UpdateUserRequest, operator 
 	user := &model.User{}
 	copier.Copy(user, json)
 	user.ID = id
+	user.DivisionID = sql.NullInt64{Int64: int64(json.DivisionID), Valid: json.DivisionID != 0}
 	user.UpdatedBy = operator
-	if err := tx.Model(user).Where(user).Updates(user).Error; err != nil {
+	if err := tx.Model(user).Updates(user).Error; err != nil {
 		logger.Logger.Debugf("UpdateUserErr: %v\n", err)
 		return nil, err
 	}
@@ -157,7 +177,7 @@ func AttachOpenIDToUser(id uint, openid string) error {
 func TxAttachOpenIDToUser(tx *gorm.DB, id uint, openid string) error {
 	user := &model.User{}
 	user.ID = id
-	if err := tx.Model(user).Where(user).Update("open_id", openid).Error; err != nil {
+	if err := tx.Model(user).Update("open_id", openid).Error; err != nil {
 		logger.Logger.Debugf("AttachOpenIDToUserErr: %v\n", err)
 		return err
 	}
@@ -191,9 +211,8 @@ func TxForceLogin(tx *gorm.DB, id uint, ip string) error {
 		LoginIP:   ip,
 		LoginTime: time.Now(),
 	}
-	u := &model.User{}
-	u.ID = id
-	if err := tx.Model(u).Where(u).Updates(user).Error; err != nil {
+	user.ID = id
+	if err := tx.Model(user).Updates(user).Error; err != nil {
 		logger.Logger.Debugf("ForceLoginErr: %v\n", err)
 		return err
 	}

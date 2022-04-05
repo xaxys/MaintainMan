@@ -1,13 +1,11 @@
 package initialize
 
 import (
-	"errors"
+	"fmt"
 	"maintainman/config"
 	"maintainman/dao"
 	"maintainman/logger"
 	"maintainman/model"
-
-	"gorm.io/gorm"
 )
 
 func InitDefaultData() {
@@ -21,14 +19,14 @@ func CreateSystemAdmin() {
 	aul.Password = config.AppConfig.GetString("admin.password")
 	aul.RoleName = config.AppConfig.GetString("admin.role_name")
 
-	if _, err := dao.GetUserByID(1); err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			logger.Logger.Debug("Create default administrator account")
-			if _, err := dao.CreateUser(aul, 0); err != nil {
-				panic("Failed to create default administrator")
-			}
-		} else {
-			panic(err)
+	count, err := dao.GetUserCount()
+	if err != nil {
+		panic(err)
+	}
+	if count == 0 {
+		logger.Logger.Debug("Create default administrator account")
+		if _, err := dao.CreateUser(aul, 0); err != nil {
+			panic(fmt.Errorf("failed to create default administrator: %v", err))
 		}
 	}
 }

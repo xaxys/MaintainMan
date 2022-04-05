@@ -1,12 +1,16 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"database/sql"
+
+	"gorm.io/gorm"
+)
 
 type Division struct {
 	gorm.Model
-	Name     string      `gorm:"not null; size:191; unique; comment:分组名称"`
-	ParentID uint        `gorm:"not null; default:0; comment:父分组ID"`
-	Children []*Division `gorm:"foreignkey:ParentID"`
+	Name     string        `gorm:"not null; size:191; unique; comment:分组名称"`
+	ParentID sql.NullInt64 `gorm:"comment:父分组ID"`
+	Children []*Division   `gorm:"foreignkey:ParentID"`
 }
 
 type CreateDivisionRequest struct {

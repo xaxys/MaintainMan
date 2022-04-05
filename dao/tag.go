@@ -88,7 +88,7 @@ func TxUpdateTag(tx *gorm.DB, id uint, aul *model.CreateTagRequest, operator uin
 	tag = JsonToTag(aul)
 	tag.ID = id
 	tag.UpdatedBy = operator
-	if err = tx.Where(tag).Updates(tag).Error; err != nil {
+	if err = tx.Model(tag).Updates(tag).Error; err != nil {
 		logger.Logger.Debugf("UpdateTagErr: %v\n", err)
 	}
 	return

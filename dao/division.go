@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"database/sql"
 	"maintainman/database"
 	"maintainman/logger"
 	"maintainman/model"
@@ -29,6 +30,7 @@ func CreateDivision(aul *model.CreateDivisionRequest) (*model.Division, error) {
 func TxCreateDivision(tx *gorm.DB, aul *model.CreateDivisionRequest) (*model.Division, error) {
 	division := &model.Division{}
 	copier.Copy(division, aul)
+	division.ParentID = sql.NullInt64{Int64: int64(aul.ParentID), Valid: aul.ParentID != 0}
 	if err := tx.Create(division).Error; err != nil {
 		logger.Logger.Debugf("CreateDivisionErr: %v\n", err)
 		return nil, err
@@ -40,12 +42,13 @@ func UpdateDivision(id uint, aul *model.UpdateDivisionRequest) (*model.Division,
 	return TxUpdateDivision(database.DB, id, aul)
 }
 
+// FIXME: Can't update division correctly
 func TxUpdateDivision(tx *gorm.DB, id uint, aul *model.UpdateDivisionRequest) (*model.Division, error) {
-	where := &model.Division{}
-	where.ID = id
 	division := &model.Division{}
 	copier.Copy(division, aul)
-	if err := tx.Model(where).Where(where).Updates(division).Error; err != nil {
+	division.ID = id
+	division.ParentID = sql.NullInt64{Int64: int64(aul.ParentID), Valid: aul.ParentID != 0}
+	if err := tx.Model(division).Updates(division).Error; err != nil {
 		logger.Logger.Debugf("UpdateDivisionErr: %v\n", err)
 		return nil, err
 	}
