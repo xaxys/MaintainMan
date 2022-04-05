@@ -37,8 +37,8 @@ func init() {
 	}
 
 	LoginInterceptor = func(ctx iris.Context) {
-		if ctx.Values().Get("auth").(*model.AuthInfo) == nil {
-			response := model.ErrorUnauthorized(fmt.Errorf("无法获取到登陆用户信息，请重新登陆"))
+		if ctx.Values().Get("auth") == nil {
+			response := model.ErrorNoPermissions(fmt.Errorf("权限不足：需要登录"))
 			ctx.StatusCode(response.Code)
 			ctx.JSON(response)
 			ctx.StopExecution()

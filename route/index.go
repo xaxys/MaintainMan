@@ -113,9 +113,9 @@ func Route(app *iris.Application) {
 				})
 
 				api.PartyFunc("/tag", func(tag router.Party) {
-					tag.Get("/{id:uint}", middleware.PermInterceptor("tag.viewall"), controller.GetTagByID)
-					tag.Get("/sort", middleware.PermInterceptor("tag.viewall"), controller.GetAllTagSorts)
-					tag.Get("/sort/{name:string}", middleware.PermInterceptor("tag.viewall"), controller.GetAllTagsBySort)
+					tag.Get("/{id:uint}", middleware.LoginInterceptor, controller.GetTagByID)
+					tag.Get("/sort", middleware.LoginInterceptor, controller.GetAllTagSorts)
+					tag.Get("/sort/{name:string}", middleware.LoginInterceptor, controller.GetAllTagsBySort)
 					tag.Post("/", middleware.PermInterceptor("tag.create"), controller.CreateTag)
 					tag.Delete("/{id:uint}", middleware.PermInterceptor("tag.delete"), controller.DeleteTag)
 				})
