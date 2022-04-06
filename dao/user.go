@@ -161,9 +161,13 @@ func TxUpdateUser(tx *gorm.DB, id uint, json *model.UpdateUserRequest, operator 
 	user := &model.User{}
 	copier.Copy(user, json)
 	user.ID = id
-	user.DivisionID = sql.NullInt64{Int64: int64(json.DivisionID), Valid: json.DivisionID != 0}
 	user.UpdatedBy = operator
-	if err := tx.Model(user).Updates(user).Error; err != nil {
+	user.DivisionID = sql.NullInt64{Int64: 0, Valid: false}
+	tx = tx.Model(user).Updates(user)
+	if json.DivisionID != 0 {
+		tx = tx.Update("division_id", sql.NullInt64{Int64: int64(json.DivisionID), Valid: json.DivisionID != -1})
+	}
+	if err := tx.Error; err != nil {
 		logger.Logger.Debugf("UpdateUserErr: %v\n", err)
 		return nil, err
 	}

@@ -89,15 +89,6 @@ func CreateUser(aul *model.CreateUserRequest, auth *model.AuthInfo) *model.ApiJs
 	if util.EmailRegex.MatchString(aul.Name) || util.PhoneRegex.MatchString(aul.Name) {
 		return model.ErrorValidation(fmt.Errorf("用户名不能为邮箱或手机号"))
 	}
-	if aul.DivisionID != 0 {
-		_, err := dao.GetDivisionByID(aul.DivisionID)
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return model.ErrorNotFound(fmt.Errorf("分组不存在: %v", err))
-			}
-			return model.ErrorQueryDatabase(err)
-		}
-	}
 	operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
 	u, err := dao.CreateUser(aul, operator)
 	if err != nil {
@@ -117,15 +108,6 @@ func UpdateUser(id uint, aul *model.UpdateUserRequest, auth *model.AuthInfo) *mo
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorQueryDatabase(err)
-	}
-	if aul.DivisionID != 0 {
-		_, err := dao.GetDivisionByID(aul.DivisionID)
-		if err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				return model.ErrorNotFound(fmt.Errorf("分组不存在: %v", err))
-			}
-			return model.ErrorQueryDatabase(err)
-		}
 	}
 	u, err := dao.UpdateUser(id, aul, auth.User)
 	if err != nil {

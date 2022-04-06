@@ -20,6 +20,14 @@ func GetDivision(id uint, auth *model.AuthInfo) *model.ApiJson {
 	return model.Success(DivisionToJson(division), "获取成功")
 }
 
+func GetDivisionsByParentID(id uint, auth *model.AuthInfo) *model.ApiJson {
+	divisions, err := dao.GetDivisionsByParentID(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	return model.Success(util.TransSlice(divisions, DivisionToJson), "获取成功")
+}
+
 func CreateDivision(aul *model.CreateDivisionRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)

@@ -67,7 +67,7 @@ type UpdateUserRequest struct {
 	Email       string `json:"email" validate:"omitempty,email,lte=191"`
 	RealName    string `json:"real_name" validate:"omitempty,lte=191"`
 	RoleName    string `json:"role_name" validate:"omitempty,lte=50"`
-	DivisionID  uint   `json:"division_id"`
+	DivisionID  int64  `json:"division_id" validate:"omitempty,gte=-1"` // -1: 修改为null 0: 不修改 n: 修改为指定的分组
 }
 
 type AllUserRequest struct {

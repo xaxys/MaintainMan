@@ -29,6 +29,27 @@ func GetDivision(ctx iris.Context) {
 	ctx.Values().Set("response", response)
 }
 
+// GetDivisionsByParentID godoc
+// @Summary 获取某分组下的子分组
+// @Description 通过父分组ID获取某分组下的子分组
+// @Tags division
+// @Produce  json
+// @Param id path uint true "父分组ID"
+// @Success 200 {object} model.ApiJson{data=[]model.DivisionJson}
+// @Failure 400 {object} model.ApiJson{data=[]string}
+// @Failure 401 {object} model.ApiJson{data=[]string}
+// @Failure 403 {object} model.ApiJson{data=[]string}
+// @Failure 404 {object} model.ApiJson{data=[]string}
+// @Failure 422 {object} model.ApiJson{data=[]string}
+// @Failure 500 {object} model.ApiJson{data=[]string}
+// @Router /v1/division/{id}/children [get]
+func GetDivisionsByParentID(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := service.GetDivisionsByParentID(id, auth)
+	ctx.Values().Set("response", response)
+}
+
 // CreateDivision godoc
 // @Summary 创建分组
 // @Description 创建分组

@@ -6,7 +6,6 @@ import (
 	"maintainman/logger"
 	"maintainman/model"
 
-	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 )
 
@@ -23,14 +22,31 @@ func TxGetDivisionByID(tx *gorm.DB, id uint) (*model.Division, error) {
 	return division, nil
 }
 
+func GetDivisionsByParentID(id uint) ([]*model.Division, error) {
+	return TxGetDivisionsByParentID(database.DB, id)
+}
+
+func TxGetDivisionsByParentID(tx *gorm.DB, id uint) (divisions []*model.Division, err error) {
+	if id != 0 {
+		tx = tx.Where("parent_id = (?)", id)
+	} else {
+		tx = tx.Where("parent_id is null")
+	}
+	if err = tx.Find(&divisions).Error; err != nil {
+		logger.Logger.Debugf("GetDivisionsByParentIDErr: %v\n", err)
+	}
+	return
+}
+
 func CreateDivision(aul *model.CreateDivisionRequest) (*model.Division, error) {
 	return TxCreateDivision(database.DB, aul)
 }
 
 func TxCreateDivision(tx *gorm.DB, aul *model.CreateDivisionRequest) (*model.Division, error) {
-	division := &model.Division{}
-	copier.Copy(division, aul)
-	division.ParentID = sql.NullInt64{Int64: int64(aul.ParentID), Valid: aul.ParentID != 0}
+	division := &model.Division{
+		Name:     aul.Name,
+		ParentID: sql.NullInt64{Int64: int64(aul.ParentID), Valid: aul.ParentID != 0},
+	}
 	if err := tx.Create(division).Error; err != nil {
 		logger.Logger.Debugf("CreateDivisionErr: %v\n", err)
 		return nil, err
@@ -44,11 +60,16 @@ func UpdateDivision(id uint, aul *model.UpdateDivisionRequest) (*model.Division,
 
 // FIXME: Can't update division correctly
 func TxUpdateDivision(tx *gorm.DB, id uint, aul *model.UpdateDivisionRequest) (*model.Division, error) {
-	division := &model.Division{}
-	copier.Copy(division, aul)
+	division := &model.Division{
+		Name:     aul.Name,
+		ParentID: sql.NullInt64{Int64: 0, Valid: false},
+	}
 	division.ID = id
-	division.ParentID = sql.NullInt64{Int64: int64(aul.ParentID), Valid: aul.ParentID != 0}
-	if err := tx.Model(division).Updates(division).Error; err != nil {
+	tx = tx.Model(division).Updates(division)
+	if aul.ParentID != 0 {
+		tx = tx.Update("parent_id", sql.NullInt64{Int64: int64(aul.ParentID), Valid: aul.ParentID != -1})
+	}
+	if err := tx.Error; err != nil {
 		logger.Logger.Debugf("UpdateDivisionErr: %v\n", err)
 		return nil, err
 	}

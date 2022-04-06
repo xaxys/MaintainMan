@@ -65,6 +65,7 @@ func Route(app *iris.Application) {
 
 				api.PartyFunc("/division", func(division router.Party) {
 					division.Get("/{id:uint}", middleware.PermInterceptor("division.viewall"), controller.GetDivision)
+					division.Get("/{id:uint}/children", middleware.PermInterceptor("division.viewall"), controller.GetDivisionsByParentID)
 					division.Post("/", middleware.PermInterceptor("division.create"), controller.CreateDivision)
 					division.Put("/{id:uint}", middleware.PermInterceptor("division.update"), controller.UpdateDivision)
 					division.Delete("/{id:uint}", middleware.PermInterceptor("division.delete"), controller.DeleteDivision)

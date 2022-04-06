@@ -20,7 +20,7 @@ type CreateDivisionRequest struct {
 
 type UpdateDivisionRequest struct {
 	Name     string `json:"name" validate:"omitempty,lte=191"`
-	ParentID uint   `json:"parent_id"`
+	ParentID int64  `json:"parent_id" validate:"omitempty,gte=-1"` // -1: 修改为null 0: 不修改 n: 修改为指定的分组
 }
 
 type DivisionJson struct {
