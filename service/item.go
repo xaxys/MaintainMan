@@ -94,7 +94,7 @@ func ConsumeItem(aul *model.ConsumeItemRequest, auth *model.AuthInfo) *model.Api
 	if order.Status != model.StatusAssigned {
 		return model.ErrorNoPermissions(fmt.Errorf("订单未处于已接单状态"))
 	}
-	if util.LastElem(order.StatusList).RepairerID != auth.User {
+	if uint(util.LastElem(order.StatusList).RepairerID.Int64) != auth.User {
 		return model.ErrorNoPermissions(fmt.Errorf("您不是订单的当前维修员"))
 	}
 	itemlog := dao.ItemLogConsume(aul)

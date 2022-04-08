@@ -12,7 +12,7 @@ func GetCommentsByOrder(id uint, param *model.PageParam, auth *model.AuthInfo) *
 	if err != nil {
 		return model.ErrorNotFound(err)
 	}
-	if order.UserID != auth.User && util.LastElem(order.StatusList).RepairerID != auth.User {
+	if order.UserID != auth.User && uint(util.LastElem(order.StatusList).RepairerID.Int64) != auth.User {
 		return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能查看评论"))
 	}
 	return ForceGetCommentsByOrder(id, param, auth)
@@ -33,7 +33,7 @@ func CreateComment(id uint, aul *model.CreateCommentRequest, auth *model.AuthInf
 	if err != nil {
 		return model.ErrorNotFound(err)
 	}
-	if order.UserID != auth.User && util.LastElem(order.StatusList).RepairerID != auth.User {
+	if order.UserID != auth.User && uint(util.LastElem(order.StatusList).RepairerID.Int64) != auth.User {
 		return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能创建评论"))
 	}
 	if order.AllowComment == model.CommentDisallow {

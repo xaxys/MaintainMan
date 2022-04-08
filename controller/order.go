@@ -14,6 +14,7 @@ import (
 // @Description 状态 0:非法 1:待处理 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价
 // @Tags order
 // @Produce json
+// @Param tags query []string false "若干 Tag 的 ID"
 // @Param status query int false "订单状态 0:非法 1:待处理 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价"
 // @Param order_by query string false "排序字段 (默认为ID正序) 只接受"{field} {asc|desc}"格式 (e.g. "id desc")"
 // @Param offset query uint false "偏移量 (默认为0)"
@@ -42,6 +43,8 @@ func GetUserOrders(ctx iris.Context) {
 // @Description 获取当前维修工的订单 分页 默认逆序 可按照是否本人正在维修过滤
 // @Tags order
 // @Produce json
+// @Param tags query []string false "若干 Tag 的 ID"
+// @Param status query int false "订单状态 0:所有 1:待处理 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价"
 // @Param current query bool true "是否本人正在维修"
 // @Param order_by query string false "排序字段 (默认为ID正序) 只接受"{field} {asc|desc}"格式 (e.g. "id desc")"
 // @Param offset query uint false "偏移量 (默认为0)"
@@ -56,7 +59,7 @@ func GetUserOrders(ctx iris.Context) {
 // @Router /v1/order/repairer [get]
 func GetRepairerOrders(ctx iris.Context) {
 	req := &model.RepairerOrderRequest{}
-	if err := ctx.ReadQuery(&req); err != nil {
+	if err := ctx.ReadQuery(req); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
@@ -71,6 +74,8 @@ func GetRepairerOrders(ctx iris.Context) {
 // @Tags order
 // @Produce json
 // @Param id path uint true "维修工ID"
+// @Param tags query []string false "若干 Tag 的 ID"
+// @Param status query int false "订单状态 0:所有 1:待处理 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价"
 // @Param current query bool true "是否本人正在维修"
 // @Param order_by query string false "排序字段 (默认为ID正序) 只接受"{field} {asc|desc}"格式 (e.g. "id desc")"
 // @Param offset query uint false "偏移量 (默认为0)"
@@ -85,7 +90,7 @@ func GetRepairerOrders(ctx iris.Context) {
 // @Router /v1/order/repairer/{id} [get]
 func ForceGetRepairerOrders(ctx iris.Context) {
 	req := &model.RepairerOrderRequest{}
-	if err := ctx.ReadQuery(&req); err != nil {
+	if err := ctx.ReadQuery(req); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
@@ -119,7 +124,7 @@ func ForceGetRepairerOrders(ctx iris.Context) {
 // @Router /v1/order/all [get]
 func GetAllOrders(ctx iris.Context) {
 	req := &model.AllOrderRequest{}
-	if err := ctx.ReadQuery(&req); err != nil {
+	if err := ctx.ReadQuery(req); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}

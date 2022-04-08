@@ -49,16 +49,16 @@ func TxGetAllOrdersWithParam(tx *gorm.DB, aul *model.AllOrderRequest) (orders []
 	}
 	db := TxPageFilter(tx, &aul.PageParam).Preload("Tags").Where(order)
 	if len(aul.Tags) > 0 {
-		if aul.Conjunctve {
-			for _, tag := range aul.Tags {
-				db = db.Where("exist (?)", db.Table("order_tags").Select("order_id").Where("tag_id = (?)", tag).Where("order_id = order.id"))
-			}
+		if aul.Disjunctive {
+			db = db.Where("id IN (?)", database.DB.Table("order_tags").Select("order_id").Where("tag_id IN (?)", aul.Tags))
 		} else {
-			db = db.Where("id IN (?)", db.Table("order_tags").Select("order_id").Where("tag_id IN (?)", aul.Tags))
+			for _, tag := range aul.Tags {
+				db = db.Where("EXISTS (?)", database.DB.Table("order_tags").Select("order_id").Where("tag_id = (?)", tag).Where("order_id = orders.id"))
+			}
 		}
 	}
 	if aul.Title != "" {
-		db = db.Where("title like ?", aul.Title)
+		db = db.Where("title LIKE ?", aul.Title)
 	}
 	if err = db.Find(&orders).Error; err != nil {
 		logger.Logger.Debugf("GetAllOrdersErr: %v\n", err)
@@ -94,6 +94,7 @@ func TxCreateOrder(tx *gorm.DB, aul *model.CreateOrderRequest, operator uint) (o
 	copier.Copy(order, aul)
 	order.CreatedBy = operator
 	order.UserID = operator
+	order.Status = model.StatusWaiting
 	tags, err := TxGetTagsByIDs(tx, aul.Tags)
 	if err != nil {
 		return

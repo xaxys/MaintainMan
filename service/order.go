@@ -28,6 +28,7 @@ func GetOrderByUser(aul *model.UserOrderRequest, auth *model.AuthInfo) *model.Ap
 	allreq := &model.AllOrderRequest{
 		UserID:    auth.User,
 		Status:    aul.Status,
+		Tags:      aul.Tags,
 		PageParam: aul.PageParam,
 	}
 	return GetAllOrders(allreq, auth)
@@ -267,7 +268,7 @@ func ReportOrder(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if order.Status != model.StatusAssigned {
 		return model.ErrorUpdateDatabase(fmt.Errorf("订单未指派，不能上报"))
 	}
-	if util.LastElem(order.StatusList).RepairerID != auth.User {
+	if uint(util.LastElem(order.StatusList).RepairerID.Int64) != auth.User {
 		return model.ErrorUpdateDatabase(fmt.Errorf("操作人不是订单指派人，不能上报"))
 	}
 	status := dao.StatusReported(auth.User)
