@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/kataras/iris/v12/httptest"
-	"github.com/spf13/cast"
 	"maintainman/model"
 	"maintainman/service"
 	"maintainman/util"
@@ -15,6 +13,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kataras/iris/v12/httptest"
+	"github.com/spf13/cast"
 )
 
 // Test User Router
@@ -593,7 +594,7 @@ func TestConsumeItemRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(orderID)+"/release").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusNoContent).Body().Raw()
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(orderID)+"/assign").
@@ -636,7 +637,7 @@ func TestReleaseOrderRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusNoContent).Body().Raw()
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
 	t.Log(responseBody)
 }
 
@@ -682,7 +683,7 @@ func TestAssignOrderRouter(t *testing.T) {
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/assign").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
 		WithQuery("repairer", repairerId).
-		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
@@ -720,7 +721,7 @@ func TestSelfAssignOrderRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
@@ -757,7 +758,7 @@ func TestCompleteOrderRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
+		Expect().Status(httptest.StatusNoContent).Body().Raw()
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
@@ -799,7 +800,7 @@ func TestCancelOrderRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusNoContent).Body().Raw()
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
@@ -836,7 +837,7 @@ func TestRejectOrderRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusNoContent).Body().Raw()
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/reject").
@@ -868,7 +869,7 @@ func TestReportOrderRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusNoContent).Body().Raw()
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
@@ -905,7 +906,7 @@ func TestHoldOrderRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusNoContent).Body().Raw()
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
@@ -948,7 +949,7 @@ func TestAppraiseOrderRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/release").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		Expect().Status(httptest.StatusNoContent).Body().Raw()
+		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(id)+"/selfassign").
@@ -969,22 +970,23 @@ func TestAppraiseOrderRouter(t *testing.T) {
 }
 
 // Test Role Router
-//func TestGetRoleRouter(t *testing.T) {
-//	app := newApp()
-//	e := httptest.New(t, app)
-//	superAdminToken := getSuperAdminToken()
-//	responseBody := e.GET("/v1/role").
-//		Expect().Status(httptest.StatusForbidden).
-//		Body().Raw()
-//	t.Log(responseBody)
-//
-//	responseBody = e.GET("/v1/role").
-//		WithHeader("Authorization", "Bearer "+superAdminToken).
-//		Expect().Status(httptest.StatusOK).
-//		Body().Raw()
-//	t.Log(responseBody)
-//}
-//
+func TestGetRoleRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	responseBody := e.GET("/v1/role").
+		Expect().Status(httptest.StatusForbidden).
+		Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/role").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusOK).
+		Body().Raw()
+	t.Log(responseBody)
+}
+
+// TODO: Allow Create Role Router
 //func TestCreateRoleRouter(t *testing.T) {
 //	app := newApp()
 //	e := httptest.New(t, app)
@@ -1021,22 +1023,22 @@ func TestAppraiseOrderRouter(t *testing.T) {
 //		Body().Raw()
 //	t.Log(responseBody)
 //}
-//
-//func TestGetAllRoles(t *testing.T) {
-//	app := newApp()
-//	e := httptest.New(t, app)
-//	superAdminToken := getSuperAdminToken()
-//	responseBody := e.GET("/v1/role/all").
-//		Expect().Status(httptest.StatusForbidden).
-//		Body().Raw()
-//	t.Log(responseBody)
-//
-//	responseBody = e.GET("/v1/role/all").
-//		WithHeader("Authorization", "Bearer "+superAdminToken).
-//		Expect().Status(httptest.StatusOK).
-//		Body().Raw()
-//	t.Log(responseBody)
-//}
+
+func TestGetAllRoles(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
+	responseBody := e.GET("/v1/role/all").
+		Expect().Status(httptest.StatusForbidden).
+		Body().Raw()
+	t.Log(responseBody)
+
+	responseBody = e.GET("/v1/role/all").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(httptest.StatusOK).
+		Body().Raw()
+	t.Log(responseBody)
+}
 
 // Test Permission Router
 func TestGetAllPermissionRouter(t *testing.T) {
