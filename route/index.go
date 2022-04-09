@@ -28,7 +28,7 @@ func Route(app *iris.Application) {
 			image.Use(middleware.HeaderExtractor, middleware.TokenValidator)
 			image.Done(middleware.ResponseHandler)
 			image.SetExecutionRules(iris.ExecutionRules{Done: iris.ExecutionOptions{Force: true}})
-			image.Post("/upload", middleware.PermInterceptor("image.upload"), middleware.RateLimiter, controller.UploadImage)
+			image.Post("/", middleware.PermInterceptor("image.upload"), middleware.RateLimiter, controller.UploadImage)
 			image.Get("/{id:uuid}", middleware.PermInterceptor("image.view"), controller.GetImage)
 		})
 

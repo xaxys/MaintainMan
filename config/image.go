@@ -27,7 +27,7 @@ func init() {
 	ImageConfig.SetDefault("upload.throttling.purge", "1m")
 	ImageConfig.SetDefault("upload.throttling.expire", "1m")
 	ImageConfig.SetDefault("upload.max_file_size", 10485760) // 10M
-	ImageConfig.SetDefault("upload.max_pixels", 8000000)     // 8M pixels
+	ImageConfig.SetDefault("upload.max_pixels", 15000000)    // 15M pixels
 
 	ImageConfig.SetDefault("cache.driver", "local")
 	ImageConfig.SetDefault("cache.limit", 1073741824) // 1GB
@@ -43,14 +43,13 @@ func init() {
 		},
 		{
 			"name":    "watermarked",
-			"params":  "w_600",
 			"default": true,
 			"texts": []map[string]any{
 				{
 					"content": "{{.Name}}@MaintainMan",
 					"gravity": "ne",
-					"x-pos":   30,
-					"y-pos":   20,
+					"x-pos":   60,
+					"y-pos":   15,
 					"color":   "#fff",
 					"font":    "fonts/SourceHanSans-Regular.ttf",
 					"size":    12,

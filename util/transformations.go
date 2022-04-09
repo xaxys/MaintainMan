@@ -112,9 +112,10 @@ type TextInfo struct {
 
 func (t *TransformationInfo) ToTransformation() *Transformation {
 	params, err := ParseParameters(t.Params)
-	if err != nil {
+	if err != nil && t.Params != "" {
 		panic(fmt.Errorf("invalid transformation parameters: %s (%s)", t.Params, err))
 	}
+
 	if !isValidTransformationName(t.Name) {
 		panic(fmt.Errorf("invalid transformation name: %s", t.Name))
 	}
@@ -196,6 +197,9 @@ func ParseParameters(parametersStr string) (Params, error) {
 	parts := strings.Split(parametersStr, ",")
 	for _, part := range parts {
 		keyAndValue := strings.SplitN(part, "_", 2)
+		if len(keyAndValue) != 2 {
+			return params, fmt.Errorf("invalid parameter: %s", part)
+		}
 		key := keyAndValue[0]
 		value := keyAndValue[1]
 
@@ -413,7 +417,7 @@ func (t *Text) getFontMetrics(scale int) FontMetrics {
 	return FontMetrics{widthFloat, height, ascent, descent}
 }
 
-func TransformCropAndResize(img image.Image, transformation *Transformation, v ...any) (imgNew image.Image) {
+func TransformCropAndResize(img image.Image, transformation *Transformation, v any) (imgNew image.Image) {
 	parameters := transformation.params
 	width := parameters.width
 	height := parameters.height

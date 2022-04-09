@@ -3,7 +3,7 @@ jpeg_quality: 80
 upload:
   async: false # Upload request returns straight after image is processed by the server (saving might still fail)
   max_file_size: 10485760 # 10 MB
-  max_pixels: 8000000 # 8 million pixels
+  max_pixels: 15000000    # 15 million pixels
   throttling:
     burst: 20
     rate: 1
@@ -22,12 +22,11 @@ transformations:
     eager:   true # Run on every upload
   watermarked:
     default: true
-    params:  w_600
     texts:
     - content: "{{.Name}}@MaintainMan"
       gravity: "ne"
-      x-pos:   30
-      y-pos:   20
+      x-pos:   60
+      y-pos:   15
       color:   "#fff"
       font:    fonts/SourceHanSans-Regular.ttf
       size:    12

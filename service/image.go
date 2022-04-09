@@ -17,47 +17,61 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetImage(id, param string, auth *model.AuthInfo) *model.ApiJson {
+type ImageResponse struct {
+	Data   []byte
+	Format string
+	ApiRes *model.ApiJson
+}
+
+func GetImage(id, param string, auth *model.AuthInfo) *ImageResponse {
 	// parse param to transformation
-	trans := dao.GetTransformation(param)
-	if trans == nil {
-		if dao.HasPermission(auth.Role, "image.custom") {
-			transParam, err := util.ParseParameters(param)
-			if err != nil {
-				return model.ErrorInvalidData(err)
-			}
-			trans = util.NewTransformation(&transParam)
+	trans, ok := dao.GetTransformation(param)
+	if !ok {
+		if err := dao.CheckPermission(auth.Role, "image.custom"); err != nil {
+			return &ImageResponse{ApiRes: model.ErrorNoPermissions(err)}
 		}
+		transParam, err := util.ParseParameters(param)
+		if err != nil {
+			return &ImageResponse{ApiRes: model.ErrorInvalidData(err)}
+		}
+		trans = util.NewTransformation(&transParam)
 	}
 
-	key := id + trans.Hash
+	key := id
+	if trans != nil {
+		key += trans.Hash
+	}
+
 	cid, cached := cache.Cache.Get(key)
 	if cached {
 		id = cid.(string)
 	}
 
 	if !dao.ExistImage(id) {
-		return model.ErrorNotFound(fmt.Errorf("未找到图片: cached: %v, id: %s", cached, id))
+		return &ImageResponse{ApiRes: model.ErrorNotFound(fmt.Errorf("未找到图片: cached: %v, id: %s", cached, id))}
 	}
 
 	image, data, format, err := dao.LoadImage(id)
 	if err != nil {
-		return model.ErrorQueryDatabase(err)
+		return &ImageResponse{ApiRes: model.ErrorQueryDatabase(err)}
 	}
 
 	// do transformation
 	if trans != nil && !cached {
-		image = util.TransformCropAndResize(image, trans)
+		image = util.TransformCropAndResize(image, trans, nil)
 		tid := uuid.New().String()
 		bytes, err := dao.SaveImage(tid, format, image)
 		if err != nil {
-			return model.ErrorInsertDatabase(err)
+			return &ImageResponse{ApiRes: model.ErrorInsertDatabase(err)}
 		}
 		cache.Cache.SetWithCost(key, tid, int64(len(bytes)), 0)
 		data = bytes
 	}
 
-	return model.Success(string(data), "获取成功")
+	return &ImageResponse{
+		Data:   data,
+		Format: "image/" + format,
+	}
 }
 
 func UploadImage(file multipart.File, auth *model.AuthInfo) *model.ApiJson {

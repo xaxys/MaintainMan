@@ -42,6 +42,9 @@ func NewTransformationPersistence(config *viper.Viper) (s *TransformationPersist
 
 	config.UnmarshalKey("transformations", &s.data)
 	for _, info := range s.data {
+		if info.Name == "origin" {
+			panic("origin transformation is reserved")
+		}
 		trans := info.ToTransformation()
 		if s.index[info.Name] != nil {
 			panic(fmt.Errorf("duplicate transformation name %s", info.Name))
@@ -61,11 +64,15 @@ func NewTransformationPersistence(config *viper.Viper) (s *TransformationPersist
 	return
 }
 
-func GetTransformation(name string) *util.Transformation {
+func GetTransformation(name string) (*util.Transformation, bool) {
 	if name == "" {
-		return TransformationPO.def
+		return TransformationPO.def, true
 	}
-	return TransformationPO.index[name]
+	if name == "origin" {
+		return nil, true
+	}
+	trans, ok := TransformationPO.index[name]
+	return trans, ok
 }
 
 func GetEagerTransformation() []*util.Transformation {
