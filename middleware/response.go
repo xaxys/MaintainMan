@@ -12,12 +12,21 @@ var (
 
 func init() {
 	ResponseHandler = func(ctx iris.Context) {
-		response := ctx.Values().Get("response").(*model.ApiJson)
-		if response != nil {
+		response := ctx.Values().Get("response")
+		if response == nil {
+			ctx.Next()
+			return
+		}
+		apiJson, ok := response.(*model.ApiJson)
+		if !ok {
+			ctx.Next()
+			return
+		}
+		if apiJson != nil {
 			// TODO: Temporary fix for inconsistent status code of log and response
-			ctx.StatusCode(response.Code)
-			ctx.JSON(response)
-			ctx.StatusCode(response.Code)
+			ctx.StatusCode(apiJson.Code)
+			ctx.JSON(apiJson)
+			ctx.StatusCode(apiJson.Code)
 		}
 		ctx.Next()
 	}

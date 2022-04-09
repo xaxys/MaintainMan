@@ -35,7 +35,7 @@ test: clean
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) test \
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
-		-coverprofile=coverage.out ./...
+		-coverprofile=coverage.out
 
 clean:
 	@echo "Cleaning MaintainMan ..."

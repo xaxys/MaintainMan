@@ -1,6 +1,8 @@
 package util
 
 import (
+	"bytes"
+	"html/template"
 	"math/rand"
 	"regexp"
 )
@@ -137,4 +139,16 @@ func TransSlice[T, U any](s []T, trans func(T) U) (us []U) {
 
 func LastElem[T any](slice []T) T {
 	return slice[len(slice)-1]
+}
+
+func ProcessString(str string, vars interface{}) string {
+	tmpl, err := template.New("").Parse(str)
+	if err != nil {
+		return str
+	}
+	buffer := bytes.NewBuffer(nil)
+	if err := tmpl.Execute(buffer, vars); err != nil {
+		panic(err)
+	}
+	return buffer.String()
 }

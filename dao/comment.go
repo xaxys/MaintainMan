@@ -35,9 +35,9 @@ func TxGetCommentsByOrder(tx *gorm.DB, oid uint, param *model.PageParam) (commen
 	return
 }
 
-func CreateComment(oid, uid uint, aul *model.CreateCommentRequest) (comment *model.Comment, err error) {
+func CreateComment(oid, uid uint, name string, aul *model.CreateCommentRequest) (comment *model.Comment, err error) {
 	database.DB.Transaction(func(tx *gorm.DB) error {
-		if comment, err = TxCreateComment(tx, oid, uid, aul); err != nil {
+		if comment, err = TxCreateComment(tx, oid, uid, name, aul); err != nil {
 			logger.Logger.Debugf("CreateCommentErr: %v\n", err)
 		}
 		return err
@@ -45,7 +45,7 @@ func CreateComment(oid, uid uint, aul *model.CreateCommentRequest) (comment *mod
 	return
 }
 
-func TxCreateComment(tx *gorm.DB, oid, uid uint, aul *model.CreateCommentRequest) (comment *model.Comment, err error) {
+func TxCreateComment(tx *gorm.DB, oid, uid uint, name string, aul *model.CreateCommentRequest) (comment *model.Comment, err error) {
 	seqNum := uint(0)
 	cmt := &model.Comment{OrderID: oid}
 	if err = tx.Where(cmt).Order("id desc").First(cmt).Error; err == nil {
@@ -53,14 +53,10 @@ func TxCreateComment(tx *gorm.DB, oid, uid uint, aul *model.CreateCommentRequest
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return
 	}
-	user := &model.User{}
-	if err = tx.First(user, uid).Error; err != nil {
-		return
-	}
 	comment = &model.Comment{
 		OrderID:     oid,
 		UserID:      uid,
-		UserName:    user.Name,
+		UserName:    name,
 		Content:     aul.Content,
 		SequenceNum: seqNum + 1,
 		BaseModel: model.BaseModel{

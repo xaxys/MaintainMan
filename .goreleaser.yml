@@ -1,0 +1,140 @@
+# This is an example .goreleaser.yml file with some sensible defaults.
+# Make sure to check the documentation at https://goreleaser.com
+before:
+  hooks:
+    # You may remove this if you don't use go modules.
+    - go mod tidy
+    # you may remove this if you don't need go generate
+    - go generate ./...
+builds:
+  - id: darwin_amd64
+    env:
+      - -extldflags '-static'
+      - CGO_ENABLED=1
+      - CC=o64-clang
+      - CXX=o64-clang++
+    goos:
+      - darwin
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w 
+      - -X "main.BuildTags={{.Tag}}"
+      - -X "main.BuildTime={{.Date}}"
+      - -X "main.GitCommit={{.FullCommit}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+
+  - id: darwin_arm64
+    env:
+      - -extldflags '-static'
+      - CGO_ENABLED=1
+      - CC=oa64-clang
+      - CXX=oa64-clang++
+    goos:
+      - darwin
+    goarch:
+      - arm64
+    ldflags:
+      - -s -w 
+      - -X "main.BuildTags={{.Tag}}"
+      - -X "main.BuildTime={{.Date}}"
+      - -X "main.GitCommit={{.FullCommit}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+
+  - id: linux_amd64
+    env:
+      - -extldflags '-static'
+      - CGO_ENABLED=1
+      - CC=gcc
+      - CXX=g++
+    goos:
+      - linux
+    goarch:
+      - amd64
+    ldflags:
+      - -s -w 
+      - -X "main.BuildTags={{.Tag}}"
+      - -X "main.BuildTime={{.Date}}"
+      - -X "main.GitCommit={{.FullCommit}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+
+  - id: linux_arm64
+    env:
+      - -extldflags '-static'
+      - CGO_ENABLED=1
+      - CC=aarch64-linux-gnu-gcc
+      - CXX=aarch64-linux-gnu-g++ 
+    goos:
+      - linux
+    goarch:
+      - arm64
+    ldflags:
+      - -s -w 
+      - -X "main.BuildTags={{.Tag}}"
+      - -X "main.BuildTime={{.Date}}"
+      - -X "main.GitCommit={{.FullCommit}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+
+  - id: windows_i686
+    env:
+      - CGO_ENABLED=1
+      - CC=i686-w64-mingw32-gcc
+      - CXX=i686-w64-mingw32-g++
+    goos:
+      - windows
+    goarch:
+      - 386
+    ldflags:
+      - -extldflags '-static'
+      - -s -w 
+      - -X "main.BuildTags={{.Tag}}"
+      - -X "main.BuildTime={{.Date}}"
+      - -X "main.GitCommit={{.FullCommit}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+
+  - id: windows_amd64
+    env:
+      - CGO_ENABLED=1
+      - CC=x86_64-w64-mingw32-gcc
+      - CXX=x86_64-w64-mingw32-g++
+    goos:
+      - windows
+    goarch:
+      - amd64
+    ldflags:
+    - -extldflags '-static'
+    - -s -w 
+    - -X "main.BuildTags={{.Tag}}"
+    - -X "main.BuildTime={{.Date}}"
+    - -X "main.GitCommit={{.FullCommit}}"
+      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+
+archives:
+  - id: default
+    builds:
+      - darwin_amd64
+      - darwin_arm64
+      - linux_amd64
+      - linux_arm64
+      - windows_i686
+      - windows_amd64
+    format_overrides:
+      - goos: windows
+        format: zip
+    replacements:
+      darwin: macOS
+      linux: Linux
+      windows: Windows
+      386: i386
+      686: i686
+      amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'

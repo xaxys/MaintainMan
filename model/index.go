@@ -18,6 +18,7 @@ type PageParam struct {
 
 type AuthInfo struct {
 	User uint
+	Name string
 	Role string
 	IP   string
 }

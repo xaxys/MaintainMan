@@ -1,4 +1,4 @@
-version: 1.1.0
+version: 1.2.0
 permission:
   user:
     view: "查看当前用户"
@@ -20,6 +20,10 @@ permission:
     viewall: "查看所有角色"
   permission:
     viewall: "查看所有权限"
+  image:
+    upload: "上传图片"
+    view: "查看图片"
+    custom: "处理图片"
   division:
     viewall: "查看所有分组"
     create: "创建分组"

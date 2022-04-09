@@ -211,7 +211,7 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 	if err := dao.ForceLogin(id, ip); err != nil {
 		return model.ErrorUpdateDatabase(fmt.Errorf("登录失败"))
 	}
-	token, err := util.GetJwtString(id, user.RoleName)
+	token, err := util.GetJwtString(id, user.Name, user.RoleName)
 	if err != nil {
 		return model.ErrorBuildJWT(err)
 	}
@@ -264,7 +264,7 @@ func WxUserRegister(aul *model.WxRegisterRequest, ip string, auth *model.AuthInf
 	if err := dao.ForceLogin(user.ID, ip); err != nil {
 		return model.ErrorUpdateDatabase(fmt.Errorf("登录失败"))
 	}
-	token, err := util.GetJwtString(user.ID, user.RoleName)
+	token, err := util.GetJwtString(user.ID, user.Name, user.RoleName)
 	if err != nil {
 		return model.ErrorBuildJWT(err)
 	}
@@ -298,7 +298,7 @@ func UserLogin(aul *model.LoginRequest, ip string, auth *model.AuthInfo) *model.
 	if err := dao.CheckLogin(user, aul.Password); err != nil {
 		return model.ErrorVerification(fmt.Errorf("密码错误"))
 	}
-	token, err := util.GetJwtString(user.ID, user.RoleName)
+	token, err := util.GetJwtString(user.ID, user.Name, user.RoleName)
 	if err != nil {
 		return model.ErrorBuildJWT(err)
 	}
@@ -316,7 +316,7 @@ func UserRenew(id uint, ip string, auth *model.AuthInfo) *model.ApiJson {
 	if err := dao.ForceLogin(id, ip); err != nil {
 		return model.ErrorUpdateDatabase(fmt.Errorf("登录失败"))
 	}
-	token, err := util.GetJwtString(id, user.RoleName)
+	token, err := util.GetJwtString(id, user.Name, user.RoleName)
 	if err != nil {
 		return model.ErrorBuildJWT(err)
 	}

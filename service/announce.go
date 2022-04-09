@@ -3,9 +3,9 @@ package service
 import (
 	"errors"
 	"fmt"
+	"maintainman/cache"
 	"maintainman/config"
 	"maintainman/dao"
-	"maintainman/database"
 	"maintainman/model"
 	"maintainman/util"
 	"time"
@@ -106,7 +106,7 @@ func DeleteAnnounce(id uint, auth *model.AuthInfo) *model.ApiJson {
 
 func HitAnnounce(id uint, auth *model.AuthInfo) *model.ApiJson {
 	key := fmt.Sprintf("%d:%d", id, auth.User)
-	if _, ok := database.Cache.Get(key); ok {
+	if _, ok := cache.Cache.Get(key); ok {
 		return model.Success(nil, "浏览过了")
 	}
 	expire, err := time.ParseDuration(config.AppConfig.GetString("app.hit_expire.announce"))
@@ -123,7 +123,7 @@ func HitAnnounce(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if time.Now().Before(*announce.StartTime) || time.Now().After(*announce.EndTime) {
 		return model.ErrorNotFound(errors.New("不在公告期间"))
 	}
-	database.Cache.Set(key, nil, expire)
+	cache.Cache.Set(key, nil, expire)
 	if err := dao.HitAnnounce(id); err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}

@@ -24,7 +24,15 @@ func Route(app *iris.Application) {
 			ctx.Redirect("/index.html")
 		})
 
-		app.PartyFunc("/v1", func(v1 iris.Party) {
+		home.PartyFunc("/image", func(image iris.Party) {
+			image.Use(middleware.HeaderExtractor, middleware.TokenValidator)
+			image.Done(middleware.ResponseHandler)
+			image.SetExecutionRules(iris.ExecutionRules{Done: iris.ExecutionOptions{Force: true}})
+			image.Post("/upload", middleware.PermInterceptor("image.upload"), middleware.RateLimiter, controller.UploadImage)
+			image.Get("/{id:uuid}", middleware.PermInterceptor("image.view"), controller.GetImage)
+		})
+
+		home.PartyFunc("/v1", func(v1 iris.Party) {
 			v1.Use(middleware.HeaderExtractor, middleware.TokenValidator)
 			v1.Done(middleware.ResponseHandler)
 			v1.SetExecutionRules(iris.ExecutionRules{Done: iris.ExecutionOptions{Force: true}})

@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const PermConfigVersion = "1.1.0"
+const PermConfigVersion = "1.2.0"
 
 var (
 	PermConfig *viper.Viper
@@ -42,6 +42,11 @@ func init() {
 		},
 		"permission": map[string]any{
 			"viewall": "查看所有权限",
+		},
+		"image": map[string]any{
+			"upload": "上传图片",
+			"view":   "查看图片",
+			"custom": "处理图片",
 		},
 		"division": map[string]any{
 			"viewall": "查看所有分组",

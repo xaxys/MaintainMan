@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"github.com/kataras/iris/v12/httptest"
-	"github.com/spf13/cast"
 	"maintainman/model"
 	"maintainman/service"
 	"maintainman/util"
@@ -15,6 +13,9 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kataras/iris/v12/httptest"
+	"github.com/spf13/cast"
 )
 
 // Test User Router
@@ -1712,7 +1713,7 @@ func TestHitAnnounceRouter(t *testing.T) {
 
 // Test Utils
 func getSuperAdminToken() string {
-	token, _ := util.GetJwtString(1, "super_admin")
+	token, _ := util.GetJwtString(1, "fake super admin", "super_admin")
 	return token
 }
 

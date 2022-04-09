@@ -46,7 +46,7 @@ func ForceCreateComment(id uint, aul *model.CreateCommentRequest, auth *model.Au
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	comment, err := dao.CreateComment(id, auth.User, aul)
+	comment, err := dao.CreateComment(id, auth.User, auth.Name, aul)
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 	}

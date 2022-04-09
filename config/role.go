@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const RoleConfigVersion = "1.1.0"
+const RoleConfigVersion = "1.2.0"
 
 var (
 	RoleConfig *viper.Viper
@@ -43,6 +43,8 @@ func init() {
 			"display_name": "普通用户",
 			"default":      true,
 			"permissions": []string{
+				"image.upload",
+				"image.view",
 				"user.view",
 				"user.update",
 				"user.renew",
@@ -96,6 +98,7 @@ func init() {
 			"name":         "admin",
 			"display_name": "管理员",
 			"permissions": []string{
+				"image.*",
 				"division.*",
 				"announce.*",
 				"order.*",

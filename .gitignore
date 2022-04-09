@@ -14,9 +14,12 @@ lib
 app.yaml
 role.yaml
 permission.yaml
+image.yaml
 app.yml
 role.yml
 permission.yml
+image.yml
 maintainman
 
 dist/
+images/

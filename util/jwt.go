@@ -21,9 +21,10 @@ func init() {
 	key = []byte(config.AppConfig.GetString("token.key"))
 }
 
-func GetJwtString(uid uint, role string) (string, error) {
+func GetJwtString(id uint, name, role string) (string, error) {
 	token := jwt.NewTokenWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"user_id":   uid,
+		"user_id":   id,
+		"user_name": name,
 		"user_role": role,
 
 		"iss": config.AppConfig.GetString("app.name"),

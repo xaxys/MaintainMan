@@ -25,9 +25,11 @@ func init() {
 		if ok {
 			jwtInfo := jwtToken.Claims.(jwt.MapClaims)
 			uid := uint(jwtInfo["user_id"].(float64))
+			name := jwtInfo["user_name"].(string)
 			role := jwtInfo["user_role"].(string)
 			auth := &model.AuthInfo{
 				User: uid,
+				Name: name,
 				Role: role,
 				IP:   ctx.Request().RemoteAddr,
 			}
