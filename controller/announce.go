@@ -38,7 +38,7 @@ func GetAnnounce(ctx iris.Context) {
 // @Param start_time query string false "开始时间; unix timestamp in seconds (UTC); -1代表不限; 含本数"
 // @Param end_time query string false "结束时间; unix timestamp in seconds (UTC); -1代表不限; 含本数"
 // @Param inclusive query bool false "true: 查询开始时间晚于start,且结束时间早于end的(在某段时间内开始并结束的); false: 查询开始时间早于start,且结束时间晚于end的(在某段时间内都能看到的)"
-// @Param order_by query string false "排序字段 (默认为ID正序) 只接受"{field} {asc|desc}"格式 (e.g. "id desc")"
+// @Param order_by query string false "排序字段 (默认为ID正序) 只接受 {field} {asc|desc} 格式 (e.g. id desc)"
 // @Param offset query uint false "偏移量 (默认为0)"
 // @Param limit query uint false "每页数据量 (默认为50)"
 // @Success 200 {object} model.ApiJson{data=[]model.AnnounceJson}

@@ -7,12 +7,12 @@ import (
 )
 
 type RoleInfo struct {
-	Name        string   `mapstructure:"name"`
-	DisplayName string   `mapstructure:"display_name"`
-	Default     bool     `mapstructure:"default"`
-	Guest       bool     `mapstructure:"guest"`
-	Permissions []string `mapstructure:"permissions"`
-	Inheritance []string `mapstructure:"inheritance"`
+	Name        string   `mapstructure:"name"         yaml:"name"`
+	DisplayName string   `mapstructure:"display_name" yaml:"display_name"`
+	Default     bool     `mapstructure:"default"      yaml:"default,omitempty"`
+	Guest       bool     `mapstructure:"guest"        yaml:"guest,omitempty"`
+	Permissions []string `mapstructure:"permissions"  yaml:"permissions"`
+	Inheritance []string `mapstructure:"inheritance"  yaml:"inheritance"`
 }
 
 type Role struct {
@@ -28,7 +28,7 @@ func (r *Role) String() string {
 }
 
 type CreateRoleRequest struct {
-	Name        string   `json:"name" validate:"required,gte=2,lte=50"`
+	Name        string   `json:"name"         validate:"required,gte=2,lte=50"`
 	DisplayName string   `json:"display_name" validate:"required,lte=191"`
 	Position    uint     `json:"position"`
 	Permissions []string `json:"permissions"`

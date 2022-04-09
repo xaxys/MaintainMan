@@ -1,6 +1,7 @@
 package dao
 
 import (
+	"database/sql"
 	"maintainman/config"
 	"maintainman/database"
 	"maintainman/logger"
@@ -17,11 +18,24 @@ func GetOrderByRepairer(id uint, json *model.RepairerOrderRequest) (orders []*mo
 
 func TxGetOrderByRepairer(tx *gorm.DB, id uint, json *model.RepairerOrderRequest) (orders []*model.Order, err error) {
 	status := &model.Status{
-		RepairerID: id,
+		RepairerID: sql.NullInt64{Int64: int64(id), Valid: true},
 		Current:    json.Current,
 	}
 	statuses := []*model.Status{}
-	if err = TxPageFilter(tx, &json.PageParam).Preload("Order").Where(status).Find(&statuses).Error; err != nil {
+	tx = TxPageFilter(tx, &json.PageParam).Preload("Order.Tags").Where(status)
+	if json.Status != 0 {
+		tx = tx.Joins("Order", &model.Order{Status: json.Status})
+	}
+	if len(json.Tags) > 0 {
+		if json.Disjunctive {
+			tx = tx.Where("id IN (?)", database.DB.Table("order_tags").Select("order_id").Where("tag_id IN (?)", json.Tags))
+		} else {
+			for _, tag := range json.Tags {
+				tx = tx.Where("EXISTS (?)", database.DB.Table("order_tags").Select("order_id").Where("tag_id = (?)", tag).Where("order_id = statuses.order_id"))
+			}
+		}
+	}
+	if err = tx.Find(&statuses).Error; err != nil {
 		logger.Logger.Debugf("GetOrderByRepairerErr: %v\n", err)
 		return
 	}
@@ -51,7 +65,7 @@ func TxGetAppraiseTimeoutOrder(tx *gorm.DB) (ids []uint, err error) {
 func NewStatus(status, repairer uint, operator uint) *model.Status {
 	return &model.Status{
 		Status:     status,
-		RepairerID: repairer,
+		RepairerID: sql.NullInt64{Int64: int64(repairer), Valid: repairer != 0},
 		Current:    true,
 		BaseModel: model.BaseModel{
 			CreatedBy: operator,

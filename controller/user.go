@@ -54,7 +54,7 @@ func GetUserByID(ctx iris.Context) {
 // @Tags user
 // @Produce  json
 // @Param id path uint true "分组ID"
-// @Param order_by query string false "排序字段 (默认为ID正序) 只接受"{field} {asc|desc}"格式 (e.g. "id desc")"
+// @Param order_by query string false "排序字段 (默认为ID正序) 只接受 {field} {asc|desc} 格式 (e.g. id desc)"
 // @Param offset query uint false "偏移量 (默认为0)"
 // @Param limit query uint false "每页数据量 (默认为50)"
 // @Success 200 {object} model.ApiJson{data=[]model.UserJson}
@@ -84,7 +84,7 @@ func GetUserByDivision(ctx iris.Context) {
 // @Produce  json
 // @Param name query string false "用户名"
 // @Param display_name query string false "昵称"
-// @Param order_by query string false "排序字段 (默认为ID正序) 只接受"{field} {asc|desc}"格式 (e.g. "id desc")"
+// @Param order_by query string false "排序字段 (默认为ID正序) 只接受 {field} {asc|desc} 格式 (e.g. id desc)"
 // @Param offset query uint false "偏移量 (默认为0)"
 // @Param limit query uint false "每页数据量 (默认为50)"
 // @Success 200 {object} model.ApiJson{data=model.UserJson}
