@@ -183,7 +183,8 @@ func (client *Redis) SetWithCost(key string, value any, cost int64, expire time.
 						if err != nil && err != redis.Nil {
 							logger.Logger.Warnf("Redis error: %+v", err)
 						}
-						if client.onEvict(value) != nil {
+
+						if err := client.onEvict(value); err != nil {
 							logger.Logger.Debugf("Failed to run evict function on %s: %+v", candidate, err)
 						}
 					}

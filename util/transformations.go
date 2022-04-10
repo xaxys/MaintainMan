@@ -81,6 +81,8 @@ const (
 	DefaultCroppingMode = CroppingModeExact
 	DefaultGravity      = GravityNorthWest
 	DefaultFilter       = "none"
+
+	MaxDimension = 10000
 )
 
 var (
@@ -170,23 +172,23 @@ func (t *TransformationInfo) ToTransformation() *Transformation {
 
 // Params is a struct of parameters specifying an image transformation
 type Params struct {
-	width    int
-	height   int
-	scale    int
-	cropping string
-	gravity  string
-	filter   string
+	Width    int
+	Height   int
+	Scale    int
+	Cropping string
+	Gravity  string
+	Filter   string
 }
 
 // ToString turns parameters into a unique string for each possible assignment of parameters
 func (p Params) ToString() string {
 	// 0 as a value for width or height means that it will be calculated
-	return fmt.Sprintf("%s_%s,%s_%s,%s_%d,%s_%d,%s_%s,%s_%d", parameterCropping, p.cropping, parameterGravity, p.gravity, parameterHeight, p.height, parameterWidth, p.width, parameterFilter, p.filter, parameterScale, p.scale)
+	return fmt.Sprintf("%s_%s,%s_%s,%s_%d,%s_%d,%s_%s,%s_%d", parameterCropping, p.Cropping, parameterGravity, p.Gravity, parameterHeight, p.Height, parameterWidth, p.Width, parameterFilter, p.Filter, parameterScale, p.Scale)
 }
 
 // WithScale returns a copy of a Params struct with the scale set to the given value
 func (p Params) WithScale(scale int) Params {
-	return Params{p.width, p.height, scale, p.cropping, p.gravity, p.filter}
+	return Params{p.Width, p.Height, scale, p.Cropping, p.Gravity, p.Filter}
 }
 
 // Turns a string like "w_400,h_300" and an image path into a Params struct
@@ -213,10 +215,13 @@ func ParseParameters(parametersStr string) (Params, error) {
 			if value <= 0 {
 				return params, fmt.Errorf("value %d must be > 0: %q", value, key)
 			}
+			if value > MaxDimension {
+				return params, fmt.Errorf("value %d must be <= %d: %q", value, MaxDimension, key)
+			}
 			if key == parameterWidth {
-				params.width = value
+				params.Width = value
 			} else {
-				params.height = value
+				params.Height = value
 			}
 		case parameterCropping:
 			value = strings.ToLower(value)
@@ -226,7 +231,7 @@ func ParseParameters(parametersStr string) (Params, error) {
 			if !isValidCroppingMode(value) {
 				return params, fmt.Errorf("invalid value for %q", key)
 			}
-			params.cropping = value
+			params.Cropping = value
 		case parameterGravity:
 			value = strings.ToLower(value)
 			if len(value) > 2 {
@@ -235,17 +240,17 @@ func ParseParameters(parametersStr string) (Params, error) {
 			if !isValidGravity(value) {
 				return params, fmt.Errorf("invalid value for %q", key)
 			}
-			params.gravity = value
+			params.Gravity = value
 		case parameterFilter:
 			value = strings.ToLower(value)
 			if !isValidFilter(value) {
 				return params, fmt.Errorf("invalid value for %q", key)
 			}
-			params.filter = value
+			params.Filter = value
 		}
 	}
 
-	if params.width == 0 && params.height == 0 {
+	if params.Width == 0 && params.Height == 0 {
 		return params, fmt.Errorf("both width and height can't be 0")
 	}
 
@@ -420,22 +425,22 @@ func (t *Text) getFontMetrics(scale int, content string) FontMetrics {
 
 func TransformCropAndResize(img image.Image, transformation *Transformation, v any) (imgNew image.Image) {
 	parameters := transformation.params
-	width := parameters.width
-	height := parameters.height
-	gravity := parameters.gravity
-	scale := parameters.scale
+	width := parameters.Width
+	height := parameters.Height
+	gravity := parameters.Gravity
+	scale := parameters.Scale
 
 	imgWidth := img.Bounds().Dx()
 	imgHeight := img.Bounds().Dy()
 
 	// Scaling factor
-	if parameters.cropping != CroppingModeKeepScale {
+	if parameters.Cropping != CroppingModeKeepScale {
 		width *= scale
 		height *= scale
 	}
 
 	// Resize and crop
-	switch parameters.cropping {
+	switch parameters.Cropping {
 	case CroppingModeExact:
 		imgNew = resize.Resize(uint(width), uint(height), img, resize.Bilinear)
 	case CroppingModeAll:
@@ -481,7 +486,7 @@ func TransformCropAndResize(img image.Image, transformation *Transformation, v a
 	}
 
 	// Filters
-	if parameters.filter == FilterGrayScale {
+	if parameters.Filter == FilterGrayScale {
 		bounds := imgNew.Bounds()
 		w, h := bounds.Max.X, bounds.Max.Y
 		gray := image.NewGray(bounds)

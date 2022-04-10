@@ -1,5 +1,7 @@
 jpeg_quality: 80
 gif_num_colors: 256
+cache_as_jpeg: true
+save_as_jpeg: false
 
 upload:
   async: false # Upload request returns straight after image is processed by the server (saving might still fail)

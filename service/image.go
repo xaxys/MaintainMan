@@ -43,7 +43,7 @@ func GetImage(id, param string, auth *model.AuthInfo) *ImageResponse {
 		key += trans.Hash
 	}
 
-	cid, cached := cache.Cache.Get(key)
+	cid, cached := cache.ImageCache.Get(key)
 	if cached {
 		id = cid.(string)
 	}
@@ -69,11 +69,12 @@ func GetImage(id, param string, auth *model.AuthInfo) *ImageResponse {
 		}
 		image = util.TransformCropAndResize(image, trans, newAuth)
 		tid := genUUID(uid)
+		format = util.Tenary(config.ImageConfig.GetBool("cache_as_jpeg"), "jpeg", format)
 		bytes, err := dao.SaveImage(tid, format, image, true)
 		if err != nil {
 			return &ImageResponse{ApiRes: model.ErrorInsertDatabase(err)}
 		}
-		cache.Cache.SetWithCost(key, tid, int64(len(bytes)), 0)
+		cache.ImageCache.SetWithCost(key, tid, int64(len(bytes)), 0)
 		data = bytes
 	}
 
@@ -102,37 +103,55 @@ func UploadImage(file multipart.File, auth *model.AuthInfo) *model.ApiJson {
 		return model.ErrorInvalidData(err)
 	}
 
-	eagerTransform := func() {
-		img, format, err := image.Decode(bytes.NewReader(data))
-		if err != nil {
-			return
-		}
-		for _, trans := range dao.GetEagerTransformation() {
-			imgNew := util.TransformCropAndResize(img, trans, *auth)
-			id := genUUID(auth.User)
-			key := id + trans.Hash
-			bytes, err := dao.SaveImage(id, format, imgNew, true)
-			if err == nil {
-				cache.Cache.SetWithCost(key, id, int64(len(bytes)), 0)
+	id := genUUID(auth.User)
+	saveImage := func(errHandler func(error)) {
+		var img image.Image
+		if config.ImageConfig.GetBool("save_as_jpeg") {
+			img, _, err = image.Decode(bytes.NewReader(data))
+			if err != nil {
+				errHandler(err)
+			}
+			if _, err := dao.SaveImage(id, "jpeg", img, false); err != nil {
+				errHandler(err)
+			}
+		} else {
+			if err := dao.SaveImageBytes(id, format, data, false); err != nil {
+				errHandler(err)
 			}
 		}
+
+		// eager transform
+		go func() {
+			if img == nil {
+				img, format, err = image.Decode(bytes.NewReader(data))
+				if err != nil {
+					return
+				}
+			}
+			for _, trans := range dao.GetEagerTransformation() {
+				imgNew := util.TransformCropAndResize(img, trans, *auth)
+				tid := genUUID(auth.User)
+				key := tid + trans.Hash
+				format = util.Tenary(config.ImageConfig.GetBool("cache_as_jpeg"), "jpeg", format)
+				bytes, err := dao.SaveImage(tid, format, imgNew, true)
+				if err == nil {
+					cache.ImageCache.SetWithCost(key, tid, int64(len(bytes)), 0)
+				}
+			}
+		}()
 	}
 
-	id := genUUID(auth.User)
+	response := model.Success(id, "上传成功")
 	if config.ImageConfig.GetBool("upload.async") {
-		go func() {
-			if err := dao.SaveImageBytes(id, format, data, false); err != nil {
-				logger.Logger.Warnf("保存图片失败(id:%s): %+v", id, err)
-			}
-			go eagerTransform()
-		}()
+		go saveImage(func(err error) {
+			logger.Logger.Warnf("保存图片失败(id:%s): %+v", id, err)
+		})
 	} else {
-		if err := dao.SaveImageBytes(id, format, data, false); err != nil {
-			return model.ErrorInsertDatabase(err)
-		}
-		go eagerTransform()
+		saveImage(func(err error) {
+			response = model.ErrorInsertDatabase(fmt.Errorf("保存图片失败(id:%s): %+v", id, err))
+		})
 	}
-	return model.Success(id, "上传成功")
+	return response
 }
 
 func genUUID(id uint) string {

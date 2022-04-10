@@ -6,6 +6,7 @@ import (
 	"maintainman/config"
 	"maintainman/dao"
 	"maintainman/database"
+	"maintainman/logger"
 	"maintainman/model"
 	"maintainman/util"
 
@@ -157,7 +158,8 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 	}
 	wxres, err := util.HTTPRequest[model.WxLoginResponse](wxURL, "GET", params)
 	if err != nil {
-		return model.ErrorVerification(err)
+		logger.Logger.Debugf("wx login error: %+v", err)
+		return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
 	}
 	if wxres.ErrCode != 0 {
 		return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
@@ -234,7 +236,8 @@ func WxUserRegister(aul *model.WxRegisterRequest, ip string, auth *model.AuthInf
 	}
 	wxres, err := util.HTTPRequest[model.WxLoginResponse](wxURL, "GET", params)
 	if err != nil {
-		return model.ErrorVerification(err)
+		logger.Logger.Debugf("wx login error: %+v", err)
+		return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
 	}
 	if wxres.ErrCode != 0 {
 		return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))

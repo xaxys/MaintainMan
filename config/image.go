@@ -21,6 +21,8 @@ func init() {
 
 	ImageConfig.SetDefault("jpeg_quality", 80)
 	ImageConfig.SetDefault("gif_num_colors", 256)
+	ImageConfig.SetDefault("cache_as_jpeg", true)
+	ImageConfig.SetDefault("save_as_jpeg", false)
 
 	ImageConfig.SetDefault("upload.async", false)
 	ImageConfig.SetDefault("upload.throttling.burst", 20)
