@@ -10,18 +10,18 @@ import (
 )
 
 // GetImage godoc
-// @Summary Get image
-// @Description Get image
+// @Summary 获取图片
+// @Description 根据图片UUID 获取图片 可以自定义图片变化
 // @Tags image
 // @Produce json
 // @Produce image/*
 // @Param id path string true "Image UUID"
 // @Param param query string false "Transformation parameters"
 // @Success 200 {object} string "Image data"
-// @Failure 400 {object} model.ApiJson "Error message"
-// @Failure 403 {object} model.ApiJson "Error message"
-// @Failure 404 {object} model.ApiJson "Error message"
-// @Failure 500 {object} model.ApiJson "Error message"
+// @Failure 400 {object} model.ApiJson{data=[]string} "Error message"
+// @Failure 403 {object} model.ApiJson{data=[]string} "Error message"
+// @Failure 404 {object} model.ApiJson{data=[]string} "Error message"
+// @Failure 500 {object} model.ApiJson{data=[]string} "Error message"
 // @Router /image/{id} [get]
 func GetImage(ctx iris.Context) {
 	id := ctx.Params().GetString("id")
@@ -38,15 +38,15 @@ func GetImage(ctx iris.Context) {
 }
 
 // UploadImage godoc
-// @Summary Upload image
-// @Description Upload image
+// @Summary 上传图片
+// @Description 上传图片
 // @Tags image
 // @Accept multipart/form-data
 // @Produce  json
 // @Param image formData file true "Image file"
 // @Success 200 {object} model.ApiJson{data=string} "Image UUID"
-// @Failure 400 {object} model.ApiJson "Error message"
-// @Failure 500 {object} model.ApiJson "Error message"
+// @Failure 400 {object} model.ApiJson{data=[]string} "Error message"
+// @Failure 500 {object} model.ApiJson{data=[]string} "Error message"
 // @Router /image [post]
 func UploadImage(ctx iris.Context) {
 	ctx.SetMaxRequestBodySize(config.ImageConfig.GetInt64("upload.max_file_size"))
