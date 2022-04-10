@@ -23,7 +23,7 @@ var (
 func init() {
 	cache.CreateImageCache(func(a any) error {
 		if id, ok := a.(string); ok {
-			return DeleteImage(id)
+			return DeleteImage(id, true)
 		}
 		return nil
 	})
@@ -81,23 +81,52 @@ func GetEagerTransformation() []*util.Transformation {
 	return TransformationPO.eager
 }
 
-func ExistImage(id string) bool {
-	return storage.Storage.Exist(id)
+// Storage API
+
+func ExistImage(id string, cached bool) bool {
+	store := util.Tenary(cached, storage.ImageCacheStorage, storage.Storage)
+	return stExistImage(store, id)
 }
 
-func LoadImage(id string) (img image.Image, data []byte, format string, err error) {
-	if data, err = storage.Storage.LoadBytes(id); err != nil {
+func LoadImage(id string, cached bool) (img image.Image, data []byte, format string, err error) {
+	store := util.Tenary(cached, storage.ImageCacheStorage, storage.Storage)
+	return stLoadImage(store, id)
+}
+
+func SaveImageBytes(id, format string, data []byte, cached bool) error {
+	store := util.Tenary(cached, storage.ImageCacheStorage, storage.Storage)
+	return stSaveImageBytes(store, id, format, data)
+}
+
+func SaveImage(id, format string, img image.Image, cached bool) ([]byte, error) {
+	store := util.Tenary(cached, storage.ImageCacheStorage, storage.Storage)
+	return stSaveImage(store, id, format, img)
+}
+
+func DeleteImage(id string, cached bool) error {
+	store := util.Tenary(cached, storage.ImageCacheStorage, storage.Storage)
+	return stDeleteImage(store, id)
+}
+
+// St Functions
+
+func stExistImage(store storage.IStorage, id string) bool {
+	return store.Exist(id)
+}
+
+func stLoadImage(store storage.IStorage, id string) (img image.Image, data []byte, format string, err error) {
+	if data, err = store.LoadBytes(id); err != nil {
 		return nil, nil, "", err
 	}
 	img, format, err = image.Decode(bytes.NewReader(data))
 	return img, data, format, err
 }
 
-func SaveImageBytes(id, format string, data []byte) error {
-	return storage.Storage.SaveBytes(id, format, data)
+func stSaveImageBytes(store storage.IStorage, id, format string, data []byte) error {
+	return store.SaveBytes(id, format, data)
 }
 
-func SaveImage(id, format string, img image.Image) ([]byte, error) {
+func stSaveImage(store storage.IStorage, id, format string, img image.Image) ([]byte, error) {
 	buffer := bytes.NewBuffer(nil)
 	imgType := ""
 
@@ -137,9 +166,9 @@ func SaveImage(id, format string, img image.Image) ([]byte, error) {
 	}
 
 	data := buffer.Bytes()
-	return data, SaveImageBytes(id, imgType, data)
+	return data, stSaveImageBytes(store, id, imgType, data)
 }
 
-func DeleteImage(id string) error {
-	return storage.Storage.Delete(id)
+func stDeleteImage(store storage.IStorage, id string) error {
+	return store.Delete(id)
 }

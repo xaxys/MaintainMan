@@ -11,10 +11,13 @@ import (
 
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/s3"
+	"github.com/spf13/viper"
 )
 
 var (
-	Storage IStorage
+	Storage           IStorage
+	ImageCacheStorage IStorage
+	s3Conn            *s3.S3
 )
 
 type IStorage interface {
@@ -27,19 +30,54 @@ type IStorage interface {
 }
 
 func init() {
-	storageType := config.AppConfig.GetString("storage.driver")
+	Storage = initStorage(config.AppConfig)
+	ImageCacheStorage = initStorage(config.ImageConfig)
+}
+
+func initStorage(config *viper.Viper) (storage IStorage) {
+	storageType := config.GetString("storage.driver")
 	switch storageType {
 	case "local":
-		Storage = initLocalStorage()
+		path := config.GetString("storage.local.path")
+		clean := config.GetBool("storage.local.clean")
+		storage = newLocalStorage(path, clean)
 	case "s3":
-		Storage = initS3Storage()
+		if s3Conn == nil {
+			initS3Conn(config)
+		}
+		bucket := config.GetString("storage.s3.bucket")
+		storage = newS3Storage(bucket)
 	default:
 		panic(fmt.Errorf("support local and s3 only"))
 	}
+	return storage
 }
 
-func initLocalStorage() *LocalStorage {
-	path := config.AppConfig.GetString("storage.local.path")
+func initS3Conn(config *viper.Viper) {
+	accessKey := config.GetString("storage.s3.access_key")
+	secretKey := config.GetString("storage.s3.secret_key")
+	auth, err := aws.GetAuth(accessKey, secretKey)
+	if err != nil {
+		panic(fmt.Errorf("aws cannot get auth: %v", err))
+	}
+
+	bucket := config.GetString("storage.s3.bucket")
+	if bucket == "" {
+		panic(fmt.Errorf("s3 bucket not set"))
+	}
+
+	region, ok := aws.Regions[config.GetString("storage.s3.region")]
+	if !ok {
+		region = aws.EUWest
+	}
+
+	s3Conn = s3.New(auth, region)
+}
+
+func newLocalStorage(path string, clean bool) *LocalStorage {
+	if clean {
+		os.RemoveAll(path)
+	}
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		os.MkdirAll(path, 0755)
 	}
@@ -48,27 +86,8 @@ func initLocalStorage() *LocalStorage {
 	}
 }
 
-func initS3Storage() *S3Storage {
-	accessKey := config.AppConfig.GetString("storage.s3.access_key")
-	secretKey := config.AppConfig.GetString("storage.s3.secret_key")
-	auth, err := aws.GetAuth(accessKey, secretKey)
-	if err != nil {
-		panic(fmt.Errorf("aws cannot get auth: %v", err))
-	}
-
-	bucket := config.AppConfig.GetString("storage.s3.bucket")
-	if bucket == "" {
-		panic(fmt.Errorf("s3 bucket not set"))
-	}
-
-	region, ok := aws.Regions[config.AppConfig.GetString("storage.s3.region")]
-	if !ok {
-		region = aws.EUWest
-	}
-
-	conn := s3.New(auth, region)
-	bucketObj := conn.Bucket(bucket)
-
+func newS3Storage(bucket string) *S3Storage {
+	bucketObj := s3Conn.Bucket(bucket)
 	return &S3Storage{
 		bucket: bucketObj,
 	}

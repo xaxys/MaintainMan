@@ -32,6 +32,12 @@ func init() {
 
 	ImageConfig.SetDefault("cache.driver", "local")
 	ImageConfig.SetDefault("cache.limit", 1073741824) // 1GB
+
+	ImageConfig.SetDefault("storage.driver", "local")
+	ImageConfig.SetDefault("storage.local.path", "./images/cache")
+	ImageConfig.SetDefault("storage.local.clean", true)
+	ImageConfig.SetDefault("storage.s3.bucket", "BUCKET")
+
 	ImageConfig.SetDefault("transformations", []map[string]any{
 		{
 			"name":   "sw-corner",

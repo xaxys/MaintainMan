@@ -15,6 +15,14 @@ cache:
   driver: local
   limit: 1073741824 # 1 GB
 
+storage:
+  driver: local
+  local:
+    path: ./images/cache
+    clean: true
+  s3:
+    bucket: BUCKET
+
 transformations:
   sw-corner:
     params:  w_100,h_100,c_k,g_sw

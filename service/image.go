@@ -48,11 +48,11 @@ func GetImage(id, param string, auth *model.AuthInfo) *ImageResponse {
 		id = cid.(string)
 	}
 
-	if !dao.ExistImage(id) {
+	if !dao.ExistImage(id, cached) {
 		return &ImageResponse{ApiRes: model.ErrorNotFound(fmt.Errorf("未找到图片: cached: %v, id: %s", cached, id))}
 	}
 
-	image, data, format, err := dao.LoadImage(id)
+	image, data, format, err := dao.LoadImage(id, cached)
 	if err != nil {
 		return &ImageResponse{ApiRes: model.ErrorQueryDatabase(err)}
 	}
@@ -69,7 +69,7 @@ func GetImage(id, param string, auth *model.AuthInfo) *ImageResponse {
 		}
 		image = util.TransformCropAndResize(image, trans, newAuth)
 		tid := genUUID(uid)
-		bytes, err := dao.SaveImage(tid, format, image)
+		bytes, err := dao.SaveImage(tid, format, image, true)
 		if err != nil {
 			return &ImageResponse{ApiRes: model.ErrorInsertDatabase(err)}
 		}
@@ -111,7 +111,7 @@ func UploadImage(file multipart.File, auth *model.AuthInfo) *model.ApiJson {
 			imgNew := util.TransformCropAndResize(img, trans, *auth)
 			id := genUUID(auth.User)
 			key := id + trans.Hash
-			bytes, err := dao.SaveImage(id, format, imgNew)
+			bytes, err := dao.SaveImage(id, format, imgNew, true)
 			if err == nil {
 				cache.Cache.SetWithCost(key, id, int64(len(bytes)), 0)
 			}
@@ -121,13 +121,13 @@ func UploadImage(file multipart.File, auth *model.AuthInfo) *model.ApiJson {
 	id := genUUID(auth.User)
 	if config.ImageConfig.GetBool("upload.async") {
 		go func() {
-			if err := dao.SaveImageBytes(id, format, data); err != nil {
+			if err := dao.SaveImageBytes(id, format, data, false); err != nil {
 				logger.Logger.Warnf("保存图片失败(id:%s): %+v", id, err)
 			}
 			go eagerTransform()
 		}()
 	} else {
-		if err := dao.SaveImageBytes(id, format, data); err != nil {
+		if err := dao.SaveImageBytes(id, format, data, false); err != nil {
 			return model.ErrorInsertDatabase(err)
 		}
 		go eagerTransform()

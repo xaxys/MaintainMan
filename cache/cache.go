@@ -43,7 +43,6 @@ type Redis struct {
 func init() {
 	initRedisConn(config.AppConfig)
 	Cache = initCache("app", config.AppConfig, nil)
-
 }
 
 func CreateImageCache(fn func(any) error) {
@@ -57,6 +56,9 @@ func initCache(name string, config *viper.Viper, fn func(any) error) ICache {
 	case "local":
 		return newRistretto(limit, fn)
 	case "redis":
+		if redisConn == nil {
+			initRedisConn(config)
+		}
 		return newRedis(name, limit, fn)
 	default:
 		panic(fmt.Errorf("support local and redis only"))
