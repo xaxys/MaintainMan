@@ -20,6 +20,7 @@ func init() {
 	ImageConfig.AddConfigPath("$HOME/.srs_wrappper/")
 
 	ImageConfig.SetDefault("jpeg_quality", 80)
+	ImageConfig.SetDefault("gif_num_colors", 256)
 
 	ImageConfig.SetDefault("upload.async", false)
 	ImageConfig.SetDefault("upload.throttling.burst", 20)

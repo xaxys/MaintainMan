@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"image"
+	"image/gif"
 	"image/jpeg"
 	"image/png"
 	"maintainman/cache"
@@ -12,6 +13,7 @@ import (
 	"maintainman/util"
 
 	"github.com/spf13/viper"
+	"golang.org/x/image/bmp"
 )
 
 var (
@@ -111,7 +113,26 @@ func SaveImage(id, format string, img image.Image) ([]byte, error) {
 		if err := png.Encode(buffer, img); err != nil {
 			return nil, err
 		}
+	case "gif":
+		imgType = "image/gif"
+		options := &gif.Options{NumColors: config.ImageConfig.GetInt("gif_num_colors")}
+		if err := gif.Encode(buffer, img, options); err != nil {
+			return nil, err
+		}
+	case "bmp":
+		imgType = "image/bmp"
+		if err := bmp.Encode(buffer, img); err != nil {
+			return nil, err
+		}
 	default:
+		// TODO: support webp format
+		// data, _ := ioutil.ReadFile(file_name)
+		// m, err := webp.Decode(bytes.NewReader(data))
+		// if err == nil {
+		//     var buf bytes.Buffer
+		//     webp.Encode(&buf, m, nil)
+		//     ioutil.WriteFile(`./_test.webp`, buf.Bytes(), 0666)
+		// }
 		return nil, fmt.Errorf("unsupported format: %s", format)
 	}
 
