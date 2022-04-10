@@ -435,8 +435,10 @@ func TransformCropAndResize(img image.Image, transformation *Transformation, v a
 
 	// Scaling factor
 	if parameters.Cropping != CroppingModeKeepScale {
-		width *= scale
-		height *= scale
+		if width*scale <= MaxDimension && height*scale <= MaxDimension {
+			width *= scale
+			height *= scale
+		}
 	}
 
 	// Resize and crop

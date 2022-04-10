@@ -42,12 +42,8 @@ func init() {
 
 	ImageConfig.SetDefault("transformations", []map[string]any{
 		{
-			"name":   "sw-corner",
-			"params": "w_100,h_100,c_k,g_sw",
-		},
-		{
 			"name":   "square",
-			"params": "w_200,h_200",
+			"params": "w_256,h_256,c_p,g_c",
 			"eager":  true,
 		},
 		{
