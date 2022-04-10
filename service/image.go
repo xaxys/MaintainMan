@@ -2,6 +2,7 @@ package service
 
 import (
 	"bytes"
+	"encoding/binary"
 	"fmt"
 	"image"
 	"io"
@@ -58,8 +59,16 @@ func GetImage(id, param string, auth *model.AuthInfo) *ImageResponse {
 
 	// do transformation
 	if trans != nil && !cached {
-		image = util.TransformCropAndResize(image, trans, nil)
-		tid := uuid.New().String()
+		uid := parseUUID(id)
+		user, err := dao.GetUserByID(uid)
+		newAuth := model.AuthInfo{User: uid}
+		if err != nil {
+			logger.Logger.Warn(err)
+		} else {
+			newAuth.Name = user.Name
+		}
+		image = util.TransformCropAndResize(image, trans, newAuth)
+		tid := genUUID(uid)
 		bytes, err := dao.SaveImage(tid, format, image)
 		if err != nil {
 			return &ImageResponse{ApiRes: model.ErrorInsertDatabase(err)}
@@ -99,8 +108,8 @@ func UploadImage(file multipart.File, auth *model.AuthInfo) *model.ApiJson {
 			return
 		}
 		for _, trans := range dao.GetEagerTransformation() {
-			imgNew := util.TransformCropAndResize(img, trans, auth)
-			id := uuid.New().String()
+			imgNew := util.TransformCropAndResize(img, trans, *auth)
+			id := genUUID(auth.User)
 			key := id + trans.Hash
 			bytes, err := dao.SaveImage(id, format, imgNew)
 			if err == nil {
@@ -109,7 +118,7 @@ func UploadImage(file multipart.File, auth *model.AuthInfo) *model.ApiJson {
 		}
 	}
 
-	id := uuid.New().String()
+	id := genUUID(auth.User)
 	if config.ImageConfig.GetBool("upload.async") {
 		go func() {
 			if err := dao.SaveImageBytes(id, format, data); err != nil {
@@ -124,4 +133,25 @@ func UploadImage(file multipart.File, auth *model.AuthInfo) *model.ApiJson {
 		go eagerTransform()
 	}
 	return model.Success(id, "上传成功")
+}
+
+func genUUID(id uint) string {
+	uuidv1, err := uuid.NewUUID()
+	if err != nil {
+		logger.Logger.Error("生成uuid失败: %+v", err)
+	}
+	bigint24 := [8]byte{}
+	binary.LittleEndian.PutUint64(bigint24[:], uint64(id))
+	copy(uuidv1[13:], bigint24[:3])
+	return uuidv1.String()
+}
+
+func parseUUID(str string) uint {
+	uuidv1, err := uuid.Parse(str)
+	if err != nil {
+		logger.Logger.Error("解析uuid失败: %+v", err)
+	}
+	bigint24 := [8]byte{}
+	copy(bigint24[:3], uuidv1[13:])
+	return uint(binary.LittleEndian.Uint64(bigint24[:]))
 }

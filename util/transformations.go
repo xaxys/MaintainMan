@@ -41,9 +41,9 @@ import (
 
 	"crypto/sha1"
 
+	"github.com/g4s8/hexcolor"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
-	"github.com/lucasb-eyer/go-colorful"
 	"github.com/nfnt/resize"
 	"golang.org/x/image/math/fixed"
 )
@@ -101,13 +101,14 @@ type TransformationInfo struct {
 }
 
 type TextInfo struct {
-	Content  string `mapstructure:"content" yaml:"content"`
-	Gravity  string `mapstructure:"gravity" yaml:"gravity"`
-	FontPath string `mapstructure:"font"    yaml:"font"`
-	X        int    `mapstructure:"x-pos"   yaml:"x-pos"`
-	Y        int    `mapstructure:"y-pos"   yaml:"y-pos"`
-	Size     int    `mapstructure:"size"    yaml:"size"`
-	Color    string `mapstructure:"color"   yaml:"color"`
+	Content  string  `mapstructure:"content" yaml:"content"`
+	Gravity  string  `mapstructure:"gravity" yaml:"gravity"`
+	FontPath string  `mapstructure:"font"    yaml:"font"`
+	X        int     `mapstructure:"x-pos"   yaml:"x-pos"`
+	Y        int     `mapstructure:"y-pos"   yaml:"y-pos"`
+	Size     int     `mapstructure:"size"    yaml:"size"`
+	Color    string  `mapstructure:"color"   yaml:"color"`
+	Alpha    float64 `mapstructure:"alpha"   yaml:"alpha"`
 }
 
 func (t *TransformationInfo) ToTransformation() *Transformation {
@@ -128,7 +129,7 @@ func (t *TransformationInfo) ToTransformation() *Transformation {
 		if text.X < 0 || text.Y < 0 {
 			panic(fmt.Errorf("invalid text position in transformation %s: %d,%d", t.Name, text.X, text.Y))
 		}
-		color, err := colorful.Hex(text.Color)
+		color, err := hexcolor.Parse(text.Color)
 		if err != nil {
 			panic(fmt.Errorf("invalid text color in transformation %s: %s (%s)", t.Name, text.Color, err))
 		}
@@ -391,7 +392,7 @@ func (t *Text) hash() []byte {
 	return h.Sum(nil)
 }
 
-func (t *Text) getFontMetrics(scale int) FontMetrics {
+func (t *Text) getFontMetrics(scale int, content string) FontMetrics {
 	// Adapted from: https://code.google.com/p/plotinum/
 
 	// Converts truetype.FUnit to float64
@@ -399,8 +400,8 @@ func (t *Text) getFontMetrics(scale int) FontMetrics {
 
 	width := 0
 	prev, hasPrev := truetype.Index(0), false
-	for _, rune := range t.content {
-		index := t.font.Index(rune)
+	for _, ch := range content {
+		index := t.font.Index(ch)
 		if hasPrev {
 			width += int(t.font.Kern(fixed.Int26_6(t.font.FUnitsPerEm()), prev, index))
 		}
@@ -564,16 +565,16 @@ func TransformCropAndResize(img image.Image, transformation *Transformation, v a
 			c.SetFont(text.font)
 			c.SetFontSize(size)
 
-			fontMetrics := text.getFontMetrics(scale)
-			width := int(c.PointToFixed(fontMetrics.width) >> 8)
-			height := int(c.PointToFixed(fontMetrics.height) >> 8)
+			content := ProcessString(text.content, v)
+			fontMetrics := text.getFontMetrics(scale, content)
+			width := int(c.PointToFixed(fontMetrics.width) >> 6)
+			height := int(c.PointToFixed(fontMetrics.height) >> 6)
 
 			pt := calculateTopLeftPointFromGravity(text.gravity, width, height, bounds.Dx(), bounds.Dy())
 			pt = pt.Add(getTranslation(text.gravity, text.x*scale, text.y*scale))
 			x := pt.X
-			y := pt.Y + int(c.PointToFixed(fontMetrics.ascent)>>8)
+			y := pt.Y + int(c.PointToFixed(fontMetrics.ascent)>>6)
 
-			content := ProcessString(text.content, v)
 			_, err := c.DrawString(content, freetype.Pt(x, y))
 			if err != nil {
 				log.Println("Error adding text:", err)

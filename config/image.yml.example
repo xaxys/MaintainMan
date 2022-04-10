@@ -16,17 +16,18 @@ cache:
 
 transformations:
   sw-corner:
-    params:  w_100,h_50,c_k,g_sw
+    params:  w_100,h_100,c_k,g_sw
   square:
     params:  w_200,h_200
     eager:   true # Run on every upload
   watermarked:
     default: true
+    params: w_800
     texts:
     - content: "{{.Name}}@MaintainMan"
-      gravity: "ne"
-      x-pos:   60
-      y-pos:   15
-      color:   "#fff"
+      gravity: se
+      x-pos:   10
+      y-pos:   0
+      color:   "#808080CC"
       font:    fonts/SourceHanSans-Regular.ttf
-      size:    12
+      size:    14

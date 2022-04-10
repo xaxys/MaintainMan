@@ -34,7 +34,7 @@ func init() {
 	ImageConfig.SetDefault("transformations", []map[string]any{
 		{
 			"name":   "sw-corner",
-			"params": "w_100,h_50,c_k,g_sw",
+			"params": "w_100,h_100,c_k,g_sw",
 		},
 		{
 			"name":   "square",
@@ -43,16 +43,17 @@ func init() {
 		},
 		{
 			"name":    "watermarked",
+			"params":  "w_800",
 			"default": true,
 			"texts": []map[string]any{
 				{
 					"content": "{{.Name}}@MaintainMan",
-					"gravity": "ne",
-					"x-pos":   60,
-					"y-pos":   15,
-					"color":   "#fff",
+					"gravity": "se",
+					"x-pos":   10,
+					"y-pos":   0,
+					"color":   "#808080CC",
 					"font":    "fonts/SourceHanSans-Regular.ttf",
-					"size":    12,
+					"size":    14,
 				},
 			},
 		},
