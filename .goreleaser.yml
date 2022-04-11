@@ -18,7 +18,6 @@ builds:
     goarch:
       - amd64
     ldflags:
-      - -extldflags '-static'
       - -s -w 
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
@@ -35,7 +34,6 @@ builds:
     goarch:
       - arm64
     ldflags:
-      - -extldflags '-static'
       - -s -w 
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
@@ -52,7 +50,6 @@ builds:
     goarch:
       - amd64
     ldflags:
-      - -extldflags '-static'
       - -s -w 
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
@@ -69,7 +66,6 @@ builds:
     goarch:
       - arm64
     ldflags:
-      - -extldflags '-static'
       - -s -w 
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
@@ -86,7 +82,6 @@ builds:
     goarch:
       - 386
     ldflags:
-      - -extldflags '-static'
       - -s -w 
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
@@ -103,7 +98,6 @@ builds:
     goarch:
       - amd64
     ldflags:
-      - -extldflags '-static'
       - -s -w 
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
