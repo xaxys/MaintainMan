@@ -28,6 +28,11 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
+      - name: Get dependencies
+        run: |
+          go mod tidy
+          go generate ./...
+
       - name: Run Unit tests.
         run: make test
 
