@@ -80,9 +80,10 @@ func initRedisConn(config *viper.Viper) {
 
 func newRistretto(limit int64, onEvict func(any) error) ICache {
 	max_cost := util.Tenary(limit > 0, limit, 1024)
+	num_counters := util.Tenary(max_cost > 1e5, 1e6, max_cost<<3)
 	ristretto, err := ristretto.NewCache(&ristretto.Config{
 		IgnoreInternalCost: true,
-		NumCounters:        max_cost << 3,
+		NumCounters:        num_counters,
 		MaxCost:            max_cost,
 		BufferItems:        64,
 		OnEvict: func(item *ristretto.Item) {
