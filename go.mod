@@ -32,7 +32,6 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/flosch/pongo2/v4 v4.0.2 // indirect
 	github.com/fsnotify/fsnotify v1.5.1 // indirect
-	github.com/go-bindata/go-bindata v3.1.2+incompatible // indirect
 	github.com/go-playground/locales v0.14.0 // indirect
 	github.com/go-sql-driver/mysql v1.6.0 // indirect
 	github.com/goccy/go-json v0.9.4 // indirect

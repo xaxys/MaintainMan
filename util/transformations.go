@@ -34,14 +34,14 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"maintainman/fonts"
 	"os"
+	"path"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"crypto/sha1"
-
-	"maintainman/bindata"
 
 	"github.com/g4s8/hexcolor"
 	"github.com/golang/freetype"
@@ -139,7 +139,7 @@ func (t *TransformationInfo) ToTransformation() *Transformation {
 		}
 
 		fontBytes := []byte{}
-		var osErr, bindataErr error
+		var osErr, embedErr error
 
 		// Try to load font from os filesystem
 		if _, err := os.Stat(text.FontPath); os.IsNotExist(err) {
@@ -152,14 +152,15 @@ func (t *TransformationInfo) ToTransformation() *Transformation {
 			}
 		}
 
-		// Try to load font from bindata
+		// Try to load font from embed file
 		if osErr != nil {
-			fontBytes, bindataErr = bindata.Asset(text.FontPath)
+			_, file := path.Split(text.FontPath)
+			fontBytes, embedErr = fonts.FontFiles.ReadFile(file)
 		}
 
-		// if not found in both os filesystem and bindata
-		if osErr != nil && bindataErr != nil {
-			panic(fmt.Errorf("font does not exist in both os file and bindata (transformation %s): osErr: %+v; binDataErr: %+v", t.Name, osErr, bindataErr))
+		// if not found in both os filesystem and embed file
+		if osErr != nil && embedErr != nil {
+			panic(fmt.Errorf("font does not exist in both os file and embed file (transformation %s): osErr: %+v; binDataErr: %+v", t.Name, osErr, embedErr))
 		}
 
 		font, err := freetype.ParseFont(fontBytes)
