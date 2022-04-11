@@ -41,6 +41,8 @@ import (
 
 	"crypto/sha1"
 
+	"maintainman/bindata"
+
 	"github.com/g4s8/hexcolor"
 	"github.com/golang/freetype"
 	"github.com/golang/freetype/truetype"
@@ -116,7 +118,7 @@ type TextInfo struct {
 func (t *TransformationInfo) ToTransformation() *Transformation {
 	params, err := ParseParameters(t.Params)
 	if err != nil && t.Params != "" {
-		panic(fmt.Errorf("invalid transformation parameters: %s (%s)", t.Params, err))
+		panic(fmt.Errorf("invalid transformation parameters: %s (%+v)", t.Params, err))
 	}
 
 	if !isValidTransformationName(t.Name) {
@@ -126,28 +128,46 @@ func (t *TransformationInfo) ToTransformation() *Transformation {
 	texts := []*Text{}
 	for _, text := range t.Texts {
 		if !isValidGravity(text.Gravity) {
-			panic(fmt.Errorf("missing or invalid gravity in transformation %s: %s", t.Name, text.Gravity))
+			panic(fmt.Errorf("missing or invalid gravity (transformation %s): %s", t.Name, text.Gravity))
 		}
 		if text.X < 0 || text.Y < 0 {
-			panic(fmt.Errorf("invalid text position in transformation %s: %d,%d", t.Name, text.X, text.Y))
+			panic(fmt.Errorf("invalid text position (transformation %s): %d,%d", t.Name, text.X, text.Y))
 		}
 		color, err := hexcolor.Parse(text.Color)
 		if err != nil {
-			panic(fmt.Errorf("invalid text color in transformation %s: %s (%s)", t.Name, text.Color, err))
+			panic(fmt.Errorf("invalid text color (transformation %s): %s (%+v)", t.Name, text.Color, err))
 		}
+
+		fontBytes := []byte{}
+		var osErr, bindataErr error
+
+		// Try to load font from os filesystem
 		if _, err := os.Stat(text.FontPath); os.IsNotExist(err) {
-			panic(fmt.Errorf("font does not exist in transformation %s: %s", t.Name, text.FontPath))
+			osErr = fmt.Errorf("font does not exist (transformation %s): %s", t.Name, text.FontPath)
 		}
-		fontBytes, err := ioutil.ReadFile(text.FontPath)
-		if err != nil {
-			panic(fmt.Errorf("loading font failed in transformation %s: %s", t.Name, err))
+		if osErr == nil {
+			fontBytes, err = ioutil.ReadFile(text.FontPath)
+			if err != nil {
+				panic(fmt.Errorf("loading font failed (transformation %s): %+v", t.Name, err))
+			}
 		}
+
+		// Try to load font from bindata
+		if osErr != nil {
+			fontBytes, bindataErr = bindata.Asset(text.FontPath)
+		}
+
+		// if not found in both os filesystem and bindata
+		if osErr != nil && bindataErr != nil {
+			panic(fmt.Errorf("font does not exist in both os file and bindata (transformation %s): osErr: %+v; binDataErr: %+v", t.Name, osErr, bindataErr))
+		}
+
 		font, err := freetype.ParseFont(fontBytes)
 		if err != nil {
-			panic(fmt.Errorf("parsing font failed in transformation %s: %s", t.Name, err))
+			panic(fmt.Errorf("parsing font failed (transformation %s): %+v", t.Name, err))
 		}
 		if text.Size <= 1 {
-			panic(fmt.Errorf("invalid text size in transformation %s: %d", t.Name, text.Size))
+			panic(fmt.Errorf("invalid text size (transformation %s): %d", t.Name, text.Size))
 		}
 		text := &Text{
 			content:  text.Content,

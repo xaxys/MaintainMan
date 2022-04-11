@@ -23,19 +23,23 @@ endif
 
 all: build
 
-build:
+build: bindata
 	@echo "Building MaintainMan ..."
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) build \
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
 		-o $(TARGET) $(PWD)/main.go
 
-test: clean
+test: clean bindata
 	@echo "Testing MaintainMan ..."
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) test \
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
 		-coverprofile=coverage.out
+
+bindata:
+	@echo "Run go-bindata ..."
+	go-bindata -nomemcopy --pkg bindata -o ./bindata/bindata.go fonts/...
 
 clean:
 	@echo "Cleaning MaintainMan ..."
@@ -45,3 +49,5 @@ clean:
 	@$(RM) *.exe
 	@$(RM) *.out
 	@$(RM) *.yaml
+
+.PHONY: all test bindata clean
