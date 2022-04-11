@@ -10,7 +10,8 @@ ifeq ($(OS),Windows_NT)  # is Windows_NT on XP, 2000, 7, Vista, 10...
 	GIT_COMMIT := $(shell git rev-parse --short HEAD)
 	GO_VERSION := $(shell go version)
 	GOPATH     := $(subst ;,,$(shell go env GOPATH))
-	RM         := del /s /q
+	RM_CMD_1   := del /s /q
+	RM_CMD_2   := 
 	EXPORT     := set
 else
 	GO		   ?= go
@@ -21,7 +22,8 @@ else
 	GIT_COMMIT := $(shell git rev-parse --short HEAD)
 	GO_VERSION := $(shell go version)
 	GOPATH     := $(shell go env GOPATH)
-	RM         := rm -rf
+	RM_CMD_1   := find . -type f -name
+	RM_CMD_2   := -delete
 	EXPORT     := export
 endif
 
@@ -44,15 +46,15 @@ test: clean bindata
 bindata:
 	@echo "Run go-bindata ..."
 	@$(GO) install -a github.com/go-bindata/go-bindata/...@latest
-	@$(GOPATH)/bin/go-bindata -nomemcopy --pkg bindata -o ./bindata/bindata.go fonts/...
+	@go-bindata -nomemcopy --pkg bindata -o ./bindata/bindata.go fonts/...
 
 clean:
 	@echo "Cleaning MaintainMan ..."
-	@$(RM) $(TARGET)
-	@$(RM) coverage.out
-	@$(RM) *.db
-	@$(RM) *.exe
-	@$(RM) *.out
-	@$(RM) *.yaml
+	@$(RM_CMD_1) $(TARGET)    $(RM_CMD_2)
+	@$(RM_CMD_1) coverage.out $(RM_CMD_2)
+	@$(RM_CMD_1) *.db         $(RM_CMD_2)
+	@$(RM_CMD_1) *.exe        $(RM_CMD_2)
+	@$(RM_CMD_1) *.out        $(RM_CMD_2)
+	@$(RM_CMD_1) *.yaml       $(RM_CMD_2)
 
 .PHONY: all test bindata clean
