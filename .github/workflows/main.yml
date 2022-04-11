@@ -53,7 +53,7 @@ jobs:
       - name: Fetch all tags
         run: git fetch --force --tags
 
-      - name: Create release on GitHub
+      - name: Create snapshot
         run: "docker run --rm --privileged -e CGO_ENABLED=1 -e GITHUB_TOKEN=$GITHUB_TOKEN -e GOVERSION=$(go version | awk '{print $3;}') -v /var/run/docker.sock:/var/run/docker.sock -v `pwd`:/go/src/maintainman -v /usr:/sysroot/usr -w /go/src/maintainman xaxy/goreleaser-cross:v1.18.0 release --snapshot --rm-dist"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
