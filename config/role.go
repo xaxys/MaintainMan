@@ -71,6 +71,7 @@ func init() {
 			"name":         "maintainer",
 			"display_name": "维护工",
 			"permissions": []string{
+				"order.viewfix",
 				"order.reject",
 				"order.report",
 				"order.complete",
