@@ -6,7 +6,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v2
         with:
           go-version: 1.18
       
@@ -21,14 +21,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Go
-        uses: actions/setup-go@v1
+        uses: actions/setup-go@v2
         with:
           go-version: 1.18
-
-      - name: Set up Go env
-        run: |
-          go install github.com/go-bindata/go-bindata/...
-          export PATH=$PATH:$(go env GOPATH)/bin
 
       - name: Check out code
         uses: actions/checkout@v2

@@ -2,23 +2,27 @@
 PACKAGE_NAME          := maintainman
 
 ifeq ($(OS),Windows_NT)  # is Windows_NT on XP, 2000, 7, Vista, 10...
-	GO		?= go.exe
-    PWD 	:= ${CURDIR}
-	TARGET	:= $(PACKAGE_NAME).exe
+	GO		   ?= go.exe
+    PWD 	   := ${CURDIR}
+	TARGET	   := $(PACKAGE_NAME).exe
 	BUILD_TAGS := $(shell git describe --tags --always --dirty="-dev")
 	BUILD_TIME := $(shell echo %date% %time%)
 	GIT_COMMIT := $(shell git rev-parse --short HEAD)
 	GO_VERSION := $(shell go version)
-	RM := del /s /q
+	GOPATH     := $(subst ;,,$(shell go env GOPATH))
+	RM         := del /s /q
+	EXPORT     := set
 else
-	GO		?= go
-    PWD 	:= ${CURDIR}
-	TARGET	:= $(PACKAGE_NAME)
+	GO		   ?= go
+    PWD 	   := ${CURDIR}
+	TARGET	   := $(PACKAGE_NAME)
 	BUILD_TAGS := $(shell git describe --tags --always --dirty="-dev")
 	BUILD_TIME := $(shell date --utc)
 	GIT_COMMIT := $(shell git rev-parse --short HEAD)
 	GO_VERSION := $(shell go version)
-	RM := rm -rf
+	GOPATH     := $(shell go env GOPATH)
+	RM         := rm -rf
+	EXPORT     := export
 endif
 
 all: build
@@ -39,8 +43,8 @@ test: clean bindata
 
 bindata:
 	@echo "Run go-bindata ..."
-	@go get -u github.com/go-bindata/go-bindata/...
-	@go-bindata -nomemcopy --pkg bindata -o ./bindata/bindata.go fonts/...
+	@$(GO) install -a github.com/go-bindata/go-bindata/...@latest
+	@$(GOPATH)/bin/go-bindata -nomemcopy --pkg bindata -o ./bindata/bindata.go fonts/...
 
 clean:
 	@echo "Cleaning MaintainMan ..."
