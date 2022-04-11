@@ -46,7 +46,7 @@ func init() {
 	AppConfig.SetDefault("database.mysql.password", "123456")
 
 	AppConfig.SetDefault("cache.driver", "local")
-	AppConfig.SetDefault("cache.limit", "268435456")
+	AppConfig.SetDefault("cache.limit", 268435456)
 	AppConfig.SetDefault("cache.redis.host", "localhost")
 	AppConfig.SetDefault("cache.redis.port", 6379)
 	AppConfig.SetDefault("cache.redis.password", "")

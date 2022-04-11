@@ -46,7 +46,7 @@ storage:
 
 cache:
   driver: "local"
-  limit: 268435456 # 128M
+  limit: 268435456 # 256M
   redis:
     host: "localhost"
     port: 6379

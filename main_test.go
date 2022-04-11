@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"maintainman/dao"
 	"maintainman/model"
 	"maintainman/service"
 	"maintainman/util"
@@ -1709,7 +1710,82 @@ func TestHitAnnounceRouter(t *testing.T) {
 	responseBody = e.GET("/v1/announce/"+cast.ToString(id)+"/hit").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
 		Expect().Status(http.StatusNoContent).Body().Raw()
+
+	responseBody = e.GET("/v1/announce/"+cast.ToString(id)+"/hit").
+		WithHeader("Authorization", "Bearer "+superAdminToken).
+		Expect().Status(http.StatusOK).Body().Raw()
 	t.Log(responseBody)
+}
+
+func TestMultiHitAnnounceRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+
+	aids := []uint{}
+	for i := 0; i < 1000; i++ {
+		announce, err := dao.CreateAnnounce(&model.ModifyAnnounceRequest{
+			Title:     util.RandomString(100),
+			Content:   util.RandomString(100),
+			StartTime: cast.ToInt64(time.Now().Unix()),
+			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+		}, 0)
+		if err != nil {
+			t.Error(err)
+		}
+		aids = append(aids, announce.ID)
+		if i%10 == 0 {
+			t.Log("create announce: ", i)
+		}
+	}
+	t.Log("create 1000 announces")
+
+	uids := []uint{}
+	users := generateRandomUsers("AnnounceHitTest", 1000)
+	for i, user := range users {
+		u, err := dao.CreateUser(&model.CreateUserRequest{RegisterUserRequest: user}, 0)
+		if err != nil {
+			t.Error(err)
+		}
+		uids = append(uids, u.ID)
+		if i%10 == 0 {
+			t.Log("create user: ", i)
+		}
+	}
+	t.Log("create 1000 users")
+
+	for i, uid := range uids {
+		token, err := util.GetJwtString(uid, "", "user")
+		if err != nil {
+			t.Error(err)
+		}
+		for j, aid := range aids {
+			e.GET("/v1/announce/"+cast.ToString(aid)+"/hit").
+				WithHeader("Authorization", "Bearer "+token).
+				Expect().Status(http.StatusNoContent).Body().Raw()
+
+			if j%50 == 0 {
+				t.Logf("%d/%d", i, j)
+			}
+		}
+	}
+	t.Log("all users hit all announces")
+
+	for i, uid := range uids {
+		token, err := util.GetJwtString(uid, "", "user")
+		if err != nil {
+			t.Error(err)
+		}
+		for j, aid := range aids {
+			e.GET("/v1/announce/"+cast.ToString(aid)+"/hit").
+				WithHeader("Authorization", "Bearer "+token).
+				Expect().Status(http.StatusOK).Body().Raw()
+
+			if j%50 == 0 {
+				t.Logf("%d/%d", i, j)
+			}
+		}
+	}
+	t.Log("all users hit all announces again")
 }
 
 // Test Utils
