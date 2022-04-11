@@ -44,13 +44,15 @@ MaintainMan is a logistic report management system powered by iris.
 
 - Item inventory management associated with the order system
 
+- Image Host with auto watermark & custom transformation & cache
+
 - More...
 
 ## Documentation
 
-Find document here [Github Wiki](https://github.com/xaxys/MaintainMan/wiki/API-Docs).
+Find document here [Maintainman Doc](https://maintainman.oasis.run/).
 
-Or Beautified Document here [Maintainman Doc](https://maintainman.oasis.run/).
+Or On [Github Wiki](https://github.com/xaxys/MaintainMan/wiki/API-Docs).
 
 ## Contributing
 
@@ -67,6 +69,10 @@ You can help to make the project better by creating an issue or pull request.
 - Marksagittarius
 
   - [github.com/Marksagittarius](https://github.com/Marksagittarius)
+
+- DawningW
+
+  - [github.com/DawningW](https://github.com/DawningW)
 
 ## License
 
