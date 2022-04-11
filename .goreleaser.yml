@@ -4,6 +4,9 @@ before:
   hooks:
     - go mod tidy
     - go generate ./...
+    # install and run go-bindata
+    - go get -u github.com/go-bindata/go-bindata/...
+    - export PATH=$PATH:$(go env GOPATH)/bin
     - go-bindata -nomemcopy --pkg bindata -o ./bindata/bindata.go fonts/...
 builds:
   - id: darwin_amd64

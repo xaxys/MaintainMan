@@ -35,11 +35,12 @@ test: clean bindata
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) test \
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
-		-coverprofile=coverage.out
+		-coverprofile=coverage.out ./...
 
 bindata:
 	@echo "Run go-bindata ..."
-	go-bindata -nomemcopy --pkg bindata -o ./bindata/bindata.go fonts/...
+	@go get -u github.com/go-bindata/go-bindata/...
+	@go-bindata -nomemcopy --pkg bindata -o ./bindata/bindata.go fonts/...
 
 clean:
 	@echo "Cleaning MaintainMan ..."

@@ -25,6 +25,11 @@ jobs:
         with:
           go-version: 1.18
 
+      - name: Set up Go env
+        run: |
+          go install github.com/go-bindata/go-bindata/...
+          export PATH=$PATH:$(go env GOPATH)/bin
+
       - name: Check out code
         uses: actions/checkout@v2
 
@@ -32,16 +37,23 @@ jobs:
         run: make test
 
   build:
-    name: Build
+    name: Build Snapshot
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Go 1.18
-        uses: actions/setup-go@v1
+      - name: Set up Go
+        uses: actions/setup-go@v2
         with:
           go-version: 1.18
 
-      - name: Check out source code
+      - name: Check out code
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-      - name: Build
-        run: make build
+      - name: Fetch all tags
+        run: git fetch --force --tags
+
+      - name: Create release on GitHub
+        run: "docker run --rm --privileged -e CGO_ENABLED=1 -e GITHUB_TOKEN=$GITHUB_TOKEN -e GOVERSION=$(go version | awk '{print $3;}') -v /var/run/docker.sock:/var/run/docker.sock -v `pwd`:/go/src/maintainman -v /usr:/sysroot/usr -w /go/src/maintainman xaxy/goreleaser-cross:v1.18.0 release --snapshot --rm-dist"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

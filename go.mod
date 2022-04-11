@@ -118,9 +118,7 @@ require (
 	github.com/iris-contrib/middleware/cors v0.0.0-20220218204641-8e282f24acb7
 	github.com/iris-contrib/middleware/jwt v0.0.0-20220301201128-27fa0f6a7d7e
 	github.com/jameskeane/bcrypt v0.0.0-20120420032655-c3cd44c1e20f
-	github.com/kataras/iris v0.0.2
 	github.com/kataras/iris/v12 v12.2.0-alpha9
-	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/mitchellh/goamz v0.0.0-20150317174335-caaaea8b30ee
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gorm.io/driver/mysql v1.3.2
