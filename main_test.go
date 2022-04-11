@@ -1740,7 +1740,7 @@ func TestMultiHitAnnounceRouter(t *testing.T) {
 	t.Log("create 1000 announces")
 
 	uids := []uint{}
-	users := generateRandomUsers("AnnounceHitTest", 1000)
+	users := generateRandomUsers("AnnounceHitTest", 25)
 	for i, user := range users {
 		u, err := dao.CreateUser(&model.CreateUserRequest{RegisterUserRequest: user}, 0)
 		if err != nil {
@@ -1751,7 +1751,7 @@ func TestMultiHitAnnounceRouter(t *testing.T) {
 			t.Log("create user: ", i)
 		}
 	}
-	t.Log("create 1000 users")
+	t.Log("create 25 users")
 
 	for i, uid := range uids {
 		token, err := util.GetJwtString(uid, "", "user")
