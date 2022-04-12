@@ -64,7 +64,7 @@ App config is used to configure the database and various connection parameters a
 <summary>example</summary>
 
 ```yaml
-version: 1.2.0
+version: 1.2.1
 app:
   # application name.
   name: "maintainman"
@@ -92,21 +92,27 @@ app:
     # order completed.
     # the order will be appraised automatically after the duration.
     timeout: "72h"
-    # the duration that the system will check the timeouted unappraised # order.
+    # the duration that the system will check the timeouted unappraised
+    # order.
     purge: "10m"
     # the default appraise score of timeouted unappraised order.
     default: 5
+
+  # Whether item count can be negative.
+  # if false, an `item count is not enough` error may be returned on
+  # item consuming.
+  item_can_negative: true
 
 wechat:
   # wechat appid.
   appid: ""
   # wechat secret.
   secret: ""
-  # whether a unregistered user will be automatically registered on wechat login.
-  # if set to false, reponse code will be `403` when a unregistered user # try wechat login.
-  # if set to true, a unregistered user will be automatically registered
-  # on wechat login. username will be open_id and user will be assigned
-  # a random password.
+  # whether a unregistered user will be registered on wechat login.
+  # if false, reponse code will be `403` when a unregistered user try
+  # wechat login.
+  # if true, a unregistered user will be registered on wechat login.
+  # username will be open_id and user will be assigned a random password.
   fastlogin: true
 
 token:
@@ -315,11 +321,11 @@ role:
   - order.comment.delete
   - tag.view.1
   - tag.add.1
-  # tag.add.1 is a special permission.
-  # in perm.? pattern, if ? is a number, the number will be compared
+  # `tag.add.1` is a special permission.
+  # in `perm.?` pattern, if `?` is a number, the number will be compared
   # to judge whether the role has the permission.
-  # e.g. if a role has perm.2, then the perm.2 and perm.1 will be judge
-  # as true.
+  # e.g. if a role has `perm.2`, then the `perm.2` and `perm.1` will be
+  # judge as true.
   inheritance:
   - guest
 
@@ -354,7 +360,8 @@ role:
   - order.*
   - tag.*
   - item.*
-  # in perm.* pattern, * means any, all sub permissions under perm will # be judged as true.
+  # in `perm.*` pattern, `*` means any, all sub permissions under perm will
+  # be judged as true.
   inheritance:
   - maintainer
 
@@ -447,7 +454,8 @@ transformations:
       # non-negative integer.
       x-pos:   10
       y-pos:   0
-      # color format is hex. e.g. #RRGGBBAA or #RRGGBB or #RGBA or #RGB
+      # color format is hex.
+      # e.g. #RRGGBBAA or #RRGGBB or #RGBA or #RGB
       color:   "#808080CC"
       # font file path. if not set, will search filename in
       # embedded fonts.
