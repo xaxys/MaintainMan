@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const AppConfigVersion = "1.2.0"
+const AppConfigVersion = "1.2.1"
 
 var (
 	AppConfig *viper.Viper
@@ -28,6 +28,7 @@ func init() {
 	AppConfig.SetDefault("app.appraise.timeout", "72h")
 	AppConfig.SetDefault("app.appraise.purge", "10m")
 	AppConfig.SetDefault("app.appraise.default", 5)
+	AppConfig.SetDefault("app.item_can_negative", true)
 
 	AppConfig.SetDefault("wechat.appid", "微信小程序的appid")
 	AppConfig.SetDefault("wechat.secret", "微信小程序的secret")

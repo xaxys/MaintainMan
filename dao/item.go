@@ -1,6 +1,8 @@
 package dao
 
 import (
+	"fmt"
+	"maintainman/config"
 	"maintainman/database"
 	"maintainman/logger"
 	"maintainman/model"
@@ -126,10 +128,9 @@ func TxConsumeItem(tx *gorm.DB, itemlog *model.ItemLog, operator uint) (item *mo
 	if item, err = GetItemByID(itemlog.ItemID); err != nil {
 		return
 	}
-	// TODO: 考虑到实际情况，是否应该允许消耗的数量大于库存数量?
-	// if item.Count < itemlog.ChangeNum {
-	// 	return fmt.Errorf("item count is not enough")
-	// }
+	if item.Count < itemlog.ChangeNum && !config.AppConfig.GetBool("app.item_can_negative") {
+		return nil, fmt.Errorf("item count is not enough")
+	}
 	item.Count -= itemlog.ChangeNum
 	item.Income += -itemlog.ChangePrice
 	item.UpdatedBy = operator
