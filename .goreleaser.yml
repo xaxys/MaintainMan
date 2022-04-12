@@ -19,7 +19,7 @@ builds:
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
-      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+      - -X "main.GoVersion={{.Env.GOVERSION}} {{.Os}}/{{.Arch}}"
 
   - id: darwin_arm64
     env:
@@ -35,7 +35,7 @@ builds:
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
-      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+      - -X "main.GoVersion={{.Env.GOVERSION}} {{.Os}}/{{.Arch}}"
 
   - id: linux_amd64
     env:
@@ -51,7 +51,7 @@ builds:
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
-      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+      - -X "main.GoVersion={{.Env.GOVERSION}} {{.Os}}/{{.Arch}}"
 
   - id: linux_arm64
     env:
@@ -67,7 +67,7 @@ builds:
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
-      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+      - -X "main.GoVersion={{.Env.GOVERSION}} {{.Os}}/{{.Arch}}"
 
   - id: windows_i686
     env:
@@ -83,7 +83,7 @@ builds:
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
-      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+      - -X "main.GoVersion={{.Env.GOVERSION}} {{.Os}}/{{.Arch}}"
 
   - id: windows_amd64
     env:
@@ -99,7 +99,7 @@ builds:
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
-      - -X "main.GoVersion='{{.Env.GOVERSION}} {{.Os}}/{{.Arch}}'"
+      - -X "main.GoVersion={{.Env.GOVERSION}} {{.Os}}/{{.Arch}}"
 
 archives:
   - id: default
@@ -120,13 +120,19 @@ archives:
       386: i386
       686: i686
       amd64: x86_64
+
 checksum:
   name_template: 'checksums.txt'
+
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  name_template: "{{ incpatch .Version }}-shapshot"
+
 changelog:
-  sort: asc
   filters:
     exclude:
       - '^docs:'
       - '^test:'
+
+release:
+  prerelease: auto
+  mode: keep-existing
