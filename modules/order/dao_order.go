@@ -43,7 +43,7 @@ func dbGetAllOrdersWithParam(aul *AllOrderRequest) (orders []*Order, err error) 
 }
 
 func txGetAllOrdersWithParam(tx *gorm.DB, aul *AllOrderRequest) (orders []*Order, err error) {
-	order := Order{
+	order := &Order{
 		UserID: aul.UserID,
 		Status: aul.Status,
 	}
@@ -182,7 +182,7 @@ func dbChangeOrderStatus(id uint, status *Status) (err error) {
 }
 
 func txChangeOrderStatus(tx *gorm.DB, id uint, status *Status) error {
-	order := Order{}
+	order := &Order{}
 	order.ID = id
 	order.Status = status.Status
 	order.UpdatedBy = status.CreatedBy
@@ -211,7 +211,7 @@ func dbChangeOrderAllowComment(id uint, allow bool) error {
 }
 
 func txChangeOrderAllowComment(tx *gorm.DB, id uint, allow bool) error {
-	order := Order{}
+	order := &Order{}
 	order.ID = id
 	order.AllowComment = util.Tenary[uint](allow, 1, 2)
 	if err := tx.Model(order).Updates(order).Error; err != nil {
@@ -232,7 +232,7 @@ func dbAppraiseOrder(id, appraisal, operator uint) (err error) {
 }
 
 func txAppraiseOrder(tx *gorm.DB, id, appraisal, operator uint) (err error) {
-	order := Order{}
+	order := &Order{}
 	order.ID = id
 	order.Appraisal = appraisal
 	order.UpdatedBy = order.UserID

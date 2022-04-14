@@ -79,7 +79,7 @@ func dbDeleteItem(id uint) error {
 }
 
 func TxDeleteItem(tx *gorm.DB, id uint) error {
-	if err := tx.Delete(Item{}, id).Error; err != nil {
+	if err := tx.Delete(&Item{}, id).Error; err != nil {
 		logger.Logger.Debugf("DeleteItemErr: %v\n", err)
 		return err
 	}

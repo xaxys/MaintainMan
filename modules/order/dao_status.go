@@ -18,7 +18,7 @@ func dbGetOrderByRepairer(id uint, json *RepairerOrderRequest) (orders []*Order,
 }
 
 func txGetOrderByRepairer(tx *gorm.DB, id uint, json *RepairerOrderRequest) (orders []*Order, err error) {
-	status := Status{
+	status := &Status{
 		RepairerID: sql.NullInt64{Int64: int64(id), Valid: true},
 		Current:    json.Current,
 	}
@@ -45,7 +45,7 @@ func txGetOrderByRepairer(tx *gorm.DB, id uint, json *RepairerOrderRequest) (ord
 }
 
 func txGetAppraiseTimeoutOrder(tx *gorm.DB) (ids []uint, err error) {
-	status := Status{
+	status := &Status{
 		Status:  StatusCompleted,
 		Current: true,
 	}

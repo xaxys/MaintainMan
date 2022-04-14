@@ -1811,7 +1811,7 @@ func TestMultiHitAnnounceRouter(t *testing.T) {
 	for i := 0; i < 1000; i++ {
 		response := e.POST("/v1/announce").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
-			WithJSON(announce.ModifyAnnounceRequest{
+			WithJSON(announce.CreateAnnounceRequest{
 				Title:     util.RandomString(100),
 				Content:   util.RandomString(100),
 				StartTime: cast.ToInt64(time.Now().Unix()),

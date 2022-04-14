@@ -1,1 +1,5 @@
 hit_expire: "12h"
+
+cache:
+  driver: "local"
+  limit: 268435456 # 256M

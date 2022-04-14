@@ -42,7 +42,7 @@ func dbGetAllTagSorts() ([]string, error) {
 }
 
 func txGetAllTagSorts(tx *gorm.DB) (sorts []string, err error) {
-	if err = tx.Model(Tag{}).Distinct().Pluck("Sort", &sorts).Error; err != nil {
+	if err = tx.Model(&Tag{}).Distinct().Pluck("Sort", &sorts).Error; err != nil {
 		logger.Logger.Debugf("GetAllTagSortsErr: %v\n", err)
 	}
 	return
@@ -53,7 +53,7 @@ func dbGetAllTagsBySort(sort string) ([]*Tag, error) {
 }
 
 func txGetAllTagsBySort(tx *gorm.DB, sort string) (tags []*Tag, err error) {
-	tag := Tag{
+	tag := &Tag{
 		Sort: sort,
 	}
 	if err = tx.Where(tag).Find(&tags).Error; err != nil {
@@ -69,7 +69,7 @@ func dbCreateTag(aul *CreateTagRequest, operator uint) (*Tag, error) {
 func txCreateTag(tx *gorm.DB, aul *CreateTagRequest, operator uint) (tag *Tag, err error) {
 	tag = jsonToTag(aul)
 	tag.CreatedBy = operator
-	cond := Tag{
+	cond := &Tag{
 		Sort: tag.Sort,
 		Name: tag.Name,
 	}

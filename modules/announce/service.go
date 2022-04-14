@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/xaxys/maintainman/core/config"
 	"github.com/xaxys/maintainman/core/model"
 	"github.com/xaxys/maintainman/core/util"
 
@@ -108,7 +107,7 @@ func hitAnnounceService(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if _, ok := mctx.Cache.Get(key); ok {
 		return model.Success(nil, "浏览过了")
 	}
-	expire, err := time.ParseDuration(config.AppConfig.GetString("app.hit_expire.announce"))
+	expire, err := time.ParseDuration(announceConfig.GetString("hit_expire"))
 	if err != nil {
 		return model.ErrorInternalServer(err)
 	}
