@@ -1809,7 +1809,7 @@ func TestMultiHitAnnounceRouter(t *testing.T) {
 
 	aids := []uint{}
 	for i := 0; i < 1000; i++ {
-		response := e.POST("/v1/announce/").
+		response := e.POST("/v1/announce").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
 			WithJSON(announce.ModifyAnnounceRequest{
 				Title:     util.RandomString(100),
