@@ -16,9 +16,9 @@ func init() {
 
 	imageConfig.SetDefault("upload.async", false)
 	imageConfig.SetDefault("upload.throttling.burst", 20)
-	imageConfig.SetDefault("upload.throttling.rate", 1)
+	imageConfig.SetDefault("upload.throttling.rate", 5)
 	imageConfig.SetDefault("upload.throttling.purge", "1m")
-	imageConfig.SetDefault("upload.throttling.expire", "1m")
+	imageConfig.SetDefault("upload.throttling.expire", "5m")
 	imageConfig.SetDefault("upload.max_file_size", 10485760) // 10M
 	imageConfig.SetDefault("upload.max_pixels", 15000000)    // 15M pixels
 

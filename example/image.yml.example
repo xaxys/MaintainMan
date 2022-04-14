@@ -9,9 +9,9 @@ upload:
   max_pixels:    15000000 # 15 million pixels
   throttling:
     burst: 20
-    rate: 1
+    rate: 5
     purge: 1m
-    expire: 1m
+    expire: 5m
 
 cache:
   driver: local
