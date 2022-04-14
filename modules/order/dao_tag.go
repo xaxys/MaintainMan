@@ -98,7 +98,7 @@ func dbDeleteTag(id uint) error {
 }
 
 func txDeleteTag(tx *gorm.DB, id uint) (err error) {
-	if err = tx.Select(clause.Associations).Delete(Tag{}, id).Error; err != nil {
+	if err = tx.Select(clause.Associations).Delete(&Tag{}, id).Error; err != nil {
 		logger.Logger.Debugf("DeleteTagErr: %v\n", err)
 	}
 	return

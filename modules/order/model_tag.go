@@ -14,7 +14,7 @@ type Tag struct {
 type CreateTagRequest struct {
 	Sort     string `json:"sort" validate:"required,lte=191"`
 	Name     string `json:"name" validate:"required,lte=191"`
-	Level    uint   `json:"level" validate:"required,gte=0"`
+	Level    uint   `json:"level" validate:"required,gte=0,lte=63"`
 	Congener uint   `json:"congener" validate:"omitempty,gte=0"` // 允许与同Sort的Tag共存的数量 0:不限 n:只允许n个(含自身)
 }
 
