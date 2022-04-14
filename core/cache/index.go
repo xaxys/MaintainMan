@@ -32,7 +32,7 @@ type Ristretto struct {
 	cache *ristretto.Cache
 }
 
-// Default implemented cache strategy: LFU
+// Default implemented cache strategy: LRU
 type Redis struct {
 	prefix  string
 	limit   int64

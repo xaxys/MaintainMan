@@ -20,7 +20,7 @@ import (
 // @Failure 403 {object} model.ApiJson{data=[]string} "Error message"
 // @Failure 404 {object} model.ApiJson{data=[]string} "Error message"
 // @Failure 500 {object} model.ApiJson{data=[]string} "Error message"
-// @Router /image/{id} [get]
+// @Router /v1/image/{id} [get]
 func getImage(ctx iris.Context) {
 	id := ctx.Params().GetString("id")
 	param := ctx.URLParam("param")
@@ -45,7 +45,7 @@ func getImage(ctx iris.Context) {
 // @Success 200 {object} model.ApiJson{data=string} "Image UUID"
 // @Failure 400 {object} model.ApiJson{data=[]string} "Error message"
 // @Failure 500 {object} model.ApiJson{data=[]string} "Error message"
-// @Router /image [post]
+// @Router /v1/image [post]
 func uploadImage(ctx iris.Context) {
 	ctx.SetMaxRequestBodySize(imageConfig.GetInt64("upload.max_file_size"))
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))

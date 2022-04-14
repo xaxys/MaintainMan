@@ -13,7 +13,7 @@ import (
 // @Tags tag
 // @Produce  json
 // @Param id path uint true "标签ID"
-// @Success 200 {object} model.ApiJson{data=model.TagJson}
+// @Success 200 {object} model.ApiJson{data=TagJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -53,7 +53,7 @@ func getAllTagSorts(ctx iris.Context) {
 // @Tags tag
 // @Produce  json
 // @Param name path string true "分类名"
-// @Success 200 {object} model.ApiJson{data=[]model.TagJson}
+// @Success 200 {object} model.ApiJson{data=[]TagJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -74,8 +74,8 @@ func getAllTagsBySort(ctx iris.Context) {
 // @Tags tag
 // @Accept  json
 // @Produce  json
-// @Param body body model.CreateTagRequest true "创建标签请求"
-// @Success 201 {object} model.ApiJson{data=model.TagJson}
+// @Param body body CreateTagRequest true "创建标签请求"
+// @Success 201 {object} model.ApiJson{data=TagJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -101,7 +101,7 @@ func createTag(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "标签ID"
-// @Success 204 {object} model.ApiJson{data=model.TagJson}
+// @Success 204 {object} model.ApiJson{data=TagJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}

@@ -14,7 +14,7 @@ import (
 // @Tags item
 // @Produce  json
 // @Param id path uint true "物品ID"
-// @Success 200 {object} model.ApiJson{data=model.ItemJson}
+// @Success 200 {object} model.ApiJson{data=ItemJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -35,7 +35,7 @@ func getItemByID(ctx iris.Context) {
 // @Tags item
 // @Produce  json
 // @Param name path string true "物品名称"
-// @Success 200 {object} model.ApiJson{data=model.ItemJson}
+// @Success 200 {object} model.ApiJson{data=ItemJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -56,7 +56,7 @@ func getItemByName(ctx iris.Context) {
 // @Tags item
 // @Produce  json
 // @Param name path string true "物品名称"
-// @Success 200 {object} model.ApiJson{data=[]model.ItemJson}
+// @Success 200 {object} model.ApiJson{data=[]ItemJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -79,7 +79,7 @@ func getItemsByFuzzyName(ctx iris.Context) {
 // @Param order_by query string false "排序字段"
 // @Param offset query uint false "偏移量"
 // @Param limit query uint false "每页数据量"
-// @Success 200 {object} model.ApiJson{data=[]model.ItemJson}
+// @Success 200 {object} model.ApiJson{data=[]ItemJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -100,8 +100,8 @@ func getAllItems(ctx iris.Context) {
 // @Tags item
 // @Accept  json
 // @Produce  json
-// @Param item body model.CreateItemRequest true "物品信息"
-// @Success 201 {object} model.ApiJson{data=model.ItemJson}
+// @Param item body CreateItemRequest true "物品信息"
+// @Success 201 {object} model.ApiJson{data=ItemJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -127,7 +127,7 @@ func createItem(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "物品ID"
-// @Success 204 {object} model.ApiJson{data=model.ItemJson}
+// @Success 204 {object} model.ApiJson{data=ItemJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -149,8 +149,8 @@ func deleteItem(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "物品ID"
-// @Param body body model.AddItemRequest true "物品数量"
-// @Success 204 {object} model.ApiJson{data=model.ItemJson}
+// @Param body body AddItemRequest true "物品数量"
+// @Success 204 {object} model.ApiJson{data=ItemJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -177,8 +177,8 @@ func addItem(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path uint true "订单ID"
-// @Param body body model.ConsumeItemRequest true "物品数量"
-// @Success 204 {object} model.ApiJson{data=model.ItemJson}
+// @Param body body ConsumeItemRequest true "物品数量"
+// @Success 204 {object} model.ApiJson{data=ItemJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}

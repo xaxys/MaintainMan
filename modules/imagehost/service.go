@@ -159,8 +159,8 @@ func genUUID(id uint) string {
 		logger.Logger.Error("生成uuid失败: %+v", err)
 	}
 	bigint24 := [8]byte{}
-	binary.LittleEndian.PutUint64(bigint24[:], uint64(id))
-	copy(uuidv1[13:], bigint24[:3])
+	binary.BigEndian.PutUint64(bigint24[:], uint64(id))
+	copy(uuidv1[12:], bigint24[4:])
 	return uuidv1.String()
 }
 
@@ -170,6 +170,6 @@ func parseUUID(str string) uint {
 		logger.Logger.Error("解析uuid失败: %+v", err)
 	}
 	bigint24 := [8]byte{}
-	copy(bigint24[:3], uuidv1[13:])
-	return uint(binary.LittleEndian.Uint64(bigint24[:]))
+	copy(bigint24[4:], uuidv1[12:])
+	return uint(binary.BigEndian.Uint64(bigint24[:]))
 }
