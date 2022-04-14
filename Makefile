@@ -47,9 +47,9 @@ clean:
 	@echo "Cleaning MaintainMan ..."
 	@$(RM_CMD_1) $(TARGET)    $(RM_CMD_2)
 	@$(RM_CMD_1) coverage.out $(RM_CMD_2)
-	@$(RM_CMD_1) *.db         $(RM_CMD_2)
-	@$(RM_CMD_1) *.exe        $(RM_CMD_2)
-	@$(RM_CMD_1) *.out        $(RM_CMD_2)
-	@$(RM_CMD_1) *.yaml       $(RM_CMD_2)
+	@$(RM_CMD_1) "*.db"       $(RM_CMD_2)
+	@$(RM_CMD_1) "*.exe"      $(RM_CMD_2)
+	@$(RM_CMD_1) "*.out"      $(RM_CMD_2)
+	@$(RM_CMD_1) "*.yaml"     $(RM_CMD_2)
 
 .PHONY: all test clean
