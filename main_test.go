@@ -2,10 +2,6 @@ package main
 
 import (
 	"fmt"
-	"maintainman/dao"
-	"maintainman/model"
-	"maintainman/service"
-	"maintainman/util"
 	"math/rand"
 	"net"
 	"net/http"
@@ -14,6 +10,12 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/xaxys/maintainman/core/dao"
+	"github.com/xaxys/maintainman/core/model"
+	"github.com/xaxys/maintainman/core/util"
+	"github.com/xaxys/maintainman/modules/announce"
+	"github.com/xaxys/maintainman/modules/order"
 
 	"github.com/kataras/iris/v12/httptest"
 	"github.com/spf13/cast"
@@ -216,7 +218,10 @@ func TestTagSortsRouter(t *testing.T) {
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	for _, tag := range getTestTags() {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	responseBody := e.GET("/v1/tag/sort").
@@ -244,8 +249,12 @@ func TestTagGetByIDRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	ids := []uint{}
 	for _, tag := range getTestTags() {
-		resp := service.CreateTag(&tag, getSuperAdminAuthInfo())
-		ids = append(ids, resp.Data.(*model.TagJson).ID)
+		response := e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
+		id := response.JSON().NotNull().Object().Value("data").Object().Value("id").NotNull().Raw().(float64)
+		ids = append(ids, uint(id))
 	}
 
 	for _, id := range ids {
@@ -263,8 +272,12 @@ func TestTagDeleteRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	ids := []uint{}
 	for _, tag := range generateRandomTags("randSorts ", "randName ", 30) {
-		resp := service.CreateTag(&tag, getSuperAdminAuthInfo())
-		ids = append(ids, resp.Data.(*model.TagJson).ID)
+		response := e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
+		id := response.JSON().NotNull().Object().Value("data").Object().Value("id").NotNull().Raw().(float64)
+		ids = append(ids, uint(id))
 	}
 
 	e.DELETE(fmt.Sprintf("/v1/tag/%d", ids[0])).
@@ -287,7 +300,10 @@ func TestCreateOrderRouter(t *testing.T) {
 	orders := generateRandomOrders("Add Order", "admin", 6)
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	responseBody := e.POST("/v1/order").
@@ -315,7 +331,10 @@ func TestGetUserOrdersRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	responseBody := e.GET("/v1/order/user").
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
@@ -333,7 +352,10 @@ func TestGetAllOrdersRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	responseBody := e.GET("/v1/order/all").
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
@@ -351,7 +373,10 @@ func TestGetRepairerOrdersRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	response := e.POST("/v1/user").
@@ -363,13 +388,13 @@ func TestGetRepairerOrdersRouter(t *testing.T) {
 
 	t.Log(response.Body().Raw())
 
-	responseBody := e.GET("/v1/order/repairer").WithJSON(model.RepairerOrderRequest{
+	responseBody := e.GET("/v1/order/repairer").WithJSON(order.RepairerOrderRequest{
 		Current:   true,
 		PageParam: model.PageParam{},
 	}).Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
-	responseBody = e.GET("/v1/order/repairer").WithJSON(model.RepairerOrderRequest{
+	responseBody = e.GET("/v1/order/repairer").WithJSON(order.RepairerOrderRequest{
 		Current:   true,
 		PageParam: model.PageParam{},
 	}).WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -383,7 +408,10 @@ func TestGetRepairerOrdersByIDRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	response := e.POST("/v1/user").
@@ -397,13 +425,13 @@ func TestGetRepairerOrdersByIDRouter(t *testing.T) {
 
 	t.Log(response.Body().Raw())
 
-	responseBody := e.GET("/v1/order/repairer/" + cast.ToString(id)).WithJSON(model.RepairerOrderRequest{
+	responseBody := e.GET("/v1/order/repairer/" + cast.ToString(id)).WithJSON(order.RepairerOrderRequest{
 		Current:   true,
 		PageParam: model.PageParam{},
 	}).Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
-	responseBody = e.GET("/v1/order/repairer/"+cast.ToString(id)).WithJSON(model.RepairerOrderRequest{
+	responseBody = e.GET("/v1/order/repairer/"+cast.ToString(id)).WithJSON(order.RepairerOrderRequest{
 		Current:   true,
 		PageParam: model.PageParam{},
 	}).WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -420,7 +448,10 @@ func TestGetOrderByIDRouter(t *testing.T) {
 	t.Log(responseBody)
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	responseBody = e.GET("/v1/order/1").
@@ -437,7 +468,10 @@ func TestUpdateOrderByUserRouter(t *testing.T) {
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -447,7 +481,7 @@ func TestUpdateOrderByUserRouter(t *testing.T) {
 	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
 
 	responseBody := e.PUT("/v1/order/" + cast.ToString(id) + "/update").
-		WithJSON(model.UpdateOrderRequest{
+		WithJSON(order.UpdateOrderRequest{
 			Title:        "TestUpdateOrder " + randomNumToString,
 			Content:      testOrder.Content + "_updated",
 			Address:      testOrder.Address,
@@ -463,7 +497,7 @@ func TestUpdateOrderByUserRouter(t *testing.T) {
 	addWrongEmergencyTag := 9 - testOrder.Tags[1]
 	responseBody = e.PUT("/v1/order/"+cast.ToString(id)+"/update").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.UpdateOrderRequest{
+		WithJSON(order.UpdateOrderRequest{
 			Title:        "TestUpdateOrder " + randomNumToString,
 			Content:      testOrder.Content + "_updated",
 			Address:      testOrder.Address,
@@ -486,7 +520,7 @@ func TestUpdateOrderByUserRouter(t *testing.T) {
 	delEmergencyTag := testOrder.Tags[1]
 	responseBody = e.PUT("/v1/order/"+cast.ToString(id)+"/update").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.UpdateOrderRequest{
+		WithJSON(order.UpdateOrderRequest{
 			Title:        "TestUpdateOrder " + randomNumToString,
 			Content:      testOrder.Content + "_updated",
 			Address:      testOrder.Address,
@@ -507,7 +541,10 @@ func TestForceUpdateOrderRouter(t *testing.T) {
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -517,7 +554,7 @@ func TestForceUpdateOrderRouter(t *testing.T) {
 	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
 
 	responseBody := e.PUT("/v1/order/1/update/force").
-		WithJSON(model.UpdateOrderRequest{
+		WithJSON(order.UpdateOrderRequest{
 			Title:        "TestUpdateOrder " + randomNumToString,
 			Content:      testOrder.Content + "_updated",
 			Address:      testOrder.Address,
@@ -531,7 +568,7 @@ func TestForceUpdateOrderRouter(t *testing.T) {
 
 	responseBody = e.PUT("/v1/order/"+cast.ToString(id)+"/update/force").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.UpdateOrderRequest{
+		WithJSON(order.UpdateOrderRequest{
 			Title:        "TestUpdateOrder " + randomNumToString,
 			Content:      testOrder.Content + "_updated",
 			Address:      testOrder.Address,
@@ -552,7 +589,10 @@ func TestConsumeItemRouter(t *testing.T) {
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -561,7 +601,7 @@ func TestConsumeItemRouter(t *testing.T) {
 	orderCreated := response.JSON().NotNull().Object().Value("data")
 	orderID := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
 
-	itemTest := model.CreateItemRequest{
+	itemTest := order.CreateItemRequest{
 		Name:        "test_item" + randomNumToString,
 		Discription: "test_item",
 	}
@@ -577,7 +617,7 @@ func TestConsumeItemRouter(t *testing.T) {
 
 	responseBody := e.POST("/v1/item/"+cast.ToString(itemID)).
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.AddItemRequest{
+		WithJSON(order.AddItemRequest{
 			ItemID: itemID,
 			Num:    100,
 			Price:  float64(rand.Intn(100)),
@@ -585,7 +625,7 @@ func TestConsumeItemRouter(t *testing.T) {
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/1/consume").
-		WithJSON(model.ConsumeItemRequest{
+		WithJSON(order.ConsumeItemRequest{
 			ItemID:  itemID,
 			OrderID: orderID,
 			Num:     uint(rand.Intn(99)),
@@ -606,7 +646,7 @@ func TestConsumeItemRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(orderID)+"/consume").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.ConsumeItemRequest{
+		WithJSON(order.ConsumeItemRequest{
 			ItemID:  itemID,
 			OrderID: orderID,
 			Num:     uint(rand.Intn(99)),
@@ -621,7 +661,10 @@ func TestReleaseOrderRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	randomNumToString := cast.ToString(rand.Intn(10000))
@@ -648,7 +691,10 @@ func TestAssignOrderRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -705,7 +751,10 @@ func TestSelfAssignOrderRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -742,7 +791,10 @@ func TestCompleteOrderRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -784,7 +836,10 @@ func TestCancelOrderRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -821,7 +876,10 @@ func TestRejectOrderRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -853,7 +911,10 @@ func TestReportOrderRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -890,7 +951,10 @@ func TestHoldOrderRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -932,7 +996,10 @@ func TestAppraiseOrderRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1079,7 +1146,7 @@ func TestCreateItemRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
-	itemTest := model.CreateItemRequest{
+	itemTest := order.CreateItemRequest{
 		Name:        "test_item" + randomNumToString,
 		Discription: "test_item",
 	}
@@ -1117,7 +1184,7 @@ func TestGetItemByIDRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
-	itemTest := model.CreateItemRequest{
+	itemTest := order.CreateItemRequest{
 		Name:        "test_item" + randomNumToString,
 		Discription: "test_item",
 	}
@@ -1147,7 +1214,7 @@ func TestAddItemByIDRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
-	itemTest := model.CreateItemRequest{
+	itemTest := order.CreateItemRequest{
 		Name:        "test_item" + randomNumToString,
 		Discription: "test_item",
 	}
@@ -1162,7 +1229,7 @@ func TestAddItemByIDRouter(t *testing.T) {
 	id := uint(item.Object().Value("id").NotNull().Raw().(float64))
 
 	responseBody := e.POST("/v1/item/" + cast.ToString(id)).
-		WithJSON(model.AddItemRequest{
+		WithJSON(order.AddItemRequest{
 			ItemID: id,
 			Num:    uint(rand.Intn(100)),
 			Price:  float64(rand.Intn(100)),
@@ -1171,7 +1238,7 @@ func TestAddItemByIDRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/item/"+cast.ToString(id)).
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.AddItemRequest{
+		WithJSON(order.AddItemRequest{
 			ItemID: id,
 			Num:    uint(rand.Intn(100)),
 			Price:  float64(rand.Intn(100)),
@@ -1185,7 +1252,7 @@ func TestDeleteItemByIDRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
-	itemTest := model.CreateItemRequest{
+	itemTest := order.CreateItemRequest{
 		Name:        "test_item" + randomNumToString,
 		Discription: "test_item",
 	}
@@ -1215,7 +1282,7 @@ func TestGetItemByNameRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
-	itemTest := model.CreateItemRequest{
+	itemTest := order.CreateItemRequest{
 		Name:        "test_item" + randomNumToString,
 		Discription: "test_item",
 	}
@@ -1245,7 +1312,7 @@ func TestGetItemByNameFuzzyRouter(t *testing.T) {
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
-	itemTest := model.CreateItemRequest{
+	itemTest := order.CreateItemRequest{
 		Name:        "test_item" + randomNumToString,
 		Discription: "test_item",
 	}
@@ -1278,7 +1345,10 @@ func TestCreateCommentRouter(t *testing.T) {
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -1288,14 +1358,14 @@ func TestCreateCommentRouter(t *testing.T) {
 	orderID := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
 
 	responseBody := e.POST("/v1/order/" + cast.ToString(orderID) + "/comment").
-		WithJSON(model.CreateCommentRequest{
+		WithJSON(order.CreateCommentRequest{
 			Content: "comment " + randomNumToString,
 		}).Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(orderID)+"/comment").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateCommentRequest{
+		WithJSON(order.CreateCommentRequest{
 			Content: "comment " + randomNumToString,
 		}).Expect().Status(httptest.StatusCreated).Body().Raw()
 	t.Log(responseBody)
@@ -1309,7 +1379,10 @@ func TestGetCommentsByOrderRouter(t *testing.T) {
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	comments := generateRandomComments("test ", 10)
 
@@ -1344,7 +1417,10 @@ func TestForceCreateCommentRouter(t *testing.T) {
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -1354,14 +1430,14 @@ func TestForceCreateCommentRouter(t *testing.T) {
 	orderID := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
 
 	responseBody := e.POST("/v1/order/" + cast.ToString(orderID) + "/comment/force").
-		WithJSON(model.CreateCommentRequest{
+		WithJSON(order.CreateCommentRequest{
 			Content: "comment " + randomNumToString,
 		}).Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
 	responseBody = e.POST("/v1/order/"+cast.ToString(orderID)+"/comment/force").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateCommentRequest{
+		WithJSON(order.CreateCommentRequest{
 			Content: "comment " + randomNumToString,
 		}).Expect().Status(httptest.StatusCreated).Body().Raw()
 	t.Log(responseBody)
@@ -1375,7 +1451,10 @@ func TestForceGetCommentsByOrderRouter(t *testing.T) {
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 	comments := generateRandomComments("test ", 10)
 
@@ -1410,7 +1489,10 @@ func TestDeleteCommentRouter(t *testing.T) {
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -1421,7 +1503,7 @@ func TestDeleteCommentRouter(t *testing.T) {
 
 	response = e.POST("/v1/order/"+cast.ToString(orderID)+"/comment").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateCommentRequest{
+		WithJSON(order.CreateCommentRequest{
 			Content: "comment " + randomNumToString,
 		}).Expect().Status(httptest.StatusCreated)
 	t.Log(response.Body().Raw())
@@ -1446,7 +1528,10 @@ func TestForceDeleteCommentRouter(t *testing.T) {
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
 	tags := getTestTags()
 	for _, tag := range tags {
-		service.CreateTag(&tag, getSuperAdminAuthInfo())
+		e.POST("/v1/tag/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
 	}
 
 	response := e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -1457,7 +1542,7 @@ func TestForceDeleteCommentRouter(t *testing.T) {
 
 	response = e.POST("/v1/order/"+cast.ToString(orderID)+"/comment").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateCommentRequest{
+		WithJSON(order.CreateCommentRequest{
 			Content: "comment " + randomNumToString,
 		}).Expect().Status(httptest.StatusCreated)
 	t.Log(response.Body().Raw())
@@ -1484,7 +1569,7 @@ func TestGetLatestAnnouncesRouter(t *testing.T) {
 
 	responseBody := e.POST("/v1/announce").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateAnnounceRequest{
+		WithJSON(announce.CreateAnnounceRequest{
 			Title:     randomNumToString,
 			Content:   randomNumToString,
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1509,7 +1594,7 @@ func TestCreateAnnounceRouter(t *testing.T) {
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
 	responseBody := e.POST("/v1/announce").
-		WithJSON(model.CreateAnnounceRequest{
+		WithJSON(announce.CreateAnnounceRequest{
 			Title:     randomNumToString,
 			Content:   randomNumToString,
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1519,7 +1604,7 @@ func TestCreateAnnounceRouter(t *testing.T) {
 
 	responseBody = e.POST("/v1/announce").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateAnnounceRequest{
+		WithJSON(announce.CreateAnnounceRequest{
 			Title:     randomNumToString,
 			Content:   randomNumToString,
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1536,7 +1621,7 @@ func TestGetAnnounceByIDRouter(t *testing.T) {
 
 	response := e.POST("/v1/announce").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateAnnounceRequest{
+		WithJSON(announce.CreateAnnounceRequest{
 			Title:     randomNumToString,
 			Content:   randomNumToString,
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1565,7 +1650,7 @@ func TestGetAllAnnouncesRouter(t *testing.T) {
 	randomNumToString := cast.ToString(rand.Intn(10000))
 	responseBody := e.POST("/v1/announce").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateAnnounceRequest{
+		WithJSON(announce.CreateAnnounceRequest{
 			Title:     randomNumToString,
 			Content:   randomNumToString,
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1574,7 +1659,7 @@ func TestGetAllAnnouncesRouter(t *testing.T) {
 	t.Log(responseBody)
 
 	responseBody = e.GET("/v1/announce/all").
-		WithQueryObject(model.AllAnnounceRequest{
+		WithQueryObject(announce.AllAnnounceRequest{
 			Title:     randomNumToString,
 			StartTime: cast.ToInt64(time.Now().Unix()) - 100000,
 			EndTime:   cast.ToInt64(time.Now().Unix()) + 100000,
@@ -1584,7 +1669,7 @@ func TestGetAllAnnouncesRouter(t *testing.T) {
 	t.Log(responseBody)
 
 	responseBody = e.GET("/v1/announce/all").
-		WithQueryObject(model.AllAnnounceRequest{
+		WithQueryObject(announce.AllAnnounceRequest{
 			Title:     "",
 			StartTime: cast.ToInt64(time.Now().Unix()) - 100000,
 			EndTime:   cast.ToInt64(time.Now().Unix()) + 100000,
@@ -1595,7 +1680,7 @@ func TestGetAllAnnouncesRouter(t *testing.T) {
 	t.Log(responseBody)
 
 	responseBody = e.GET("/v1/announce/all").
-		WithQueryObject(model.AllAnnounceRequest{
+		WithQueryObject(announce.AllAnnounceRequest{
 			Title:     "",
 			StartTime: -1,
 			EndTime:   -1,
@@ -1614,7 +1699,7 @@ func TestUpdateAnnounceRouter(t *testing.T) {
 
 	response := e.POST("/v1/announce").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateAnnounceRequest{
+		WithJSON(announce.CreateAnnounceRequest{
 			Title:     randomNumToString,
 			Content:   randomNumToString,
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1626,7 +1711,7 @@ func TestUpdateAnnounceRouter(t *testing.T) {
 	id := uint(item.Object().Value("id").NotNull().Raw().(float64))
 
 	responseBody := e.PUT("/v1/announce/" + cast.ToString(id)).
-		WithJSON(model.UpdateAnnounceRequest{
+		WithJSON(announce.UpdateAnnounceRequest{
 			Title:     randomNumToString + "_updated",
 			Content:   randomNumToString + "_updated",
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1636,7 +1721,7 @@ func TestUpdateAnnounceRouter(t *testing.T) {
 
 	responseBody = e.PUT("/v1/announce/"+cast.ToString(id)).
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.UpdateAnnounceRequest{
+		WithJSON(announce.UpdateAnnounceRequest{
 			Title:     randomNumToString + "_updated",
 			Content:   randomNumToString + "_updated",
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1653,7 +1738,7 @@ func TestDeleteAnnounceRouter(t *testing.T) {
 
 	response := e.POST("/v1/announce").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateAnnounceRequest{
+		WithJSON(announce.CreateAnnounceRequest{
 			Title:     randomNumToString,
 			Content:   randomNumToString,
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1665,7 +1750,7 @@ func TestDeleteAnnounceRouter(t *testing.T) {
 	id := uint(item.Object().Value("id").NotNull().Raw().(float64))
 
 	responseBody := e.DELETE("/v1/announce/" + cast.ToString(id)).
-		WithJSON(model.UpdateAnnounceRequest{
+		WithJSON(announce.UpdateAnnounceRequest{
 			Title:     randomNumToString + "_updated",
 			Content:   randomNumToString + "_updated",
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1675,7 +1760,7 @@ func TestDeleteAnnounceRouter(t *testing.T) {
 
 	responseBody = e.DELETE("/v1/announce/"+cast.ToString(id)).
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.UpdateAnnounceRequest{
+		WithJSON(announce.UpdateAnnounceRequest{
 			Title:     randomNumToString + "_updated",
 			Content:   randomNumToString + "_updated",
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1692,7 +1777,7 @@ func TestHitAnnounceRouter(t *testing.T) {
 
 	response := e.POST("/v1/announce").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateAnnounceRequest{
+		WithJSON(announce.CreateAnnounceRequest{
 			Title:     randomNumToString,
 			Content:   randomNumToString,
 			StartTime: cast.ToInt64(time.Now().Unix()),
@@ -1720,19 +1805,20 @@ func TestHitAnnounceRouter(t *testing.T) {
 func TestMultiHitAnnounceRouter(t *testing.T) {
 	app := newApp()
 	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
 
 	aids := []uint{}
 	for i := 0; i < 1000; i++ {
-		announce, err := dao.CreateAnnounce(&model.ModifyAnnounceRequest{
-			Title:     util.RandomString(100),
-			Content:   util.RandomString(100),
-			StartTime: cast.ToInt64(time.Now().Unix()),
-			EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
-		}, 0)
-		if err != nil {
-			t.Error(err)
-		}
-		aids = append(aids, announce.ID)
+		response := e.POST("/v1/announce/").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(announce.ModifyAnnounceRequest{
+				Title:     util.RandomString(100),
+				Content:   util.RandomString(100),
+				StartTime: cast.ToInt64(time.Now().Unix()),
+				EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+			}).Expect().Status(httptest.StatusCreated)
+		id := uint(response.JSON().Object().Value("data").Object().Value("id").NotNull().Raw().(float64))
+		aids = append(aids, uint(id))
 		if i%10 == 0 {
 			t.Log("create announce: ", i)
 		}
@@ -1802,8 +1888,8 @@ func getSuperAdminAuthInfo() *model.AuthInfo {
 	}
 }
 
-func getTestTags() []model.CreateTagRequest {
-	return []model.CreateTagRequest{
+func getTestTags() []order.CreateTagRequest {
+	return []order.CreateTagRequest{
 		{
 			Sort:     "楼名",
 			Name:     "一舍",
@@ -1886,21 +1972,21 @@ func generateRandomUsers(prefix string, num uint) (usersRegister []model.Registe
 	return
 }
 
-func generateRandomComments(prefix string, num uint) (comments []model.CreateCommentRequest) {
+func generateRandomComments(prefix string, num uint) (comments []order.CreateCommentRequest) {
 	for i := uint(1); i <= num; i++ {
 		comments = append(comments, initComment(prefix))
 	}
 	return
 }
 
-func generateRandomTags(baseSort, baseName string, num uint) (tags []model.CreateTagRequest) {
+func generateRandomTags(baseSort, baseName string, num uint) (tags []order.CreateTagRequest) {
 	for i := uint(1); i <= num; i++ {
 		tags = append(tags, initTag(baseSort+util.RandomString(1), baseName+util.RandomString(5), uint(rand.Int())))
 	}
 	return
 }
 
-func generateRandomOrders(baseTitle string, baseName string, num uint) (orders []model.CreateOrderRequest) {
+func generateRandomOrders(baseTitle string, baseName string, num uint) (orders []order.CreateOrderRequest) {
 	for i := uint(1); i <= num; i++ {
 		orders = append(orders, initOrder(baseTitle, "Content:"+strconv.Itoa(rand.Intn(100000)), "Address:"+strconv.Itoa(rand.Intn(100000)), baseName, uint(rand.Int63n(7))))
 	}
@@ -1918,22 +2004,22 @@ func initUser(name string, password string, displayName string) model.RegisterUs
 	}
 }
 
-func initTag(sort, name string, level uint) model.CreateTagRequest {
-	return model.CreateTagRequest{
+func initTag(sort, name string, level uint) order.CreateTagRequest {
+	return order.CreateTagRequest{
 		Sort:  sort,
 		Name:  name,
 		Level: level,
 	}
 }
 
-func initWrongOrder(title string, content string, address string, name string, maxTagID uint) model.CreateOrderRequest {
+func initWrongOrder(title string, content string, address string, name string, maxTagID uint) order.CreateOrderRequest {
 	tags := make([]uint, 0)
 	tags = append(tags, 1, 2)
 	tags = append(tags, 4, 5)
 	for i := uint(1 + 5); i <= maxTagID+5; i++ {
 		tags = append(tags, i)
 	}
-	return model.CreateOrderRequest{
+	return order.CreateOrderRequest{
 		Title:        title,
 		Content:      content,
 		Address:      address,
@@ -1943,7 +2029,7 @@ func initWrongOrder(title string, content string, address string, name string, m
 	}
 }
 
-func initOrder(title string, content string, address string, name string, maxTagID uint) model.CreateOrderRequest {
+func initOrder(title string, content string, address string, name string, maxTagID uint) order.CreateOrderRequest {
 	tags := make([]uint, 0)
 	building := rand.Intn(3) + 1
 	tags = append(tags, uint(building))
@@ -1952,7 +2038,7 @@ func initOrder(title string, content string, address string, name string, maxTag
 	for i := uint(1 + 5); i <= maxTagID+5; i++ {
 		tags = append(tags, i)
 	}
-	return model.CreateOrderRequest{
+	return order.CreateOrderRequest{
 		Title:        title,
 		Content:      content,
 		Address:      address,
@@ -1962,8 +2048,8 @@ func initOrder(title string, content string, address string, name string, maxTag
 	}
 }
 
-func initComment(baseContent string) model.CreateCommentRequest {
-	return model.CreateCommentRequest{
+func initComment(baseContent string) order.CreateCommentRequest {
+	return order.CreateCommentRequest{
 		Content: baseContent + strconv.Itoa(rand.Intn(100000)),
 	}
 }

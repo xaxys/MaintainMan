@@ -5,11 +5,17 @@ import (
 
 	"github.com/kataras/iris/v12"
 
-	"maintainman/config"
-	"maintainman/initialize"
-	"maintainman/logger"
-	"maintainman/route"
-	"maintainman/service"
+	"github.com/xaxys/maintainman/core/config"
+	"github.com/xaxys/maintainman/core/database"
+	"github.com/xaxys/maintainman/core/initialize"
+	"github.com/xaxys/maintainman/core/logger"
+	"github.com/xaxys/maintainman/core/router"
+	"github.com/xaxys/maintainman/core/service"
+	"github.com/xaxys/maintainman/core/util"
+	"github.com/xaxys/maintainman/module"
+	"github.com/xaxys/maintainman/modules/announce"
+	"github.com/xaxys/maintainman/modules/imagehost"
+	"github.com/xaxys/maintainman/modules/order"
 )
 
 var (
@@ -47,7 +53,19 @@ func newApp() *iris.Application {
 	app := iris.New()
 	logger.Logger = app.Logger()
 	initialize.InitDefaultData()
-	route.Route(app)
+	router.Register(app)
+	server := module.Server{
+		Validator: util.Validator,
+		Logger:    app.Logger(),
+		Scheduler: service.Scheduler,
+		Database:  database.DB,
+	}
+	registry := module.NewRegistry(&server)
+	registry.Register(
+		&imagehost.Module,
+		&announce.Module,
+		&order.Module,
+	)
 	service.Scheduler.StartAsync()
 	return app
 }

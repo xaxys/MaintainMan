@@ -1,6 +1,36 @@
-module maintainman
+module github.com/xaxys/maintainman
 
 go 1.18
+
+replace github.com/xaxys/maintainman/core/config => ./core/config
+
+replace github.com/xaxys/maintainman/core/controller => ./core/controller
+
+replace github.com/xaxys/maintainman/core/dao => ./core/dao
+
+replace github.com/xaxys/maintainman/core/database => ./core/database
+
+replace github.com/xaxys/maintainman/core/initialize => ./core/initialize
+
+replace github.com/xaxys/maintainman/core/model => ./core/model
+
+replace github.com/xaxys/maintainman/core/router => ./core/router
+
+replace github.com/xaxys/maintainman/core/service => ./core/service
+
+replace github.com/xaxys/maintainman/core/storage => ./core/storage
+
+replace github.com/xaxys/maintainman/core/util => ./core/util
+
+replace github.com/xaxys/maintainman/modules/announce => ./modules/announce
+
+replace github.com/xaxys/maintainman/modules/imagehost => ./modules/imagehost
+
+replace github.com/xaxys/maintainman/modules/orders => ./modules/orders
+
+replace github.com/xaxys/maintainman/fonts => ./fonts
+
+replace github.com/xaxys/maintainman/module => ./module
 
 require (
 	github.com/dgraph-io/ristretto v0.1.0

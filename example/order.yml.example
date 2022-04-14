@@ -1,0 +1,6 @@
+appraise:
+  timeout: "72h"
+  purge: "10m"
+  default: 5
+
+item_can_negative: true

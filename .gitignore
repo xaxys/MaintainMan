@@ -15,10 +15,12 @@ app.yaml
 role.yaml
 permission.yaml
 image.yaml
+announce.yaml
 app.yml
 role.yml
 permission.yml
 image.yml
+announce.yml
 maintainman
 
 dist/
