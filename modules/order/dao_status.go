@@ -26,7 +26,7 @@ func txGetOrderByRepairer(tx *gorm.DB, id uint, json *RepairerOrderRequest) (ord
 		Current:    json.Current,
 	}
 	statuses := []*Status{}
-	tx = dao.TxPageFilter(tx, &json.PageParam).Preload("Order.Tags").Where(status)
+	tx = dao.TxPageFilter(tx, &json.PageParam).Model(status).Where(status)
 	if json.Status != 0 {
 		tx = tx.Joins("Order", Order{Status: json.Status})
 	}
@@ -39,14 +39,14 @@ func txGetOrderByRepairer(tx *gorm.DB, id uint, json *RepairerOrderRequest) (ord
 			}
 		}
 	}
-	if err = tx.Find(&statuses).Error; err != nil {
-		return
-	}
 	cnt := int64(0)
-	if err = tx.Count(&cnt).Error; err != nil {
+	if err = tx.Count(&cnt).Error; err != nil || cnt == 0 {
 		return
 	}
 	count = uint(cnt)
+	if err = tx.Preload("Order.Tags").Find(&statuses).Error; err != nil {
+		return
+	}
 	orders = util.TransSlice(statuses, func(status *Status) *Order { return status.Order })
 	return
 }

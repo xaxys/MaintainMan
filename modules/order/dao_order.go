@@ -63,7 +63,7 @@ func txGetAllOrdersWithParam(tx *gorm.DB, aul *AllOrderRequest) (orders []*Order
 		UserID: aul.UserID,
 		Status: aul.Status,
 	}
-	tx = dao.TxPageFilter(tx, &aul.PageParam).Preload("Tags").Where(order)
+	tx = dao.TxPageFilter(tx, &aul.PageParam).Model(order).Where(order)
 	if len(aul.Tags) > 0 {
 		if aul.Disjunctive {
 			tx = tx.Where("id IN (?)", mctx.Database.Table("order_tags").Select("order_id").Where("tag_id IN (?)", aul.Tags))
@@ -76,14 +76,14 @@ func txGetAllOrdersWithParam(tx *gorm.DB, aul *AllOrderRequest) (orders []*Order
 	if aul.Title != "" {
 		tx = tx.Where("title LIKE ?", aul.Title)
 	}
-	if err = tx.Find(&orders).Error; err != nil {
-		return
-	}
 	cnt := int64(0)
-	if err = tx.Count(&cnt).Error; err != nil {
+	if err = tx.Count(&cnt).Error; err != nil || cnt == 0 {
 		return
 	}
 	count = uint(cnt)
+	if err = tx.Preload("Tags").Find(&orders).Error; err != nil {
+		return
+	}
 	return
 }
 
