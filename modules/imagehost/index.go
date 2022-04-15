@@ -24,9 +24,6 @@ func entry(ctx *module.ModuleContext) {
 	mctx = ctx
 	initLimiter()
 	ctx.Route.PartyFunc("/image", func(image iris.Party) {
-		image.Use(middleware.HeaderExtractor, middleware.TokenValidator)
-		image.Done(middleware.ResponseHandler)
-		image.SetExecutionRules(iris.ExecutionRules{Done: iris.ExecutionOptions{Force: true}})
 		image.Post("/", middleware.PermInterceptor("image.upload"), rateLimiter, uploadImage)
 		image.Get("/{id:uuid}", middleware.PermInterceptor("image.view"), getImage)
 	})
