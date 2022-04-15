@@ -37,7 +37,7 @@ func getAllAnnouncesService(aul *AllAnnounceRequest, auth *model.AuthInfo) *mode
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	announces, err := dbGetAllAnnouncesWithParam(aul)
+	announces, count, err := dbGetAllAnnouncesWithParam(aul)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
@@ -45,7 +45,7 @@ func getAllAnnouncesService(aul *AllAnnounceRequest, auth *model.AuthInfo) *mode
 		return model.ErrorQueryDatabase(err)
 	}
 	as := util.TransSlice(announces, announceToJson)
-	return model.Success(as, "获取成功")
+	return model.SuccessPaged(as, count, "获取成功")
 }
 
 func getLatestAnnouncesService(param *model.PageParam, auth *model.AuthInfo) *model.ApiJson {

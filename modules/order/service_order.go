@@ -37,7 +37,7 @@ func getOrderByRepairerService(id uint, aul *RepairerOrderRequest, auth *model.A
 		return model.ErrorValidation(err)
 	}
 	aul.OrderBy = util.NotEmpty(aul.OrderBy, "id desc")
-	orders, err := dbGetOrderByRepairer(id, aul)
+	orders, count, err := dbGetOrderByRepairer(id, aul)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
@@ -45,14 +45,14 @@ func getOrderByRepairerService(id uint, aul *RepairerOrderRequest, auth *model.A
 		return model.ErrorQueryDatabase(err)
 	}
 	os := util.TransSlice(orders, orderToJson)
-	return model.Success(os, "获取成功")
+	return model.SuccessPaged(os, count, "获取成功")
 }
 
 func getAllOrdersService(aul *AllOrderRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	orders, err := dbGetAllOrdersWithParam(aul)
+	orders, count, err := dbGetAllOrdersWithParam(aul)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
@@ -60,7 +60,7 @@ func getAllOrdersService(aul *AllOrderRequest, auth *model.AuthInfo) *model.ApiJ
 		return model.ErrorQueryDatabase(err)
 	}
 	os := util.TransSlice(orders, orderToJson)
-	return model.Success(os, "获取成功")
+	return model.SuccessPaged(os, count, "获取成功")
 }
 
 func createOrderService(aul *CreateOrderRequest, auth *model.AuthInfo) *model.ApiJson {

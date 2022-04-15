@@ -2,6 +2,15 @@ package model
 
 import "github.com/xaxys/maintainman/core/util"
 
+type Page struct {
+	Entries interface{} `json:"entries"`
+	Total   uint        `json:"total"`
+}
+
+func PagedData(entries interface{}, total uint) *Page {
+	return &Page{Entries: entries, Total: total}
+}
+
 type ApiJson struct {
 	Code   int         `json:"code"`
 	Status bool        `json:"status"`
@@ -20,6 +29,11 @@ func combineError(errs ...error) (errMsg []string) {
 // Success 成功
 func Success(objects interface{}, msg string) *ApiJson {
 	return ApiResponse(200, true, objects, msg)
+}
+
+// SuccessPaged 成功
+func SuccessPaged(entries interface{}, total uint, msg string) *ApiJson {
+	return ApiResponse(200, true, PagedData(entries, total), msg)
 }
 
 // SuccessUpdate 成功更新/删除资源

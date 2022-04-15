@@ -10,6 +10,19 @@ import (
 	"gorm.io/gorm"
 )
 
+func dbGetItemCount() (uint, error) {
+	return txGetItemCount(mctx.Database)
+}
+
+func txGetItemCount(tx *gorm.DB) (uint, error) {
+	count := int64(0)
+	if err := tx.Model(&Item{}).Count(&count).Error; err != nil {
+		logger.Logger.Debugf("GetItemCountErr: %v\n", err)
+		return 0, err
+	}
+	return uint(count), nil
+}
+
 func dbGetItemByID(id uint) (*Item, error) {
 	return txGetItemByID(mctx.Database, id)
 }
@@ -48,15 +61,26 @@ func TxGetItemsByFuzzyName(tx *gorm.DB, name string) (items []*Item, err error) 
 	return
 }
 
-func dbGetAllItems(param *model.PageParam) (items []*Item, err error) {
-	return txGetAllItems(mctx.Database, param)
+func dbGetAllItems(param *model.PageParam) (items []*Item, count uint, err error) {
+	mctx.Database.Transaction(func(tx *gorm.DB) error {
+		if items, count, err = txGetAllItems(tx, param); err != nil {
+			logger.Logger.Debugf("GetAllItemsErr: %v\n", err)
+		}
+		return err
+	})
+	return
 }
 
-func txGetAllItems(tx *gorm.DB, param *model.PageParam) (items []*Item, err error) {
-	if err = dao.TxPageFilter(tx, param).Find(&items).Error; err != nil {
-		logger.Logger.Debugf("GetAllItemsErr: %v\n", err)
+func txGetAllItems(tx *gorm.DB, param *model.PageParam) (items []*Item, count uint, err error) {
+	tx = dao.TxPageFilter(tx, param)
+	if err = tx.Find(&items).Error; err != nil {
 		return
 	}
+	cnt := int64(0)
+	if err = tx.Count(&cnt).Error; err != nil {
+		return
+	}
+	count = uint(cnt)
 	return
 }
 

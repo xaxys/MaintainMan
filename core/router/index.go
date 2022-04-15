@@ -45,7 +45,7 @@ func Register(app *iris.Application) {
 			user.Get("/{id:uint}", middleware.PermInterceptor("user.viewall"), controller.GetUserByID)
 			user.Put("/{id:uint}", middleware.PermInterceptor("user.updateall"), controller.ForceUpdateUser)
 			user.Delete("/{id:uint}", middleware.PermInterceptor("user.delete"), controller.ForceDeleteUser)
-			user.Get("/division/{id:uint}", middleware.PermInterceptor("user.viewall"), controller.GetUserByDivision)
+			user.Get("/division/{id:uint}", middleware.PermInterceptor("user.viewall"), controller.GetUsersByDivision)
 		})
 
 		api.PartyFunc("/role", func(role iris.Party) {

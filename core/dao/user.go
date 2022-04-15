@@ -15,17 +15,17 @@ import (
 	"gorm.io/gorm"
 )
 
-func GetUserCount() (int, error) {
+func GetUserCount() (uint, error) {
 	return TxGetUserCount(database.DB)
 }
 
-func TxGetUserCount(tx *gorm.DB) (int, error) {
+func TxGetUserCount(tx *gorm.DB) (uint, error) {
 	count := int64(0)
 	if err := tx.Model(&model.User{}).Count(&count).Error; err != nil {
 		logger.Logger.Debugf("GetUserCountErr: %v\n", err)
 		return 0, err
 	}
-	return int(count), nil
+	return uint(count), nil
 }
 
 func GetUserByID(id uint) (*model.User, error) {
@@ -93,11 +93,15 @@ func TxGetUserByOpenID(tx *gorm.DB, openid string) (*model.User, error) {
 	return user, nil
 }
 
-func GetUserByDivision(id uint, param *model.PageParam) ([]*model.User, error) {
-	return TxGetUserByDivision(database.DB, id, param)
+func GetUsersByDivision(id uint, param *model.PageParam) (users []*model.User, count uint, err error) {
+	database.DB.Transaction(func(tx *gorm.DB) error {
+		users, count, err = TxGetUserByDivision(tx, id, param)
+		return err
+	})
+	return
 }
 
-func TxGetUserByDivision(tx *gorm.DB, id uint, param *model.PageParam) (users []*model.User, err error) {
+func TxGetUserByDivision(tx *gorm.DB, id uint, param *model.PageParam) (users []*model.User, count uint, err error) {
 	user := &model.User{}
 	user.DivisionID = sql.NullInt64{Int64: int64(id), Valid: id != 0}
 	tx = TxPageFilter(tx, param).Where(user)
@@ -105,23 +109,39 @@ func TxGetUserByDivision(tx *gorm.DB, id uint, param *model.PageParam) (users []
 		tx = tx.Where("division_id is null")
 	}
 	if err = tx.Find(&users).Error; err != nil {
-		logger.Logger.Debugf("GetUserByDivisionErr: %v\n", err)
+		return
 	}
+	cnt := int64(0)
+	if err = tx.Count(&cnt).Error; err != nil {
+		return
+	}
+	count = uint(cnt)
 	return
 }
 
-func GetAllUsersWithParam(aul *model.AllUserRequest) ([]*model.User, error) {
-	return TxGetAllUsersWithParam(database.DB, aul)
+func GetAllUsersWithParam(aul *model.AllUserRequest) (users []*model.User, count uint, err error) {
+	database.DB.Transaction(func(tx *gorm.DB) error {
+		users, count, err = TxGetAllUsersWithParam(tx, aul)
+		logger.Logger.Debugf("GetAllUsersWithParamErr: %v\n", err)
+		return err
+	})
+	return
 }
 
-func TxGetAllUsersWithParam(tx *gorm.DB, aul *model.AllUserRequest) (users []*model.User, err error) {
+func TxGetAllUsersWithParam(tx *gorm.DB, aul *model.AllUserRequest) (users []*model.User, count uint, err error) {
 	user := &model.User{
 		Name:        aul.Name,
 		DisplayName: aul.DisplayName,
 	}
-	if err = TxPageFilter(tx, &aul.PageParam).Where(user).Find(&users).Error; err != nil {
-		logger.Logger.Debugf("GetAllUserErr: %v\n", err)
+	tx = TxPageFilter(tx, &aul.PageParam).Where(user)
+	if err = tx.Find(&users).Error; err != nil {
+		return
 	}
+	cnt := int64(0)
+	if err = tx.Count(&cnt).Error; err != nil {
+		return
+	}
+	count = uint(cnt)
 	return
 }
 

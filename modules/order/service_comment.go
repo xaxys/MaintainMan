@@ -20,12 +20,12 @@ func getCommentsByOrderService(id uint, param *model.PageParam, auth *model.Auth
 
 func forceGetCommentsByOrderService(id uint, param *model.PageParam, auth *model.AuthInfo) *model.ApiJson {
 	param.OrderBy = util.NotEmpty(param.OrderBy, "id desc")
-	comments, err := dbGetCommentsByOrder(id, param)
+	comments, count, err := dbGetCommentsByOrder(id, param)
 	if err != nil {
 		return model.ErrorQueryDatabase(err)
 	}
 	cs := util.TransSlice(comments, commentToJson)
-	return model.Success(cs, "获取成功")
+	return model.SuccessPaged(cs, count, "获取成功")
 }
 
 func createCommentService(id uint, aul *CreateCommentRequest, auth *model.AuthInfo) *model.ApiJson {

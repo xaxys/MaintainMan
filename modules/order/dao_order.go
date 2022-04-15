@@ -2,13 +2,25 @@ package order
 
 import (
 	"github.com/xaxys/maintainman/core/dao"
-	"github.com/xaxys/maintainman/core/database"
 	"github.com/xaxys/maintainman/core/logger"
 	"github.com/xaxys/maintainman/core/util"
 
 	"github.com/jinzhu/copier"
 	"gorm.io/gorm"
 )
+
+func dbGetOrderCount() (count uint, err error) {
+	return txGetOrderCount(mctx.Database)
+}
+
+func txGetOrderCount(tx *gorm.DB) (uint, error) {
+	count := int64(0)
+	if err := tx.Model(&Order{}).Count(&count).Error; err != nil {
+		logger.Logger.Debugf("GetOrderCountErr: %v\n", err)
+		return 0, err
+	}
+	return uint(count), nil
+}
 
 // GetSimpleOrderByID return no relative info
 func dbGetSimpleOrderByID(id uint) (*Order, error) {
@@ -38,11 +50,16 @@ func txGetOrderByID(tx *gorm.DB, id uint) (*Order, error) {
 	return order, nil
 }
 
-func dbGetAllOrdersWithParam(aul *AllOrderRequest) (orders []*Order, err error) {
-	return txGetAllOrdersWithParam(mctx.Database, aul)
+func dbGetAllOrdersWithParam(aul *AllOrderRequest) (orders []*Order, count uint, err error) {
+	mctx.Database.Transaction(func(tx *gorm.DB) error {
+		orders, count, err = txGetAllOrdersWithParam(tx, aul)
+		mctx.Logger.Debugf("GetAllOrdersWithParam: %v\n", err)
+		return err
+	})
+	return
 }
 
-func txGetAllOrdersWithParam(tx *gorm.DB, aul *AllOrderRequest) (orders []*Order, err error) {
+func txGetAllOrdersWithParam(tx *gorm.DB, aul *AllOrderRequest) (orders []*Order, count uint, err error) {
 	order := &Order{
 		UserID: aul.UserID,
 		Status: aul.Status,
@@ -50,10 +67,10 @@ func txGetAllOrdersWithParam(tx *gorm.DB, aul *AllOrderRequest) (orders []*Order
 	tx = dao.TxPageFilter(tx, &aul.PageParam).Preload("Tags").Where(order)
 	if len(aul.Tags) > 0 {
 		if aul.Disjunctive {
-			tx = tx.Where("id IN (?)", database.DB.Table("order_tags").Select("order_id").Where("tag_id IN (?)", aul.Tags))
+			tx = tx.Where("id IN (?)", mctx.Database.Table("order_tags").Select("order_id").Where("tag_id IN (?)", aul.Tags))
 		} else {
 			for _, tag := range aul.Tags {
-				tx = tx.Where("EXISTS (?)", database.DB.Table("order_tags").Select("order_id").Where("tag_id = (?)", tag).Where("order_id = orders.id"))
+				tx = tx.Where("EXISTS (?)", mctx.Database.Table("order_tags").Select("order_id").Where("tag_id = (?)", tag).Where("order_id = orders.id"))
 			}
 		}
 	}
@@ -61,8 +78,13 @@ func txGetAllOrdersWithParam(tx *gorm.DB, aul *AllOrderRequest) (orders []*Order
 		tx = tx.Where("title LIKE ?", aul.Title)
 	}
 	if err = tx.Find(&orders).Error; err != nil {
-		logger.Logger.Debugf("GetAllOrdersErr: %v\n", err)
+		return
 	}
+	cnt := int64(0)
+	if err = tx.Count(&cnt).Error; err != nil {
+		return
+	}
+	count = uint(cnt)
 	return
 }
 

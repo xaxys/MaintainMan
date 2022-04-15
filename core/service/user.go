@@ -62,11 +62,11 @@ func GetUserInfoByName(name string, auth *model.AuthInfo) *model.ApiJson {
 	return model.Success(json, "获取成功")
 }
 
-func GetUserByDivision(id uint, param *model.PageParam, auth *model.AuthInfo) *model.ApiJson {
+func GetUsersByDivision(id uint, param *model.PageParam, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(param); err != nil {
 		return model.ErrorValidation(err)
 	}
-	users, err := dao.GetUserByDivision(id, param)
+	users, count, err := dao.GetUsersByDivision(id, param)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
@@ -74,7 +74,7 @@ func GetUserByDivision(id uint, param *model.PageParam, auth *model.AuthInfo) *m
 		return model.ErrorQueryDatabase(err)
 	}
 	us := util.TransSlice(users, UserToJson)
-	return model.Success(us, "获取成功")
+	return model.SuccessPaged(us, count, "获取成功")
 }
 
 func RegisterUser(aul *model.RegisterUserRequest, auth *model.AuthInfo) *model.ApiJson {
@@ -135,7 +135,7 @@ func GetAllUsers(aul *model.AllUserRequest, auth *model.AuthInfo) *model.ApiJson
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	users, err := dao.GetAllUsersWithParam(aul)
+	users, count, err := dao.GetAllUsersWithParam(aul)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
@@ -143,7 +143,7 @@ func GetAllUsers(aul *model.AllUserRequest, auth *model.AuthInfo) *model.ApiJson
 		return model.ErrorQueryDatabase(err)
 	}
 	us := util.TransSlice(users, UserToJson)
-	return model.Success(us, "获取成功")
+	return model.SuccessPaged(us, count, "获取成功")
 }
 
 func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *model.ApiJson {

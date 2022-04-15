@@ -41,7 +41,7 @@ func getAnnounce(ctx iris.Context) {
 // @Param order_by query string false "排序字段 (默认为ID正序) 只接受 {field} {asc|desc} 格式 (e.g. id desc)"
 // @Param offset query uint false "偏移量 (默认为0)"
 // @Param limit query uint false "每页数据量 (默认为50)"
-// @Success 200 {object} model.ApiJson{data=[]AnnounceJson}
+// @Success 200 {object} model.ApiJson{data=model.Page{entries=[]AnnounceJson}}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -67,7 +67,7 @@ func getAllAnnounces(ctx iris.Context) {
 // @Produce  json
 // @Param offset query uint false "偏移量"
 // @Param limit query uint false "每页数据量"
-// @Success 200 {object} model.ApiJson{data=[]AnnounceJson}
+// @Success 200 {object} model.ApiJson{data=model.Page{entries=[]AnnounceJson}}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}

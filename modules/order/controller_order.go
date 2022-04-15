@@ -19,7 +19,7 @@ import (
 // @Param order_by query string false "排序字段 (默认为ID正序) 只接受 {field} {asc|desc} 格式 (e.g. id desc)"
 // @Param offset query uint false "偏移量 (默认为0)"
 // @Param limit query uint false "每页数据量 (默认为50)"
-// @Success 200 {object} model.ApiJson{data=[]OrderJson}  "返回结果 带Tag"
+// @Success 200 {object} model.ApiJson{data=model.Page{entries=[]OrderJson}}  "返回结果 带Tag"
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -43,7 +43,6 @@ func getUserOrders(ctx iris.Context) {
 // @Description 获取当前维修工的订单 分页 默认逆序 可按照是否本人正在维修过滤
 // @Tags order
 // @Produce json
-// @
 // @Param tags query []string false "若干 Tag 的 ID"
 // @Param disjunctve query bool false "false: 查询包含所有Tag的订单, true: 查询包含任一Tag的订单"
 // @Param status query int false "订单状态 0:所有 1:待处理 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价"
@@ -51,7 +50,7 @@ func getUserOrders(ctx iris.Context) {
 // @Param order_by query string false "排序字段 (默认为ID正序) 只接受 {field} {asc|desc} 格式 (e.g. id desc)"
 // @Param offset query uint false "偏移量 (默认为0)"
 // @Param limit query uint false "每页数据量 (默认为50)"
-// @Success 200 {object} model.ApiJson{data=[]OrderJson}  "返回结果 带Tag"
+// @Success 200 {object} model.ApiJson{data=model.Page{entries=[]OrderJson}}  "返回结果 带Tag"
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -71,7 +70,7 @@ func getRepairerOrders(ctx iris.Context) {
 }
 
 // forceGetRepairerOrders godoc
-// @Summary 获取某维修工的订单
+// @Summary 获取某维修工的订单 (管理员)
 // @Description 通过维修工ID获取某维修工的订单 分页 默认逆序 可按照是否该人正在维修过滤
 // @Tags order
 // @Produce json
@@ -83,7 +82,7 @@ func getRepairerOrders(ctx iris.Context) {
 // @Param order_by query string false "排序字段 (默认为ID正序) 只接受 {field} {asc|desc} 格式 (e.g. id desc)"
 // @Param offset query uint false "偏移量 (默认为0)"
 // @Param limit query uint false "每页数据量 (默认为50)"
-// @Success 200 {object} model.ApiJson{data=[]OrderJson}  "返回结果 带Tag"
+// @Success 200 {object} model.ApiJson{data=model.Page{entries=[]OrderJson}}  "返回结果 带Tag"
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -117,7 +116,7 @@ func forceGetRepairerOrders(ctx iris.Context) {
 // @Param order_by query string false "排序字段 (默认为ID正序) 只接受 {field} {asc|desc} 格式 (e.g. id desc)"
 // @Param offset query uint false "偏移量 (默认为0)"
 // @Param limit query uint false "每页数据量 (默认为50)"
-// @Success 200 {object} model.ApiJson{data=[]OrderJson}  "返回结果 带Tag"
+// @Success 200 {object} model.ApiJson{data=model.Page{entries=[]OrderJson}}  "返回结果 带Tag"
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}

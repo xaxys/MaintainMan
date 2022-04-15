@@ -45,12 +45,12 @@ func getAllItemsService(param *model.PageParam, auth *model.AuthInfo) *model.Api
 	if err := util.Validator.Struct(param); err != nil {
 		return model.ErrorValidation(err)
 	}
-	items, err := dbGetAllItems(param)
+	items, count, err := dbGetAllItems(param)
 	if err != nil {
 		return model.ErrorQueryDatabase(err)
 	}
 	is := util.TransSlice(items, itemToJson)
-	return model.Success(is, "获取成功")
+	return model.SuccessPaged(is, count, "获取成功")
 }
 
 func createItemService(aul *CreateItemRequest, auth *model.AuthInfo) *model.ApiJson {

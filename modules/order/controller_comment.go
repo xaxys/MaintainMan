@@ -17,7 +17,7 @@ import (
 // @Param order_by query string false "排序字段"
 // @Param offset query uint false "偏移量"
 // @Param limit query uint false "每页数据量"
-// @Success 200 {object} model.ApiJson{data=[]CommentJson}
+// @Success 200 {object} model.ApiJson{data=model.Page{entries=[]CommentJson}}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -42,7 +42,7 @@ func getCommentsByOrder(ctx iris.Context) {
 // @Param order_by query string false "排序字段"
 // @Param offset query uint false "偏移量"
 // @Param limit query uint false "每页数据量"
-// @Success 200 {object} model.ApiJson{data=[]CommentJson}
+// @Success 200 {object} model.ApiJson{data=model.Page{entries=[]CommentJson}}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}

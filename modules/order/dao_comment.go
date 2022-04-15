@@ -10,6 +10,20 @@ import (
 	"gorm.io/gorm"
 )
 
+func dbGetCommentCountByOrder(id uint) (uint, error) {
+	return txGetCommentCountByOrder(mctx.Database, id)
+}
+
+func txGetCommentCountByOrder(tx *gorm.DB, id uint) (uint, error) {
+	count := int64(0)
+	comment := &Comment{OrderID: id}
+	if err := tx.Model(comment).Where(comment).Count(&count).Error; err != nil {
+		logger.Logger.Debugf("GetCommentCountByOrderErr: %v\n", err)
+		return 0, err
+	}
+	return uint(count), nil
+}
+
 func dbGetCommentByID(id uint) (*Comment, error) {
 	return txGetCommentByID(mctx.Database, id)
 }
@@ -23,16 +37,26 @@ func txGetCommentByID(tx *gorm.DB, id uint) (*Comment, error) {
 	return comment, nil
 }
 
-func dbGetCommentsByOrder(id uint, param *model.PageParam) (comments []*Comment, err error) {
-	return txGetCommentsByOrder(mctx.Database, id, param)
+func dbGetCommentsByOrder(id uint, param *model.PageParam) (comments []*Comment, count uint, err error) {
+	mctx.Database.Transaction(func(tx *gorm.DB) error {
+		comments, count, err = txGetCommentsByOrder(tx, id, param)
+		mctx.Logger.Debugf("GetCommentsByOrder: %v\n", err)
+		return err
+	})
+	return
 }
 
-func txGetCommentsByOrder(tx *gorm.DB, oid uint, param *model.PageParam) (comments []*Comment, err error) {
+func txGetCommentsByOrder(tx *gorm.DB, oid uint, param *model.PageParam) (comments []*Comment, count uint, err error) {
 	comment := &Comment{OrderID: oid}
-	if err = dao.TxPageFilter(tx, param).Where(comment).Find(&comments).Error; err != nil {
-		logger.Logger.Debugf("GetCommentsByOrderErr: %v\n", err)
+	tx = dao.TxPageFilter(tx, param).Where(comment)
+	if err = tx.Find(&comments).Error; err != nil {
 		return
 	}
+	cnt := int64(0)
+	if err = tx.Count(&cnt).Error; err != nil {
+		return
+	}
+	count = uint(cnt)
 	return
 }
 

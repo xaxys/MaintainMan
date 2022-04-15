@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/xaxys/maintainman/core/dao"
-	"github.com/xaxys/maintainman/core/database"
 	"github.com/xaxys/maintainman/core/logger"
 	"github.com/xaxys/maintainman/core/model"
 	"github.com/xaxys/maintainman/core/util"
@@ -13,11 +12,16 @@ import (
 	"gorm.io/gorm"
 )
 
-func dbGetOrderByRepairer(id uint, json *RepairerOrderRequest) (orders []*Order, err error) {
-	return txGetOrderByRepairer(mctx.Database, id, json)
+func dbGetOrderByRepairer(id uint, json *RepairerOrderRequest) (orders []*Order, count uint, err error) {
+	mctx.Database.Transaction(func(tx *gorm.DB) error {
+		orders, count, err = txGetOrderByRepairer(tx, id, json)
+		mctx.Logger.Debugf("GetOrderByRepairer: %v\n", err)
+		return err
+	})
+	return
 }
 
-func txGetOrderByRepairer(tx *gorm.DB, id uint, json *RepairerOrderRequest) (orders []*Order, err error) {
+func txGetOrderByRepairer(tx *gorm.DB, id uint, json *RepairerOrderRequest) (orders []*Order, count uint, err error) {
 	status := &Status{
 		RepairerID: sql.NullInt64{Int64: int64(id), Valid: true},
 		Current:    json.Current,
@@ -29,17 +33,21 @@ func txGetOrderByRepairer(tx *gorm.DB, id uint, json *RepairerOrderRequest) (ord
 	}
 	if len(json.Tags) > 0 {
 		if json.Disjunctive {
-			tx = tx.Where("id IN (?)", database.DB.Table("order_tags").Select("order_id").Where("tag_id IN (?)", json.Tags))
+			tx = tx.Where("id IN (?)", mctx.Database.Table("order_tags").Select("order_id").Where("tag_id IN (?)", json.Tags))
 		} else {
 			for _, tag := range json.Tags {
-				tx = tx.Where("EXISTS (?)", database.DB.Table("order_tags").Select("order_id").Where("tag_id = (?)", tag).Where("order_id = statuses.order_id"))
+				tx = tx.Where("EXISTS (?)", mctx.Database.Table("order_tags").Select("order_id").Where("tag_id = (?)", tag).Where("order_id = statuses.order_id"))
 			}
 		}
 	}
 	if err = tx.Find(&statuses).Error; err != nil {
-		logger.Logger.Debugf("GetOrderByRepairerErr: %v\n", err)
 		return
 	}
+	cnt := int64(0)
+	if err = tx.Count(&cnt).Error; err != nil {
+		return
+	}
+	count = uint(cnt)
 	orders = util.TransSlice(statuses, func(status *Status) *Order { return status.Order })
 	return
 }

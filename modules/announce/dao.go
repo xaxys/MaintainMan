@@ -9,6 +9,19 @@ import (
 	"gorm.io/gorm"
 )
 
+func dbGetAnnounceCount() (count uint, err error) {
+	return txGetAnnounceCount(mctx.Database)
+}
+
+func txGetAnnounceCount(tx *gorm.DB) (uint, error) {
+	count := int64(0)
+	if err := tx.Model(&Announce{}).Count(&count).Error; err != nil {
+		logger.Logger.Debugf("GetAnnounceCountErr: %v\n", err)
+		return 0, err
+	}
+	return uint(count), nil
+}
+
 func dbGetAnnounceByID(id uint) (announce *Announce, err error) {
 	return txGetAnnounceByID(mctx.Database, id)
 }
@@ -35,11 +48,15 @@ func txGetAnnounceByTitle(tx *gorm.DB, title string) (*Announce, error) {
 	return announce, nil
 }
 
-func dbGetAllAnnouncesWithParam(aul *AllAnnounceRequest) (announces []*Announce, err error) {
-	return txGetAllAnnounceWithParam(mctx.Database, aul)
+func dbGetAllAnnouncesWithParam(aul *AllAnnounceRequest) (announces []*Announce, count uint, err error) {
+	mctx.Database.Transaction(func(tx *gorm.DB) error {
+		announces, count, err = txGetAllAnnouncesWithParam(tx, aul)
+		return err
+	})
+	return
 }
 
-func txGetAllAnnounceWithParam(tx *gorm.DB, aul *AllAnnounceRequest) (announces []*Announce, err error) {
+func txGetAllAnnouncesWithParam(tx *gorm.DB, aul *AllAnnounceRequest) (announces []*Announce, count uint, err error) {
 	tx = dao.TxFilter(tx, aul.OrderBy, aul.Offset, aul.Limit)
 	if aul.Title != "" {
 		tx = tx.Where("title like ?", aul.Title)
@@ -64,8 +81,13 @@ func txGetAllAnnounceWithParam(tx *gorm.DB, aul *AllAnnounceRequest) (announces 
 	}
 
 	if err = tx.Find(&announces).Error; err != nil {
-		logger.Logger.Debugf("GetAllAnnounceErr: %v\n", err)
+		return
 	}
+	cnt := int64(0)
+	if err = tx.Count(&cnt).Error; err != nil {
+		return
+	}
+	count = uint(cnt)
 	return
 }
 
