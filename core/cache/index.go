@@ -46,6 +46,9 @@ func init() {
 }
 
 func InitCache(name string, config *viper.Viper, fn func(any) error) ICache {
+	if config == nil {
+		return nil
+	}
 	cacheType := config.GetString("cache.driver")
 	limit := config.GetInt64("cache.limit")
 	switch cacheType {

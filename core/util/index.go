@@ -2,6 +2,7 @@ package util
 
 import (
 	"bytes"
+	"fmt"
 	"html/template"
 	"math/rand"
 	"regexp"
@@ -146,9 +147,31 @@ func ProcessString(str string, vars interface{}) string {
 	if err != nil {
 		return str
 	}
+	return ProcessStringWithTPL(tmpl, str, vars)
+}
+
+func ProcessStringWithTPL(tpl *template.Template, str string, vars interface{}) string {
+	tmpl, err := tpl.Parse(str)
+	if err != nil {
+		return str
+	}
 	buffer := bytes.NewBuffer(nil)
 	if err := tmpl.Execute(buffer, vars); err != nil {
 		panic(err)
 	}
 	return buffer.String()
+}
+
+func FormatBytes(bytes uint64) string {
+	if bytes>>40 > 100 {
+		return fmt.Sprintf("%d TiB", bytes>>40)
+	} else if bytes>>30 > 100 {
+		return fmt.Sprintf("%d GiB", bytes>>30)
+	} else if bytes>>20 > 100 {
+		return fmt.Sprintf("%d MiB", bytes>>20)
+	} else if bytes>>10 > 100 {
+		return fmt.Sprintf("%d KiB", bytes>>10)
+	} else {
+		return fmt.Sprintf("%d B", bytes)
+	}
 }

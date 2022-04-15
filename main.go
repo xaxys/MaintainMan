@@ -16,6 +16,7 @@ import (
 	"github.com/xaxys/maintainman/modules/announce"
 	"github.com/xaxys/maintainman/modules/imagehost"
 	"github.com/xaxys/maintainman/modules/order"
+	"github.com/xaxys/maintainman/modules/sysinfo"
 )
 
 var (
@@ -65,6 +66,7 @@ func newApp() *iris.Application {
 		&imagehost.Module,
 		&announce.Module,
 		&order.Module,
+		&sysinfo.Module,
 	)
 	service.Scheduler.StartAsync()
 	return app

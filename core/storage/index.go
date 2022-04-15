@@ -38,6 +38,9 @@ func init() {
 }
 
 func InitStorage(config *viper.Viper) (storage IStorage) {
+	if config == nil {
+		return nil
+	}
 	storageType := config.GetString("storage.driver")
 	switch storageType {
 	case "":

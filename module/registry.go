@@ -28,13 +28,15 @@ func (r *Registry) Register(module ...*Module) {
 	}
 	for _, m := range module {
 		database.SyncModel(m.getModel()...)
-		m.ModuleConfig.SetConfigName(m.ModuleName)
-		m.ModuleConfig.SetConfigType("yaml")
-		m.ModuleConfig.AddConfigPath(".")
-		m.ModuleConfig.AddConfigPath("./config")
-		m.ModuleConfig.AddConfigPath("/etc/maintainman/")
-		m.ModuleConfig.AddConfigPath("$HOME/.maintainman/")
-		config.ReadAndUpdateConfig(m.ModuleConfig, m.ModuleName, m.ModuleVersion)
+		if m.ModuleConfig != nil {
+			m.ModuleConfig.SetConfigName(m.ModuleName)
+			m.ModuleConfig.SetConfigType("yaml")
+			m.ModuleConfig.AddConfigPath(".")
+			m.ModuleConfig.AddConfigPath("./config")
+			m.ModuleConfig.AddConfigPath("/etc/maintainman/")
+			m.ModuleConfig.AddConfigPath("$HOME/.maintainman/")
+			config.ReadAndUpdateConfig(m.ModuleConfig, m.ModuleName, m.ModuleVersion)
+		}
 		mctx := &ModuleContext{
 			Server:  r.server,
 			Route:   router.APIRoute.Party(m.ModuleRoute),
