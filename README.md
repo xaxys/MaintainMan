@@ -4,53 +4,75 @@ MaintainMan is a logistic report management system powered by iris.
 
 ## Feature
 
-- Offer RESTful HTTP API
+- RESTful HTTP API
 
-- Configurable permissions and role management
+- User management with configurable Role-Based access control
 
-- User management
+- Database: Mysql, Sqlite3
 
-- Order management
+- Storage: S3, Local
 
-  - 8 status available
+- Cache: Redis, Local
 
-    - Waiting for Assignment
+- 3 pulggable modules
 
-    - Order Assigned
+  - Order management
 
-    - Order Completed
+    - 8 status available
 
-    - Order Appraised
+      - Waiting for Assignment
 
-    - Reported as pending
+      - Order Assigned
 
-    - Hold for a while
+      - Order Completed
 
-    - Order Canceled
+      - Order Appraised
 
-    - Order Rejected
+      - Reported as pending
 
-  - Switchable order comment
+      - Hold for a while
 
-  - Order assignment system
+      - Order Canceled
 
-    - One Repairer for one assignment
+      - Order Rejected
 
-    - Supports multiple order assignments
+    - Switchable order comment
 
-  - Order appraising system and performance display
+    - Order assignment system
 
-- Announcement  with configurable display times
+      - One Repairer for one assignment
 
-- Item inventory management associated with the order system
+      - Supports multiple order assignments
 
-- Image Host with auto watermark & custom transformation & cache
+    - Order appraising system and performance display
+
+    - Item inventory management associated with the order system
+
+  - Announcement management
+  
+    - Configurable display times
+
+    - User click statistics
+
+  - Image Hosting service
+  
+    - Auto watermarking
+
+    - Custom transformation
+
+      - Resizing & Croping
+
+      - Text with color and font
+
+    - Image compression
+
+    - Configurable image cache
 
 - More...
 
 ## Configuration
 
-MaintainMan has 4 configuration files now. All configuration files have independent version control.
+MaintainMan has 6 configuration files now. All configuration files have independent version control.
 
 When the maintainman detected a old version configuration file, it will automatically upgrade it (conflict field will be skipped).
 
@@ -64,7 +86,7 @@ App config is used to configure the database and various connection parameters a
 <summary>example</summary>
 
 ```yaml
-version: 1.2.1
+version: 1.2.2
 app:
   # application name.
   name: "maintainman"
@@ -81,27 +103,6 @@ app:
     # this number will be used when http request paramenter `limit`
     # is not specified or <= 0.
     default: 50
-
-  hit_expire:
-    # the duration that a user hit the same announcement will not
-    # be counted repeatedly.
-    announce: "12h"
-
-  appraise:
-    # the duration that a user can appraise the order after the
-    # order completed.
-    # the order will be appraised automatically after the duration.
-    timeout: "72h"
-    # the duration that the system will check the timeouted unappraised
-    # order.
-    purge: "10m"
-    # the default appraise score of timeouted unappraised order.
-    default: 5
-
-  # Whether item count can be negative.
-  # if false, an `item count is not enough` error may be returned on
-  # item consuming.
-  item_can_negative: true
 
 wechat:
   # wechat appid.
@@ -142,6 +143,8 @@ storage:
   driver: "local"
   local:
     path: "./images"
+  # if s3 connection defined here, module config without s3 connection
+  # will use the connection defined here.
   s3:
     access_key: ""
     secret_key: ""
@@ -394,8 +397,8 @@ cache_as_jpeg: true
 save_as_jpeg: false
 
 upload:
-  # Upload request returns straight after image is processed by the
-  # server (saving might still fail)
+  # upload request returns straight after image is processed by the server.
+  # but saving might still fail.
   async: false
   # the max file size of image allowed to upload.
   max_file_size: 10485760 # 10 MB
@@ -426,12 +429,20 @@ storage:
   # storage type (local, s3).
   driver: local
   local:
-    path: ./images/cache
-    # whether the storage path will be cleaned up on server start.
-    clean: true
-  # s3 connection has been configured in app.yml
+    path: ./images
   s3:
-    bucket: BUCKET
+    # if access_key and secret_key are not set, s3 connection defined
+    # in app.yml will be used.
+    # access_key: ""
+    # secret_key: ""
+    # region: ""
+    bucket: "Image"
+  # image cache storage. sub path of main storage.
+  # e.g. if main storage is ./images, cache storage is ./images/cache,
+  cache:
+    # whether the storage path will be cleaned up on server start.
+    # recommended to be true if you are using local cache instead of redis.
+    clean: true
 
 transformations:
   # predefined transformations.
@@ -461,6 +472,53 @@ transformations:
       # embedded fonts.
       font:    fonts/SourceHanSans-Regular.ttf
       size:    14
+
+```
+
+</details>
+
+### announce.yml
+
+Announce config is used to configure announcement management.
+
+<details>
+<summary>example</summary>
+
+```yaml
+# the duration that a user hit the same announcement will not
+# be counted repeatedly.
+hit_expire: "12h"
+
+cache:
+  driver: "local"
+  limit: 268435456 # 256M
+
+```
+
+</details>
+
+### order.yml
+
+Order config is used to configure order management.
+
+<details>
+<summary>example</summary>
+
+```yaml
+# Whether item count can be negative.
+# if false, an `item count is not enough` error may be returned on
+# item consuming.
+item_can_negative: true
+
+appraise:
+  # the duration that a user can appraise the order after the
+  # order completed.
+  # the order will be appraised automatically after the duration.
+  timeout: "72h"
+  # the duration that the system will check the timeouted unappraised order.
+  purge: "10m"
+  # the default appraise score of timeouted unappraised order.
+  default: 5
 
 ```
 
