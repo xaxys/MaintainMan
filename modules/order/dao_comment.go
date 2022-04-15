@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/xaxys/maintainman/core/dao"
-	"github.com/xaxys/maintainman/core/logger"
 	"github.com/xaxys/maintainman/core/model"
 
 	"gorm.io/gorm"
@@ -18,7 +17,7 @@ func txGetCommentCountByOrder(tx *gorm.DB, id uint) (uint, error) {
 	count := int64(0)
 	comment := &Comment{OrderID: id}
 	if err := tx.Model(comment).Where(comment).Count(&count).Error; err != nil {
-		logger.Logger.Debugf("GetCommentCountByOrderErr: %v\n", err)
+		mctx.Logger.Debugf("GetCommentCountByOrderErr: %v\n", err)
 		return 0, err
 	}
 	return uint(count), nil
@@ -31,7 +30,7 @@ func dbGetCommentByID(id uint) (*Comment, error) {
 func txGetCommentByID(tx *gorm.DB, id uint) (*Comment, error) {
 	comment := &Comment{}
 	if err := tx.First(comment, id).Error; err != nil {
-		logger.Logger.Debugf("GetCommentByIDErr: %v\n", err)
+		mctx.Logger.Debugf("GetCommentByIDErr: %v\n", err)
 		return nil, err
 	}
 	return comment, nil
@@ -63,7 +62,7 @@ func txGetCommentsByOrder(tx *gorm.DB, oid uint, param *model.PageParam) (commen
 func dbCreateComment(oid, uid uint, name string, aul *CreateCommentRequest) (comment *Comment, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if comment, err = txCreateComment(tx, oid, uid, name, aul); err != nil {
-			logger.Logger.Debugf("CreateCommentErr: %v\n", err)
+			mctx.Logger.Debugf("CreateCommentErr: %v\n", err)
 		}
 		return err
 	})
@@ -101,7 +100,7 @@ func dbDeleteComment(id uint) error {
 
 func txDeleteComment(tx *gorm.DB, id uint) error {
 	if err := tx.Delete(&Comment{}, id).Error; err != nil {
-		logger.Logger.Debugf("DeleteCommentErr: %v\n", err)
+		mctx.Logger.Debugf("DeleteCommentErr: %v\n", err)
 		return err
 	}
 	return nil

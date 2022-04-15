@@ -10,7 +10,6 @@ import (
 	"mime/multipart"
 
 	"github.com/xaxys/maintainman/core/dao"
-	"github.com/xaxys/maintainman/core/logger"
 	"github.com/xaxys/maintainman/core/model"
 	"github.com/xaxys/maintainman/core/util"
 
@@ -62,7 +61,7 @@ func getImageService(id, param string, auth *model.AuthInfo) *imageResponse {
 		user, err := dao.GetUserByID(uid)
 		newAuth := model.AuthInfo{User: uid}
 		if err != nil {
-			logger.Logger.Warn(err)
+			mctx.Logger.Warn(err)
 		} else {
 			newAuth.Name = user.Name
 		}
@@ -143,7 +142,7 @@ func uploadImageService(file multipart.File, auth *model.AuthInfo) *model.ApiJso
 	response := model.Success(id, "上传成功")
 	if imageConfig.GetBool("upload.async") {
 		go saveImage(func(err error) {
-			logger.Logger.Warnf("保存图片失败(id:%s): %+v", id, err)
+			mctx.Logger.Warnf("保存图片失败(id:%s): %+v", id, err)
 		})
 	} else {
 		saveImage(func(err error) {
@@ -156,7 +155,7 @@ func uploadImageService(file multipart.File, auth *model.AuthInfo) *model.ApiJso
 func genUUID(id uint) string {
 	uuidv1, err := uuid.NewUUID()
 	if err != nil {
-		logger.Logger.Error("生成uuid失败: %+v", err)
+		mctx.Logger.Error("生成uuid失败: %+v", err)
 	}
 	bigint24 := [8]byte{}
 	binary.BigEndian.PutUint64(bigint24[:], uint64(id))
@@ -167,7 +166,7 @@ func genUUID(id uint) string {
 func parseUUID(str string) uint {
 	uuidv1, err := uuid.Parse(str)
 	if err != nil {
-		logger.Logger.Error("解析uuid失败: %+v", err)
+		mctx.Logger.Error("解析uuid失败: %+v", err)
 	}
 	bigint24 := [8]byte{}
 	copy(bigint24[4:], uuidv1[12:])

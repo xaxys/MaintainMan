@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/xaxys/maintainman/core/dao"
-	"github.com/xaxys/maintainman/core/logger"
 	"github.com/xaxys/maintainman/core/model"
 
 	"gorm.io/gorm"
@@ -17,7 +16,7 @@ func dbGetItemCount() (uint, error) {
 func txGetItemCount(tx *gorm.DB) (uint, error) {
 	count := int64(0)
 	if err := tx.Model(&Item{}).Count(&count).Error; err != nil {
-		logger.Logger.Debugf("GetItemCountErr: %v\n", err)
+		mctx.Logger.Debugf("GetItemCountErr: %v\n", err)
 		return 0, err
 	}
 	return uint(count), nil
@@ -30,7 +29,7 @@ func dbGetItemByID(id uint) (*Item, error) {
 func txGetItemByID(tx *gorm.DB, id uint) (*Item, error) {
 	item := &Item{}
 	if err := tx.First(item, id).Error; err != nil {
-		logger.Logger.Debugf("GetItemByIDErr: %v\n", err)
+		mctx.Logger.Debugf("GetItemByIDErr: %v\n", err)
 		return nil, err
 	}
 	return item, nil
@@ -43,7 +42,7 @@ func dbGetItemByName(name string) (*Item, error) {
 func txGetItemByName(tx *gorm.DB, name string) (*Item, error) {
 	item := &Item{Name: name}
 	if err := tx.Where(item).First(item).Error; err != nil {
-		logger.Logger.Debugf("GetItemByNameErr: %v\n", err)
+		mctx.Logger.Debugf("GetItemByNameErr: %v\n", err)
 		return nil, err
 	}
 	return item, nil
@@ -55,7 +54,7 @@ func dbGetItemsByFuzzyName(name string) (items []*Item, err error) {
 
 func TxGetItemsByFuzzyName(tx *gorm.DB, name string) (items []*Item, err error) {
 	if err = dao.TxFilter(tx, "", 0, 0).Where("name like (?)", name).Find(&items).Error; err != nil {
-		logger.Logger.Debugf("GetItemByNameErr: %v\n", err)
+		mctx.Logger.Debugf("GetItemByNameErr: %v\n", err)
 		return nil, err
 	}
 	return
@@ -64,7 +63,7 @@ func TxGetItemsByFuzzyName(tx *gorm.DB, name string) (items []*Item, err error) 
 func dbGetAllItems(param *model.PageParam) (items []*Item, count uint, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if items, count, err = txGetAllItems(tx, param); err != nil {
-			logger.Logger.Debugf("GetAllItemsErr: %v\n", err)
+			mctx.Logger.Debugf("GetAllItemsErr: %v\n", err)
 		}
 		return err
 	})
@@ -92,7 +91,7 @@ func TxCreateItem(tx *gorm.DB, aul *CreateItemRequest, operator uint) (*Item, er
 	item := jsonToItem(aul)
 	item.CreatedBy = operator
 	if err := tx.Create(item).Error; err != nil {
-		logger.Logger.Debugf("CreateItemErr: %v\n", err)
+		mctx.Logger.Debugf("CreateItemErr: %v\n", err)
 		return nil, err
 	}
 	return item, nil
@@ -104,7 +103,7 @@ func dbDeleteItem(id uint) error {
 
 func TxDeleteItem(tx *gorm.DB, id uint) error {
 	if err := tx.Delete(&Item{}, id).Error; err != nil {
-		logger.Logger.Debugf("DeleteItemErr: %v\n", err)
+		mctx.Logger.Debugf("DeleteItemErr: %v\n", err)
 		return err
 	}
 	return nil
@@ -113,7 +112,7 @@ func TxDeleteItem(tx *gorm.DB, id uint) error {
 func dbAddItem(itemlog *ItemLog, operator uint) (item *Item, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if item, err = txAddItem(tx, itemlog, operator); err != nil {
-			logger.Logger.Debugf("AddItemErr: %v\n", err)
+			mctx.Logger.Debugf("AddItemErr: %v\n", err)
 		}
 		return err
 	})
@@ -140,7 +139,7 @@ func txAddItem(tx *gorm.DB, itemlog *ItemLog, operator uint) (item *Item, err er
 func dbConsumeItem(itemlog *ItemLog, operator uint) (item *Item, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if item, err = txConsumeItem(tx, itemlog, operator); err != nil {
-			logger.Logger.Debugf("ConsumeItemErr: %v\n", err)
+			mctx.Logger.Debugf("ConsumeItemErr: %v\n", err)
 		}
 		return err
 	})

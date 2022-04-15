@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/xaxys/maintainman/core/dao"
-	"github.com/xaxys/maintainman/core/logger"
 	"github.com/xaxys/maintainman/core/model"
 	"github.com/xaxys/maintainman/core/util"
 
@@ -63,7 +62,7 @@ func txGetAppraiseTimeoutOrder(tx *gorm.DB) (ids []uint, err error) {
 	exp := time.Now().Add(-timeout)
 
 	if err = tx.Where(status).Where("created_at <= (?)", exp).Find(&statuses).Error; err != nil {
-		logger.Logger.Debugf("GetAppraiseTimeoutOrderErr: %v\n", err)
+		mctx.Logger.Debugf("GetAppraiseTimeoutOrderErr: %v\n", err)
 		return
 	}
 

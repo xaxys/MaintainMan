@@ -2,7 +2,6 @@ package order
 
 import (
 	"github.com/xaxys/maintainman/core/dao"
-	"github.com/xaxys/maintainman/core/logger"
 	"github.com/xaxys/maintainman/core/util"
 
 	"github.com/jinzhu/copier"
@@ -16,7 +15,7 @@ func dbGetOrderCount() (count uint, err error) {
 func txGetOrderCount(tx *gorm.DB) (uint, error) {
 	count := int64(0)
 	if err := tx.Model(&Order{}).Count(&count).Error; err != nil {
-		logger.Logger.Debugf("GetOrderCountErr: %v\n", err)
+		mctx.Logger.Debugf("GetOrderCountErr: %v\n", err)
 		return 0, err
 	}
 	return uint(count), nil
@@ -31,7 +30,7 @@ func dbGetSimpleOrderByID(id uint) (*Order, error) {
 func txGetSimpleOrderByID(tx *gorm.DB, id uint) (*Order, error) {
 	order := &Order{}
 	if err := tx.First(order, id).Error; err != nil {
-		logger.Logger.Debugf("TxGetOrderByIDErr: %v\n", err)
+		mctx.Logger.Debugf("TxGetOrderByIDErr: %v\n", err)
 		return nil, err
 	}
 	return order, nil
@@ -44,7 +43,7 @@ func dbGetOrderByID(id uint) (*Order, error) {
 func txGetOrderByID(tx *gorm.DB, id uint) (*Order, error) {
 	order := &Order{}
 	if err := tx.Preload("Tags").Preload("Comments").First(order, id).Error; err != nil {
-		logger.Logger.Debugf("TxGetOrderByIDErr: %v\n", err)
+		mctx.Logger.Debugf("TxGetOrderByIDErr: %v\n", err)
 		return nil, err
 	}
 	return order, nil
@@ -95,7 +94,7 @@ func dbGetOrderWithLastStatus(id uint) (*Order, error) {
 func txGetOrderWithLastStatus(tx *gorm.DB, id uint) (*Order, error) {
 	order := &Order{}
 	if err := tx.Preload("StatusList", "current = TRUE").Model(order).Find(order, id).Error; err != nil {
-		logger.Logger.Debugf("GetOrderWithLastStatusErr: %v\n", err)
+		mctx.Logger.Debugf("GetOrderWithLastStatusErr: %v\n", err)
 		return nil, err
 	}
 	return order, nil
@@ -104,7 +103,7 @@ func txGetOrderWithLastStatus(tx *gorm.DB, id uint) (*Order, error) {
 func dbCreateOrder(aul *CreateOrderRequest, operator uint) (order *Order, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if order, err = txCreateOrder(tx, aul, operator); err != nil {
-			logger.Logger.Debugf("CreateOrderErr: %v\n", err)
+			mctx.Logger.Debugf("CreateOrderErr: %v\n", err)
 		}
 		return err
 	})
@@ -141,7 +140,7 @@ func txCreateOrder(tx *gorm.DB, aul *CreateOrderRequest, operator uint) (order *
 func dbUpdateOrder(id uint, aul *UpdateOrderRequest, operator uint) (order *Order, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if order, err = TxUpdateOrder(tx, id, aul, operator); err != nil {
-			logger.Logger.Debugf("UpdateOrderErr: %v\n", err)
+			mctx.Logger.Debugf("UpdateOrderErr: %v\n", err)
 		}
 		return err
 	})
@@ -187,7 +186,7 @@ func dbDeleteOrder(id uint) error {
 
 func txDeleteOrder(tx *gorm.DB, id uint) error {
 	if err := tx.Delete(Order{}, id).Error; err != nil {
-		logger.Logger.Debugf("TxDeleteOrderErr: %v\n", err)
+		mctx.Logger.Debugf("TxDeleteOrderErr: %v\n", err)
 		return err
 	}
 	return nil
@@ -196,7 +195,7 @@ func txDeleteOrder(tx *gorm.DB, id uint) error {
 func dbChangeOrderStatus(id uint, status *Status) (err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if err = txChangeOrderStatus(tx, id, status); err != nil {
-			logger.Logger.Debugf("ChangeOrderStatusErr: %v\n", err)
+			mctx.Logger.Debugf("ChangeOrderStatusErr: %v\n", err)
 		}
 		return err
 	})
@@ -237,7 +236,7 @@ func txChangeOrderAllowComment(tx *gorm.DB, id uint, allow bool) error {
 	order.ID = id
 	order.AllowComment = util.Tenary[uint](allow, 1, 2)
 	if err := tx.Model(order).Updates(order).Error; err != nil {
-		logger.Logger.Debugf("TxChangeOrderAllowCommentErr: %v\n", err)
+		mctx.Logger.Debugf("TxChangeOrderAllowCommentErr: %v\n", err)
 		return err
 	}
 	return nil
@@ -246,7 +245,7 @@ func txChangeOrderAllowComment(tx *gorm.DB, id uint, allow bool) error {
 func dbAppraiseOrder(id, appraisal, operator uint) (err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if err := txAppraiseOrder(tx, id, appraisal, operator); err != nil {
-			logger.Logger.Debugf("AppraiseOrderErr: %v\n", err)
+			mctx.Logger.Debugf("AppraiseOrderErr: %v\n", err)
 		}
 		return err
 	})
