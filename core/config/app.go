@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const AppConfigVersion = "1.2.1"
+const AppConfigVersion = "1.2.2"
 
 var (
 	AppConfig *viper.Viper
