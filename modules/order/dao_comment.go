@@ -38,8 +38,9 @@ func txGetCommentByID(tx *gorm.DB, id uint) (*Comment, error) {
 
 func dbGetCommentsByOrder(id uint, param *model.PageParam) (comments []*Comment, count uint, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
-		comments, count, err = txGetCommentsByOrder(tx, id, param)
-		mctx.Logger.Debugf("GetCommentsByOrder: %v\n", err)
+		if comments, count, err = txGetCommentsByOrder(tx, id, param); err != nil {
+			mctx.Logger.Debugf("GetCommentsByOrder: %v\n", err)
+		}
 		return err
 	})
 	return

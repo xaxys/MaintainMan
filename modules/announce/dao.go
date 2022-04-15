@@ -49,7 +49,9 @@ func txGetAnnounceByTitle(tx *gorm.DB, title string) (*Announce, error) {
 
 func dbGetAllAnnouncesWithParam(aul *AllAnnounceRequest) (announces []*Announce, count uint, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
-		announces, count, err = txGetAllAnnouncesWithParam(tx, aul)
+		if announces, count, err = txGetAllAnnouncesWithParam(tx, aul); err != nil {
+			mctx.Logger.Debugf("GetAllAnnouncesWithParamErr: %v\n", err)
+		}
 		return err
 	})
 	return

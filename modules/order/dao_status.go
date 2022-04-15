@@ -13,8 +13,9 @@ import (
 
 func dbGetOrderByRepairer(id uint, json *RepairerOrderRequest) (orders []*Order, count uint, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
-		orders, count, err = txGetOrderByRepairer(tx, id, json)
-		mctx.Logger.Debugf("GetOrderByRepairer: %v\n", err)
+		if orders, count, err = txGetOrderByRepairer(tx, id, json); err != nil {
+			mctx.Logger.Debugf("GetOrderByRepairer: %v\n", err)
+		}
 		return err
 	})
 	return

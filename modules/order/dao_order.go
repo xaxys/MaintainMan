@@ -51,8 +51,9 @@ func txGetOrderByID(tx *gorm.DB, id uint) (*Order, error) {
 
 func dbGetAllOrdersWithParam(aul *AllOrderRequest) (orders []*Order, count uint, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
-		orders, count, err = txGetAllOrdersWithParam(tx, aul)
-		mctx.Logger.Debugf("GetAllOrdersWithParam: %v\n", err)
+		if orders, count, err = txGetAllOrdersWithParam(tx, aul); err != nil {
+			mctx.Logger.Debugf("GetAllOrdersWithParam: %v\n", err)
+		}
 		return err
 	})
 	return
