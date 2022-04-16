@@ -1,0 +1,91 @@
+# Only buttom-up inheritance is valid (latter roles are superior)
+role:
+
+- display_name: 封停用户
+  name: banned
+  permissions: []
+  inheritance: []
+
+- name: guest
+  display_name: 访客
+  guest: true
+  permissions:
+  - user.register
+  - user.login
+  - user.wxlogin
+  - user.wxregister
+  inheritance: []
+
+- name: user
+  display_name: 普通用户
+  default: true
+  permissions:
+  - image.upload
+  - image.view
+  - user.view
+  - user.update
+  - user.renew
+  - role.view
+  - announce.view
+  - announce.hit
+  - order.view
+  - order.create
+  - order.cancel
+  - order.update
+  - order.appraise
+  - order.urgence
+  - order.comment.view
+  - order.comment.create
+  - order.comment.delete
+  - tag.view.1
+  - tag.add.1
+  # `tag.add.1` is a special permission.
+  # in `perm.?` pattern, if `?` is a number, the number will be compared
+  # to judge whether the role has the permission.
+  # e.g. if a role has `perm.2`, then the `perm.2` and `perm.1` will be
+  # judge as true.
+  inheritance:
+  - guest
+
+- name: maintainer
+  display_name: 维护工
+  permissions:
+  - order.viewfix
+  - order.reject
+  - order.report
+  - order.complete
+  - item.consume
+  - item.viewall
+  - tag.view.2
+  - tag.add.2
+  inheritance:
+  - user
+
+- name: super_maintainer
+  display_name: 维护工（可自行接单）
+  permissions:
+  - order.selfassign
+  - order.viewall
+  inheritance:
+  - maintainer
+
+- name: admin
+  display_name: 管理员
+  permissions:
+  - image.*
+  - division.*
+  - announce.*
+  - order.*
+  - tag.*
+  - item.*
+  # in `perm.*` pattern, `*` means any, all sub permissions under perm will
+  # be judged as true.
+  inheritance:
+  - maintainer
+
+- name: super_admin
+  display_name: 超级管理员
+  permissions:
+  - '*'
+  inheritance:
+  - admin

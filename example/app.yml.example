@@ -1,0 +1,63 @@
+app:
+  # application name.
+  name: "maintainman"
+  # listen port.
+  listen: ":8080"
+  # log level (debug, info, warn, error, fatal).
+  loglevel: "debug"
+
+  page:
+    # max number of items in a page.
+    # http request paramenter `limit` must not exceed this value.
+    limit: 100
+    # default number of items in a page.
+    # this number will be used when http request paramenter `limit`
+    # is not specified or <= 0.
+    default: 50
+
+token:
+  # token secret.
+  # IMPORTANT! you'd better change it to a random string or a strong
+  # secret key.
+  key: ""
+  # token expire duration.
+  expire: "30m"
+
+database:
+  # database type (mysql, sqlite).
+  driver: "mysql"
+  mysql:
+    host: "localhost"
+    port: 3306
+    name: "maintainman"
+    params: "parseTime=true&loc=Local&charset=utf8mb4"
+    user: "root"
+    password: ""
+  sqlite:
+    # sqlite database file path.
+    path: "maintainman.db"
+
+storage:
+  # storage type (local, s3).
+  driver: "local"
+  local:
+    path: "./images"
+  # if s3 connection defined here, module config without s3 connection
+  # will use the connection defined here.
+  s3:
+    access_key: ""
+    secret_key: ""
+    bucket: ""
+    region: ""
+
+cache:
+  # cache type (local, redis).
+  driver: "local"
+  # cache limit. if the cache limit is reached, some entries will be
+  # evicted automatically.
+  # if the cache limit is 0, no entries will not be evicted.
+  limit: 268435456 # 256M
+  redis:
+    host: "localhost"
+    port: 6379
+    password: ""

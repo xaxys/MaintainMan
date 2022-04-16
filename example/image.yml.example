@@ -1,0 +1,85 @@
+# jpeg compression quality.
+jpeg_quality: 80
+# max gif color number.
+gif_num_colors: 256
+# all image after transformation will be cached as jpeg.
+cache_as_jpeg: true
+# all image uploaded will be saved as gif.
+save_as_jpeg: false
+
+upload:
+  # upload request returns straight after image is processed by the server.
+  # but saving might still fail.
+  async: false
+  # the max file size of image allowed to upload.
+  max_file_size: 10485760 # 10 MB
+  # the max dimension of image allowed to upload.
+  max_pixels: 15000000    # 15 million pixels
+  # the throttling rate control.
+  throttling:
+    # the max number of requests allowed in a period.
+    burst: 20
+    # the duration between requests.
+    rate: 1
+    # the purge duration.
+    purge: 1m
+    # the expiration duration.
+    expire: 1m
+
+cache:
+  # cache type (local, redis).
+  driver: local
+  # cache limit. if the cache limit is reached, image in storage
+  # will be deteted automatically.
+  # if the cache limit is 0, no entries will not be evicted.
+  # (strongly not recommended)
+  limit: 1073741824 # 1 GB
+  # if redis, connection has been configured in app.yml
+
+storage:
+  # storage type (local, s3).
+  driver: local
+  local:
+    path: ./images
+  s3:
+    # if access_key and secret_key are not set, s3 connection defined
+    # in app.yml will be used.
+    # access_key: ""
+    # secret_key: ""
+    # region: ""
+    bucket: "Image"
+  # image cache storage. sub path of main storage.
+  # e.g. if main storage is ./images, cache storage is ./images/cache,
+  cache:
+    # whether the storage path will be cleaned up on server start.
+    # recommended to be true if you are using local cache instead of redis.
+    clean: true
+
+transformations:
+  # predefined transformations.
+  # square returns a 256 x 256 square image chopped from the center.
+  square:
+    params:   w_256,h_256,c_p,g_c
+    # Run on every upload
+    eager:   true
+  # watermarked returns a equal scaling, 800 widthm, watermarked image.
+  watermarked:
+    # if params is not set, the transformation will be applied on.
+    default: true
+    params: w_800
+    texts:
+    # text will be added to the bottom right corner of the image.
+    # the {{.Name}} will be replaced by the upload user name.
+    - content: "{{.Name}}@MaintainMan"
+      gravity: se
+      # text position in the image. relative to gravity.
+      # non-negative integer.
+      x-pos:   10
+      y-pos:   0
+      # color format is hex.
+      # e.g. #RRGGBBAA or #RRGGBB or #RGBA or #RGB
+      color:   "#808080CC"
+      # font file path. if not set, will search filename in
+      # embedded fonts.
+      font:    fonts/SourceHanSans-Regular.ttf
+      size:    14

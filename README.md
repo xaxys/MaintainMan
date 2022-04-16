@@ -4,53 +4,75 @@ MaintainMan is a logistic report management system powered by iris.
 
 ## Feature
 
-- Offer RESTful HTTP API
+- RESTful HTTP API
 
-- Configurable permissions and role management
+- User management with configurable Role-Based access control
 
-- User management
+- Database: Mysql, Sqlite3
 
-- Order management
+- Storage: S3, Local
 
-  - 8 status available
+- Cache: Redis, Local
 
-    - Waiting for Assignment
+- 3 pulggable modules
 
-    - Order Assigned
+  - Order management
 
-    - Order Completed
+    - 8 status available
 
-    - Order Appraised
+      - Waiting for Assignment
 
-    - Reported as pending
+      - Order Assigned
 
-    - Hold for a while
+      - Order Completed
 
-    - Order Canceled
+      - Order Appraised
 
-    - Order Rejected
+      - Reported as pending
 
-  - Switchable order comment
+      - Hold for a while
 
-  - Order assignment system
+      - Order Canceled
 
-    - One Repairer for one assignment
+      - Order Rejected
 
-    - Supports multiple order assignments
+    - Switchable order comment
 
-  - Order appraising system and performance display
+    - Order assignment system
 
-- Announcement  with configurable display times
+      - One Repairer for one assignment
 
-- Item inventory management associated with the order system
+      - Supports multiple order assignments
 
-- Image Host with auto watermark & custom transformation & cache
+    - Order appraising system and performance display
+
+    - Item inventory management associated with the order system
+
+  - Announcement management
+  
+    - Configurable display times
+
+    - User click statistics
+
+  - Image Hosting service
+  
+    - Auto watermarking
+
+    - Custom transformation
+
+      - Resizing & Croping
+
+      - Text with color and font
+
+    - Image compression
+
+    - Configurable image cache
 
 - More...
 
 ## Configuration
 
-MaintainMan has 4 configuration files now. All configuration files have independent version control.
+MaintainMan has 6 configuration files now. All configuration files have independent version control.
 
 When the maintainman detected a old version configuration file, it will automatically upgrade it (conflict field will be skipped).
 
@@ -64,7 +86,6 @@ App config is used to configure the database and various connection parameters a
 <summary>example</summary>
 
 ```yaml
-version: 1.2.1
 app:
   # application name.
   name: "maintainman"
@@ -81,39 +102,6 @@ app:
     # this number will be used when http request paramenter `limit`
     # is not specified or <= 0.
     default: 50
-
-  hit_expire:
-    # the duration that a user hit the same announcement will not
-    # be counted repeatedly.
-    announce: "12h"
-
-  appraise:
-    # the duration that a user can appraise the order after the
-    # order completed.
-    # the order will be appraised automatically after the duration.
-    timeout: "72h"
-    # the duration that the system will check the timeouted unappraised
-    # order.
-    purge: "10m"
-    # the default appraise score of timeouted unappraised order.
-    default: 5
-
-  # Whether item count can be negative.
-  # if false, an `item count is not enough` error may be returned on
-  # item consuming.
-  item_can_negative: true
-
-wechat:
-  # wechat appid.
-  appid: ""
-  # wechat secret.
-  secret: ""
-  # whether a unregistered user will be registered on wechat login.
-  # if false, reponse code will be `403` when a unregistered user try
-  # wechat login.
-  # if true, a unregistered user will be registered on wechat login.
-  # username will be open_id and user will be assigned a random password.
-  fastlogin: true
 
 token:
   # token secret.
@@ -142,6 +130,8 @@ storage:
   driver: "local"
   local:
     path: "./images"
+  # if s3 connection defined here, module config without s3 connection
+  # will use the connection defined here.
   s3:
     access_key: ""
     secret_key: ""
@@ -160,6 +150,30 @@ cache:
     port: 6379
     password: ""
 
+```
+
+</details>
+
+### user.yml
+
+User config is used to configure login and user management options.
+
+<details>
+<summary>example</summary>
+
+```yaml
+wechat:
+  # wechat appid.
+  appid: ""
+  # wechat secret.
+  secret: ""
+  # whether a unregistered user will be registered on wechat login.
+  # if false, reponse code will be `403` when a unregistered user try
+  # wechat login.
+  # if true, a unregistered user will be registered on wechat login.
+  # username will be open_id and user will be assigned a random password.
+  fastlogin: true
+
 # the admin user configuration.
 # only apply at first initialization.
 # IMPORTANT! you'd better change it to some strong password and delete
@@ -174,103 +188,6 @@ admin:
 
 </details>
 
-### permission.yml
-
-Permission config is used to configure all permissions and their corresponding names. It only affects the permission name display.
-No permission will be added or deleted if you change the config file.
-
-<details>
-<summary>example</summary>
-
-```yaml
-version: 1.2.0
-permission:
-  announce:
-    create: 创建公告
-    delete: 删除公告
-    hit: 点击公告
-    update: 更新公告
-    view: 查看公告
-    viewall: 查看所有公告
-  comment:
-    create: 创建评论
-    createall: 创建所有评论
-    delete: 删除评论
-    deleteall: 删除所有评论
-    view: 查看我的评论
-    viewall: 查看所有评论
-  division:
-    create: 创建分组
-    delete: 删除分组
-    update: 更新分组
-    viewall: 查看所有分组
-  image:
-    custom: 处理图片
-    upload: 上传图片
-    view: 查看图片
-  item:
-    consume: 消耗零件
-    create: 创建零件
-    delete: 删除零件
-    update: 更新零件
-    viewall: 查看所有零件
-  order:
-    appraise: 评分
-    assign: 分配订单
-    cancel: 取消订单
-    comment:
-      create: 创建评论
-      createall: 创建所有评论
-      delete: 删除评论
-      deleteall: 删除所有评论
-      view: 查看我的评论
-      viewall: 查看所有评论
-    complete: 完成订单
-    create: 创建订单
-    defect: 修改故障分类
-    hold: 挂起订单
-    reject: 拒绝订单
-    release: 释放订单
-    report: 上报订单
-    selfassign: 给自己分配订单
-    update: 更新订单
-    updateall: 更新所有订单
-    urgence: 修改紧急程度
-    view: 查看我的订单
-    viewall: 查看所有订单
-    viewfix: 查看我维修的订单
-  permission:
-    viewall: 查看所有权限
-  role:
-    create: 创建角色
-    delete: 删除角色
-    update: 更新角色
-    view: 查看当前角色
-    viewall: 查看所有角色
-  tag:
-    add: 添加标签
-    create: 创建标签
-    delete: 删除标签
-    view: 查看标签
-  user:
-    create: 创建用户
-    delete: 删除用户
-    division: 修改部门
-    login: 登录
-    register: 注册
-    renew: 更新Token
-    role: 修改角色
-    update: 更新用户
-    updateall: 更新所有用户
-    view: 查看当前用户
-    viewall: 查看所有用户
-    wxlogin: 微信登录
-    wxregister: 微信注册
-
-```
-
-</details>
-
 ### role.yml
 
 Role config is used to configure all roles and their corresponding permissions. Roles are ordered. Only buttom-up inheritance is valid (latter roles are superior).
@@ -279,8 +196,6 @@ Role config is used to configure all roles and their corresponding permissions. 
 <summary>example</summary>
 
 ```yaml
-version: 1.2.0
-
 role:
 
 - display_name: 封停用户
@@ -394,8 +309,8 @@ cache_as_jpeg: true
 save_as_jpeg: false
 
 upload:
-  # Upload request returns straight after image is processed by the
-  # server (saving might still fail)
+  # upload request returns straight after image is processed by the server.
+  # but saving might still fail.
   async: false
   # the max file size of image allowed to upload.
   max_file_size: 10485760 # 10 MB
@@ -426,12 +341,20 @@ storage:
   # storage type (local, s3).
   driver: local
   local:
-    path: ./images/cache
-    # whether the storage path will be cleaned up on server start.
-    clean: true
-  # s3 connection has been configured in app.yml
+    path: ./images
   s3:
-    bucket: BUCKET
+    # if access_key and secret_key are not set, s3 connection defined
+    # in app.yml will be used.
+    # access_key: ""
+    # secret_key: ""
+    # region: ""
+    bucket: "Image"
+  # image cache storage. sub path of main storage.
+  # e.g. if main storage is ./images, cache storage is ./images/cache,
+  cache:
+    # whether the storage path will be cleaned up on server start.
+    # recommended to be true if you are using local cache instead of redis.
+    clean: true
 
 transformations:
   # predefined transformations.
@@ -461,6 +384,53 @@ transformations:
       # embedded fonts.
       font:    fonts/SourceHanSans-Regular.ttf
       size:    14
+
+```
+
+</details>
+
+### announce.yml
+
+Announce config is used to configure announcement management.
+
+<details>
+<summary>example</summary>
+
+```yaml
+# the duration that a user hit the same announcement will not
+# be counted repeatedly.
+hit_expire: "12h"
+
+cache:
+  driver: "local"
+  limit: 268435456 # 256M
+
+```
+
+</details>
+
+### order.yml
+
+Order config is used to configure order management.
+
+<details>
+<summary>example</summary>
+
+```yaml
+# Whether item count can be negative.
+# if false, an `item count is not enough` error may be returned on
+# item consuming.
+item_can_negative: true
+
+appraise:
+  # the duration that a user can appraise the order after the
+  # order completed.
+  # the order will be appraised automatically after the duration.
+  timeout: "72h"
+  # the duration that the system will check the timeouted unappraised order.
+  purge: "10m"
+  # the default appraise score of timeouted unappraised order.
+  default: 5
 
 ```
 
