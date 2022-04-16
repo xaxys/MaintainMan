@@ -7,7 +7,7 @@ import (
 )
 
 var Module = module.Module{
-	ModuleName:    "permission",
+	ModuleName:    "role",
 	ModuleVersion: "1.2.0",
 	ModuleConfig:  roleConfig,
 	ModuleEnv:     map[string]any{},
