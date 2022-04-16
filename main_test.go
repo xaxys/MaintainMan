@@ -1802,78 +1802,78 @@ func TestHitAnnounceRouter(t *testing.T) {
 	t.Log(responseBody)
 }
 
-// func TestMultiHitAnnounceRouter(t *testing.T) {
-// 	app := newApp()
-// 	e := httptest.New(t, app)
-// 	superAdminToken := getSuperAdminToken()
+func TestMultiHitAnnounceRouter(t *testing.T) {
+	app := newApp()
+	e := httptest.New(t, app)
+	superAdminToken := getSuperAdminToken()
 
-// 	aids := []uint{}
-// 	for i := 0; i < 1000; i++ {
-// 		response := e.POST("/v1/announce").
-// 			WithHeader("Authorization", "Bearer "+superAdminToken).
-// 			WithJSON(announce.CreateAnnounceRequest{
-// 				Title:     util.RandomString(100),
-// 				Content:   util.RandomString(100),
-// 				StartTime: cast.ToInt64(time.Now().Unix()),
-// 				EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
-// 			}).Expect().Status(httptest.StatusCreated)
-// 		id := uint(response.JSON().Object().Value("data").Object().Value("id").NotNull().Raw().(float64))
-// 		aids = append(aids, uint(id))
-// 		if i%10 == 0 {
-// 			t.Log("create announce: ", i)
-// 		}
-// 	}
-// 	t.Log("create 1000 announces")
+	aids := []uint{}
+	for i := 0; i < 1000; i++ {
+		response := e.POST("/v1/announce").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(announce.CreateAnnounceRequest{
+				Title:     util.RandomString(100),
+				Content:   util.RandomString(100),
+				StartTime: cast.ToInt64(time.Now().Unix()),
+				EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+			}).Expect().Status(httptest.StatusCreated)
+		id := uint(response.JSON().Object().Value("data").Object().Value("id").NotNull().Raw().(float64))
+		aids = append(aids, uint(id))
+		if i%10 == 0 {
+			t.Log("create announce: ", i)
+		}
+	}
+	t.Log("create 1000 announces")
 
-// 	uids := []uint{}
-// 	users := generateRandomUsers("AnnounceHitTest", 25)
-// 	for i, user := range users {
-// 		response := e.POST("/v1/user").
-// 			WithHeader("Authorization", "Bearer "+superAdminToken).
-// 			WithJSON(user).Expect().Status(httptest.StatusCreated)
-// 		u := response.JSON().NotNull().Object().Value("data")
-// 		id := uint(u.Object().Value("id").NotNull().Raw().(float64))
-// 		uids = append(uids, id)
-// 		if i%10 == 0 {
-// 			t.Log("create user: ", i)
-// 		}
-// 	}
-// 	t.Log("create 25 users")
+	uids := []uint{}
+	users := generateRandomUsers("AnnounceHitTest", 25)
+	for i, user := range users {
+		response := e.POST("/v1/user").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(user).Expect().Status(httptest.StatusCreated)
+		u := response.JSON().NotNull().Object().Value("data")
+		id := uint(u.Object().Value("id").NotNull().Raw().(float64))
+		uids = append(uids, id)
+		if i%10 == 0 {
+			t.Log("create user: ", i)
+		}
+	}
+	t.Log("create 25 users")
 
-// 	for i, uid := range uids {
-// 		token, err := util.GetJwtString(uid, "", "user")
-// 		if err != nil {
-// 			t.Error(err)
-// 		}
-// 		for j, aid := range aids {
-// 			e.GET("/v1/announce/"+cast.ToString(aid)+"/hit").
-// 				WithHeader("Authorization", "Bearer "+token).
-// 				Expect().Status(http.StatusNoContent).Body().Raw()
+	for i, uid := range uids {
+		token, err := util.GetJwtString(uid, "", "user")
+		if err != nil {
+			t.Error(err)
+		}
+		for j, aid := range aids {
+			e.GET("/v1/announce/"+cast.ToString(aid)+"/hit").
+				WithHeader("Authorization", "Bearer "+token).
+				Expect().Status(http.StatusNoContent).Body().Raw()
 
-// 			if j%50 == 0 {
-// 				t.Logf("%d/%d", i, j)
-// 			}
-// 		}
-// 	}
-// 	t.Log("all users hit all announces")
+			if j%50 == 0 {
+				t.Logf("%d/%d", i, j)
+			}
+		}
+	}
+	t.Log("all users hit all announces")
 
-// 	for i, uid := range uids {
-// 		token, err := util.GetJwtString(uid, "", "user")
-// 		if err != nil {
-// 			t.Error(err)
-// 		}
-// 		for j, aid := range aids {
-// 			e.GET("/v1/announce/"+cast.ToString(aid)+"/hit").
-// 				WithHeader("Authorization", "Bearer "+token).
-// 				Expect().Status(http.StatusOK).Body().Raw()
+	for i, uid := range uids {
+		token, err := util.GetJwtString(uid, "", "user")
+		if err != nil {
+			t.Error(err)
+		}
+		for j, aid := range aids {
+			e.GET("/v1/announce/"+cast.ToString(aid)+"/hit").
+				WithHeader("Authorization", "Bearer "+token).
+				Expect().Status(http.StatusOK).Body().Raw()
 
-// 			if j%50 == 0 {
-// 				t.Logf("%d/%d", i, j)
-// 			}
-// 		}
-// 	}
-// 	t.Log("all users hit all announces again")
-// }
+			if j%50 == 0 {
+				t.Logf("%d/%d", i, j)
+			}
+		}
+	}
+	t.Log("all users hit all announces again")
+}
 
 // Test Utils
 func getSuperAdminToken() string {
