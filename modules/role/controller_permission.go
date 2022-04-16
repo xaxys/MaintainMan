@@ -13,7 +13,7 @@ import (
 // @Tags permission
 // @Produce  json
 // @Param name path string true "权限名"
-// @Success 200 {object} model.ApiJson{data=model.PermissionJson}
+// @Success 200 {object} model.ApiJson{data=rbac.PermissionJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -33,7 +33,7 @@ func getPermission(ctx iris.Context) {
 // @Description 获取所有权限信息 不分页
 // @Tags permission
 // @Produce  json
-// @Success 200 {object} model.ApiJson{data=[]model.PermissionJson}
+// @Success 200 {object} model.ApiJson{data=[]rbac.PermissionJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}

@@ -13,7 +13,7 @@ import (
 // @Tags division
 // @Produce  json
 // @Param id path uint true "分组ID"
-// @Success 200 {object} model.ApiJson{data=model.DivisionJson}
+// @Success 200 {object} model.ApiJson{data=DivisionJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -34,7 +34,7 @@ func getDivision(ctx iris.Context) {
 // @Tags division
 // @Produce  json
 // @Param id path uint true "父分组ID"
-// @Success 200 {object} model.ApiJson{data=[]model.DivisionJson}
+// @Success 200 {object} model.ApiJson{data=[]DivisionJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -55,8 +55,8 @@ func getDivisionsByParentID(ctx iris.Context) {
 // @Tags division
 // @Accept  json
 // @Produce  json
-// @Param body body model.CreateDivisionRequest true "创建分组请求"
-// @Success 201 {object} model.ApiJson{data=model.DivisionJson}
+// @Param body body CreateDivisionRequest true "创建分组请求"
+// @Success 201 {object} model.ApiJson{data=DivisionJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -81,8 +81,8 @@ func createDivision(ctx iris.Context) {
 // @Tags division
 // @Accept  json
 // @Produce  json
-// @Param body body model.UpdateDivisionRequest true "更新分组请求"
-// @Success 204 {object} model.ApiJson{data=model.DivisionJson}
+// @Param body body UpdateDivisionRequest true "更新分组请求"
+// @Success 204 {object} model.ApiJson{data=DivisionJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}

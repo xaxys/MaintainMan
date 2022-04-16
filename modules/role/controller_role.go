@@ -13,7 +13,7 @@ import (
 // @Description 获取当前用户角色信息
 // @Tags role
 // @Produce  json
-// @Success 200 {object} model.ApiJson{data=model.RoleJson}
+// @Success 200 {object} model.ApiJson{data=rbac.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -33,7 +33,7 @@ func getRole(ctx iris.Context) {
 // @Tags role
 // @Produce  json
 // @Param name path string true "角色名"
-// @Success 200 {object} model.ApiJson{data=model.RoleJson}
+// @Success 200 {object} model.ApiJson{data=rbac.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -54,8 +54,8 @@ func getRoleByName(ctx iris.Context) {
 // @Tags role
 // @Accept  json
 // @Produce  json
-// @Param body body model.rbac.CreateRoleRequest true "创建角色请求"
-// @Success 201 {object} model.ApiJson{data=model.RoleJson}
+// @Param body body rbac.CreateRoleRequest true "创建角色请求"
+// @Success 201 {object} model.ApiJson{data=rbac.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -81,7 +81,7 @@ func createRole(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param body body rbac.UpdateRoleRequest true "更新角色请求"
-// @Success 204 {object} model.ApiJson{data=model.RoleJson}
+// @Success 204 {object} model.ApiJson{data=rbac.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -108,7 +108,7 @@ func updateRole(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param name path string true "角色名"
-// @Success 204 {object} model.ApiJson{data=model.RoleJson}
+// @Success 204 {object} model.ApiJson{data=rbac.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -130,7 +130,7 @@ func setDefaultRole(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param name path string true "角色名"
-// @Success 204 {object} model.ApiJson{data=model.RoleJson}
+// @Success 204 {object} model.ApiJson{data=rbac.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -152,7 +152,7 @@ func setGuestRole(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param name path string true "角色名"
-// @Success 204 {object} model.ApiJson{data=model.RoleJson}
+// @Success 204 {object} model.ApiJson{data=rbac.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -172,7 +172,7 @@ func deleteRole(ctx iris.Context) {
 // @Description 获取所有角色 不分页
 // @Tags role
 // @Produce  json
-// @Success 200 {object} model.ApiJson{data=[]model.RoleJson}
+// @Success 200 {object} model.ApiJson{data=[]rbac.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}

@@ -111,7 +111,7 @@ func getAllUsers(ctx iris.Context) {
 // @Tags user
 // @Accept  json
 // @Produce  json
-// @Param body body model.LoginRequest true "登录信息"
+// @Param body body LoginRequest true "登录信息"
 // @Success 200 {object} model.ApiJson{data=string} "JWT Token"
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
@@ -137,7 +137,7 @@ func userLogin(ctx iris.Context) {
 // @Tags user
 // @Accept  json
 // @Produce  json
-// @Param body body model.WxLoginRequest true "登录信息"
+// @Param body body WxLoginRequest true "登录信息"
 // @Success 200 {object} model.ApiJson{data=string} "JWT Token"
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
@@ -163,7 +163,7 @@ func wxUserLogin(ctx iris.Context) {
 // @Tags user
 // @Accept  json
 // @Produce  json
-// @Param body body model.WxRegisterRequest true "登录信息"
+// @Param body body WxRegisterRequest true "登录信息"
 // @Success 200 {object} model.ApiJson{data=string} "JWT Token"
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
@@ -210,7 +210,7 @@ func userRenew(ctx iris.Context) {
 // @Tags user
 // @Accept  json
 // @Produce  json
-// @Param body body model.RegisterUserRequest true "注册信息"
+// @Param body body RegisterUserRequest true "注册信息"
 // @Success 201 {object} model.ApiJson{data=user.UserJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
@@ -236,8 +236,8 @@ func userRegister(ctx iris.Context) {
 // @Tags user
 // @Accept  json
 // @Produce  json
-// @Param body body user.CreateUserRequest true "创建信息"
-// @Success 201 {object} model.ApiJson{data=user.UserJson}
+// @Param body body CreateUserRequest true "创建信息"
+// @Success 201 {object} model.ApiJson{data=UserJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -262,8 +262,8 @@ func createUser(ctx iris.Context) {
 // @Tags user
 // @Accept  json
 // @Produce  json
-// @Param body body model.UpdateUserRequest true "更新信息"
-// @Success 204 {object} model.ApiJson{data=user.UserJson}
+// @Param body body UpdateUserRequest true "更新信息"
+// @Success 204 {object} model.ApiJson{data=UserJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -291,8 +291,8 @@ func updateUser(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "用户ID"
-// @Param body body model.UpdateUserRequest true "更新信息"
-// @Success 204 {object} model.ApiJson{data=user.UserJson}
+// @Param body body UpdateUserRequest true "更新信息"
+// @Success 204 {object} model.ApiJson{data=UserJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
@@ -319,7 +319,7 @@ func forceUpdateUser(ctx iris.Context) {
 // @Accept  json
 // @Produce  json
 // @Param id path string true "用户ID"
-// @Success 204 {object} model.ApiJson{data=model.RoleJson}
+// @Success 204 {object} model.ApiJson
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
 // @Failure 403 {object} model.ApiJson{data=[]string}
