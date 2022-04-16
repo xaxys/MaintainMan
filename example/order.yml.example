@@ -1,6 +1,14 @@
-appraise:
-  timeout: "72h"
-  purge: "10m"
-  default: 5
-
+# Whether item count can be negative.
+# if false, an `item count is not enough` error may be returned on
+# item consuming.
 item_can_negative: true
+
+appraise:
+  # the duration that a user can appraise the order after the
+  # order completed.
+  # the order will be appraised automatically after the duration.
+  timeout: "72h"
+  # the duration that the system will check the timeouted unappraised order.
+  purge: "10m"
+  # the default appraise score of timeouted unappraised order.
+  default: 5

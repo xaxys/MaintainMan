@@ -3,7 +3,6 @@ package user
 import (
 	"fmt"
 
-	"github.com/xaxys/maintainman/core/config"
 	"github.com/xaxys/maintainman/core/logger"
 )
 
@@ -13,10 +12,10 @@ func initDefaultData() {
 
 func createSystemAdmin() {
 	aul := &CreateUserRequest{}
-	aul.Name = config.AppConfig.GetString("admin.name")
-	aul.DisplayName = config.AppConfig.GetString("admin.display_name")
-	aul.Password = config.AppConfig.GetString("admin.password")
-	aul.RoleName = config.AppConfig.GetString("admin.role_name")
+	aul.Name = userConfig.GetString("admin.name")
+	aul.DisplayName = userConfig.GetString("admin.display_name")
+	aul.Password = userConfig.GetString("admin.password")
+	aul.RoleName = userConfig.GetString("admin.role_name")
 
 	count, err := dbGetUserCount()
 	if err != nil {

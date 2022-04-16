@@ -1,3 +1,5 @@
+# the duration that a user hit the same announcement will not
+# be counted repeatedly.
 hit_expire: "12h"
 
 cache:

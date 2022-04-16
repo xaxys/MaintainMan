@@ -1,0 +1,21 @@
+wechat:
+  # wechat appid.
+  appid: ""
+  # wechat secret.
+  secret: ""
+  # whether a unregistered user will be registered on wechat login.
+  # if false, reponse code will be `403` when a unregistered user try
+  # wechat login.
+  # if true, a unregistered user will be registered on wechat login.
+  # username will be open_id and user will be assigned a random password.
+  fastlogin: true
+
+# the admin user configuration.
+# only apply at first initialization.
+# IMPORTANT! you'd better change it to some strong password and delete
+# belowing entries after the first initialization.
+admin:
+  name: "admin"
+  display_name: "maintainman default admin"
+  role_name: "super_admin"
+  password: "12345678"

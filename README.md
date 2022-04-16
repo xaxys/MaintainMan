@@ -86,7 +86,6 @@ App config is used to configure the database and various connection parameters a
 <summary>example</summary>
 
 ```yaml
-version: 1.2.2
 app:
   # application name.
   name: "maintainman"
@@ -103,18 +102,6 @@ app:
     # this number will be used when http request paramenter `limit`
     # is not specified or <= 0.
     default: 50
-
-wechat:
-  # wechat appid.
-  appid: ""
-  # wechat secret.
-  secret: ""
-  # whether a unregistered user will be registered on wechat login.
-  # if false, reponse code will be `403` when a unregistered user try
-  # wechat login.
-  # if true, a unregistered user will be registered on wechat login.
-  # username will be open_id and user will be assigned a random password.
-  fastlogin: true
 
 token:
   # token secret.
@@ -163,6 +150,30 @@ cache:
     port: 6379
     password: ""
 
+```
+
+</details>
+
+### user.yml
+
+User config is used to configure login and user management options.
+
+<details>
+<summary>example</summary>
+
+```yaml
+wechat:
+  # wechat appid.
+  appid: ""
+  # wechat secret.
+  secret: ""
+  # whether a unregistered user will be registered on wechat login.
+  # if false, reponse code will be `403` when a unregistered user try
+  # wechat login.
+  # if true, a unregistered user will be registered on wechat login.
+  # username will be open_id and user will be assigned a random password.
+  fastlogin: true
+
 # the admin user configuration.
 # only apply at first initialization.
 # IMPORTANT! you'd better change it to some strong password and delete
@@ -177,103 +188,6 @@ admin:
 
 </details>
 
-### permission.yml
-
-Permission config is used to configure all permissions and their corresponding names. It only affects the permission name display.
-No permission will be added or deleted if you change the config file.
-
-<details>
-<summary>example</summary>
-
-```yaml
-version: 1.2.0
-permission:
-  announce:
-    create: 创建公告
-    delete: 删除公告
-    hit: 点击公告
-    update: 更新公告
-    view: 查看公告
-    viewall: 查看所有公告
-  comment:
-    create: 创建评论
-    createall: 创建所有评论
-    delete: 删除评论
-    deleteall: 删除所有评论
-    view: 查看我的评论
-    viewall: 查看所有评论
-  division:
-    create: 创建分组
-    delete: 删除分组
-    update: 更新分组
-    viewall: 查看所有分组
-  image:
-    custom: 处理图片
-    upload: 上传图片
-    view: 查看图片
-  item:
-    consume: 消耗零件
-    create: 创建零件
-    delete: 删除零件
-    update: 更新零件
-    viewall: 查看所有零件
-  order:
-    appraise: 评分
-    assign: 分配订单
-    cancel: 取消订单
-    comment:
-      create: 创建评论
-      createall: 创建所有评论
-      delete: 删除评论
-      deleteall: 删除所有评论
-      view: 查看我的评论
-      viewall: 查看所有评论
-    complete: 完成订单
-    create: 创建订单
-    defect: 修改故障分类
-    hold: 挂起订单
-    reject: 拒绝订单
-    release: 释放订单
-    report: 上报订单
-    selfassign: 给自己分配订单
-    update: 更新订单
-    updateall: 更新所有订单
-    urgence: 修改紧急程度
-    view: 查看我的订单
-    viewall: 查看所有订单
-    viewfix: 查看我维修的订单
-  permission:
-    viewall: 查看所有权限
-  role:
-    create: 创建角色
-    delete: 删除角色
-    update: 更新角色
-    view: 查看当前角色
-    viewall: 查看所有角色
-  tag:
-    add: 添加标签
-    create: 创建标签
-    delete: 删除标签
-    view: 查看标签
-  user:
-    create: 创建用户
-    delete: 删除用户
-    division: 修改部门
-    login: 登录
-    register: 注册
-    renew: 更新Token
-    role: 修改角色
-    update: 更新用户
-    updateall: 更新所有用户
-    view: 查看当前用户
-    viewall: 查看所有用户
-    wxlogin: 微信登录
-    wxregister: 微信注册
-
-```
-
-</details>
-
 ### role.yml
 
 Role config is used to configure all roles and their corresponding permissions. Roles are ordered. Only buttom-up inheritance is valid (latter roles are superior).
@@ -282,8 +196,6 @@ Role config is used to configure all roles and their corresponding permissions. 
 <summary>example</summary>
 
 ```yaml
-version: 1.2.0
-
 role:
 
 - display_name: 封停用户

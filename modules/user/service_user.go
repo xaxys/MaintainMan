@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/xaxys/maintainman/core/config"
 	"github.com/xaxys/maintainman/core/model"
 	"github.com/xaxys/maintainman/core/rbac"
 	"github.com/xaxys/maintainman/core/util"
@@ -150,8 +149,8 @@ func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *m
 	}
 	const wxURL = "https://api.weixin.qq.com/sns/jscode2session"
 	params := map[string]string{
-		"appid":      config.AppConfig.GetString("wechat.appid"),
-		"secret":     config.AppConfig.GetString("wechat.secret"),
+		"appid":      userConfig.GetString("wechat.appid"),
+		"secret":     userConfig.GetString("wechat.secret"),
 		"js_code":    aul.Code,
 		"grant_type": "authorization_code",
 	}
@@ -177,7 +176,7 @@ func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *m
 				return model.ErrorUpdateDatabase(err)
 			}
 			id = auth.User
-		} else if config.AppConfig.GetBool("wechat.fastlogin") {
+		} else if userConfig.GetBool("wechat.fastlogin") {
 			// If not login, create a new user
 			aul := &CreateUserRequest{
 				RegisterUserRequest: RegisterUserRequest{
@@ -228,8 +227,8 @@ func wxUserRegisterService(aul *WxRegisterRequest, ip string, auth *model.AuthIn
 	}
 	const wxURL = "https://api.weixin.qq.com/sns/jscode2session"
 	params := map[string]string{
-		"appid":      config.AppConfig.GetString("wechat.appid"),
-		"secret":     config.AppConfig.GetString("wechat.secret"),
+		"appid":      userConfig.GetString("wechat.appid"),
+		"secret":     userConfig.GetString("wechat.secret"),
 		"js_code":    aul.Code,
 		"grant_type": "authorization_code",
 	}
