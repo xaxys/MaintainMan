@@ -27,12 +27,12 @@ func entry(mctx *module.ModuleContext) {
 }
 
 // getSysInfo godoc
-// @Summary 获取系统信息
-// @Description 获取Go Runtime信息
-// @Tags sysinfo
-// @Produce json
-// @Success 200 {object} RuntimeStatus
-// @Router /v1/sysinfo [get]
+// @Summary      获取系统信息
+// @Description  获取Go Runtime信息
+// @Tags         sysinfo
+// @Produce      json
+// @Success      200  {object}  RuntimeStatus
+// @Router       /v1/sysinfo [get]
 func getSysInfo(ctx iris.Context) {
 	response := model.Success(newStatus(), "")
 	ctx.Values().Set("response", response)
