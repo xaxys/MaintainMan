@@ -1,4 +1,4 @@
-package util
+package rbac
 
 import (
 	"strconv"
@@ -9,7 +9,7 @@ type PermSet struct {
 	data map[string]interface{}
 }
 
-func NewPermSet() *PermSet {
+func newPermSet() *PermSet {
 	return &PermSet{
 		data: make(map[string]interface{}),
 	}

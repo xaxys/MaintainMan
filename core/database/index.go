@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/xaxys/maintainman/core/config"
-	"github.com/xaxys/maintainman/core/model"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
@@ -25,10 +24,6 @@ func init() {
 	default:
 		panic(fmt.Errorf("support mysql and sqlite only"))
 	}
-	SyncModel(
-		&model.User{},
-		&model.Division{},
-	)
 }
 
 func initSqlite() *gorm.DB {

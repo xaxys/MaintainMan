@@ -9,9 +9,10 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 
-	"github.com/xaxys/maintainman/core/dao"
 	"github.com/xaxys/maintainman/core/model"
+	"github.com/xaxys/maintainman/core/rbac"
 	"github.com/xaxys/maintainman/core/util"
+	"github.com/xaxys/maintainman/modules/user"
 
 	"github.com/google/uuid"
 )
@@ -26,7 +27,7 @@ func getImageService(id, param string, auth *model.AuthInfo) *imageResponse {
 	// parse param to transformation
 	trans, ok := getTransformation(param)
 	if !ok {
-		if err := dao.CheckPermission(auth.Role, "image.custom"); err != nil {
+		if err := rbac.CheckPermission(auth.Role, "image.custom"); err != nil {
 			return &imageResponse{ApiRes: model.ErrorNoPermissions(err)}
 		}
 		transParam, err := parseParameters(param)
@@ -58,7 +59,7 @@ func getImageService(id, param string, auth *model.AuthInfo) *imageResponse {
 	// do transformation
 	if trans != nil && !cached {
 		uid := parseUUID(id)
-		user, err := dao.GetUserByID(uid)
+		user, err := user.GetUserByID(uid)
 		newAuth := model.AuthInfo{User: uid}
 		if err != nil {
 			mctx.Logger.Warn(err)

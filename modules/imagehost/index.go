@@ -1,8 +1,8 @@
 package imagehost
 
 import (
-	"github.com/xaxys/maintainman/core/middleware"
-	"github.com/xaxys/maintainman/module"
+	"github.com/xaxys/maintainman/core/module"
+	"github.com/xaxys/maintainman/core/rbac"
 
 	"github.com/kataras/iris/v12"
 )
@@ -15,7 +15,12 @@ var Module = module.Module{
 		"cache.evict": onEvict,
 	},
 	ModuleExport: map[string]any{},
-	EntryPoint:   entry,
+	ModulePerm: map[string]string{
+		"image.upload": "上传图片",
+		"image.view":   "查看图片",
+		"image.custom": "处理图片",
+	},
+	EntryPoint: entry,
 }
 
 var mctx *module.ModuleContext
@@ -24,8 +29,8 @@ func entry(ctx *module.ModuleContext) {
 	mctx = ctx
 	initLimiter()
 	ctx.Route.PartyFunc("/image", func(image iris.Party) {
-		image.Post("/", middleware.PermInterceptor("image.upload"), rateLimiter, uploadImage)
-		image.Get("/{id:uuid}", middleware.PermInterceptor("image.view"), getImage)
+		image.Post("/", rbac.PermInterceptor("image.upload"), rateLimiter, uploadImage)
+		image.Get("/{id:uuid}", rbac.PermInterceptor("image.view"), getImage)
 	})
 
 	transformationPO = newTransformationPersistence(imageConfig)

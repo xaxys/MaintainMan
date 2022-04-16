@@ -1,25 +1,15 @@
-package config
+package role
 
 import (
 	"github.com/spf13/viper"
 )
 
-const RoleConfigVersion = "1.2.0"
-
 var (
-	RoleConfig *viper.Viper
+	roleConfig = viper.New()
 )
 
 func init() {
-	RoleConfig = viper.New()
-	RoleConfig.SetConfigName("role")
-	RoleConfig.SetConfigType("yaml")
-	RoleConfig.AddConfigPath(".")
-	RoleConfig.AddConfigPath("./config")
-	RoleConfig.AddConfigPath("/etc/maintainman/")
-	RoleConfig.AddConfigPath("$HOME/.maintainman/")
-
-	RoleConfig.SetDefault("role", []any{
+	roleConfig.SetDefault("role", []any{
 		map[string]any{
 			"name":         "banned",
 			"display_name": "封停用户",
@@ -121,6 +111,4 @@ func init() {
 			},
 		},
 	})
-
-	ReadAndUpdateConfig(RoleConfig, "role", RoleConfigVersion)
 }

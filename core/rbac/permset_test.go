@@ -1,4 +1,4 @@
-package util
+package rbac
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 
 func TestPermissionSet(t *testing.T) {
 	perms := []string{"admin.*", "user.update", "tag.view.2"}
-	s := NewPermSet().Add(perms...)
+	s := newPermSet().Add(perms...)
 	if !s.Has("admin.whatever") {
 		t.Error("admin.whatever should be true")
 	}

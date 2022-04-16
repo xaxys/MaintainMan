@@ -1,90 +1,88 @@
-package service
+package user
 
 import (
 	"errors"
 	"fmt"
 
 	"github.com/xaxys/maintainman/core/config"
-	"github.com/xaxys/maintainman/core/dao"
-	"github.com/xaxys/maintainman/core/database"
-	"github.com/xaxys/maintainman/core/logger"
 	"github.com/xaxys/maintainman/core/model"
+	"github.com/xaxys/maintainman/core/rbac"
 	"github.com/xaxys/maintainman/core/util"
 
 	"gorm.io/gorm"
 )
 
-func GetUserByID(id uint, auth *model.AuthInfo) *model.ApiJson {
-	user, err := dao.GetUserByID(id)
+func getUserByIDService(id uint, auth *model.AuthInfo) *model.ApiJson {
+	user, err := dbGetUserByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorQueryDatabase(err)
 	}
-	return model.Success(UserToJson(user), "获取成功")
+	return model.Success(userToJson(user), "获取成功")
 }
 
-func GetUserInfoByID(id uint, auth *model.AuthInfo) *model.ApiJson {
-	user, err := dao.GetUserByID(id)
+func getUserInfoByIDService(id uint, auth *model.AuthInfo) *model.ApiJson {
+	user, err := dbGetUserByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorQueryDatabase(err)
 	}
-	json := UserToJson(user)
-	json.Role = dao.GetRole(user.RoleName)
+	json := userToJson(user)
+	json.Role = rbac.GetRole(user.RoleName)
 	return model.Success(json, "获取成功")
 }
 
-func GetUserByName(name string, auth *model.AuthInfo) *model.ApiJson {
-	user, err := dao.GetUserByName(name)
+func getUserByNameService(name string, auth *model.AuthInfo) *model.ApiJson {
+	user, err := dbGetUserByName(name)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorQueryDatabase(err)
 	}
-	return model.Success(UserToJson(user), "获取成功")
+	return model.Success(userToJson(user), "获取成功")
 }
 
-func GetUserInfoByName(name string, auth *model.AuthInfo) *model.ApiJson {
-	user, err := dao.GetUserByName(name)
+func getUserInfoByNameService(name string, auth *model.AuthInfo) *model.ApiJson {
+	user, err := dbGetUserByName(name)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorQueryDatabase(err)
 	}
-	json := UserToJson(user)
-	json.Role = dao.GetRole(user.RoleName)
+	json := userToJson(user)
+	json.Role = rbac.GetRole(user.RoleName)
 	return model.Success(json, "获取成功")
 }
 
-func GetUsersByDivision(id uint, param *model.PageParam, auth *model.AuthInfo) *model.ApiJson {
+func getUsersByDivisionService(id uint, param *model.PageParam, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(param); err != nil {
 		return model.ErrorValidation(err)
 	}
-	users, count, err := dao.GetUsersByDivision(id, param)
+	users, count, err := dbGetUsersByDivision(id, param)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorQueryDatabase(err)
 	}
-	us := util.TransSlice(users, UserToJson)
+	us := util.TransSlice(users, userToJson)
 	return model.SuccessPaged(us, count, "获取成功")
 }
 
-func RegisterUser(aul *model.RegisterUserRequest, auth *model.AuthInfo) *model.ApiJson {
-	req := &model.CreateUserRequest{
+func registerUserService(aul *RegisterUserRequest, auth *model.AuthInfo) *model.ApiJson {
+	req := &CreateUserRequest{
 		RegisterUserRequest: *aul,
 	}
-	return CreateUser(req, auth)
+	return createUserService(req, auth)
 }
 
-func CreateUser(aul *model.CreateUserRequest, auth *model.AuthInfo) *model.ApiJson {
+func createUserService(aul *CreateUserRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
@@ -92,37 +90,37 @@ func CreateUser(aul *model.CreateUserRequest, auth *model.AuthInfo) *model.ApiJs
 		return model.ErrorValidation(fmt.Errorf("用户名不能为邮箱或手机号"))
 	}
 	operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
-	u, err := dao.CreateUser(aul, operator)
+	u, err := dbCreateUser(aul, operator)
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 	}
-	return model.SuccessCreate(UserToJson(u), "创建成功")
+	return model.SuccessCreate(userToJson(u), "创建成功")
 
 }
 
-func UpdateUser(id uint, aul *model.UpdateUserRequest, auth *model.AuthInfo) *model.ApiJson {
+func updateUserService(id uint, aul *UpdateUserRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	_, err := dao.GetUserByID(id)
+	_, err := dbGetUserByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorQueryDatabase(err)
 	}
-	u, err := dao.UpdateUser(id, aul, auth.User)
+	u, err := dbUpdateUser(id, aul, auth.User)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorUpdateDatabase(err)
 	}
-	return model.SuccessUpdate(UserToJson(u), "更新成功")
+	return model.SuccessUpdate(userToJson(u), "更新成功")
 }
 
-func DeleteUser(id uint, auth *model.AuthInfo) *model.ApiJson {
-	if err := dao.DeleteUser(id); err != nil {
+func deleteUserService(id uint, auth *model.AuthInfo) *model.ApiJson {
+	if err := dbDeleteUser(id); err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
 		}
@@ -131,22 +129,22 @@ func DeleteUser(id uint, auth *model.AuthInfo) *model.ApiJson {
 	return model.SuccessUpdate(nil, "删除成功")
 }
 
-func GetAllUsers(aul *model.AllUserRequest, auth *model.AuthInfo) *model.ApiJson {
+func getAllUsersService(aul *AllUserRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	users, count, err := dao.GetAllUsersWithParam(aul)
+	users, count, err := dbGetAllUsersWithParam(aul)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorQueryDatabase(err)
 	}
-	us := util.TransSlice(users, UserToJson)
+	us := util.TransSlice(users, userToJson)
 	return model.SuccessPaged(us, count, "获取成功")
 }
 
-func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *model.ApiJson {
+func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
@@ -157,9 +155,9 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 		"js_code":    aul.Code,
 		"grant_type": "authorization_code",
 	}
-	wxres, err := util.HTTPRequest[model.WxLoginResponse](wxURL, "GET", params)
+	wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
 	if err != nil {
-		logger.Logger.Debugf("wx login error: %+v", err)
+		mctx.Logger.Debugf("wx login error: %+v", err)
 		return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
 	}
 	if wxres.ErrCode != 0 {
@@ -167,7 +165,7 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 	}
 
 	id := uint(0)
-	user, err := dao.GetUserByOpenID(wxres.OpenID)
+	user, err := dbGetUserByOpenID(wxres.OpenID)
 	if err != nil {
 		// If user related to openid not found, attach openid to current user OR create a new one
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -175,27 +173,27 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 		}
 		if auth != nil {
 			// If already login, attach openid to current user
-			if err := dao.AttachOpenIDToUser(auth.User, wxres.OpenID); err != nil {
+			if err := dbAttachOpenIDToUser(auth.User, wxres.OpenID); err != nil {
 				return model.ErrorUpdateDatabase(err)
 			}
 			id = auth.User
 		} else if config.AppConfig.GetBool("wechat.fastlogin") {
 			// If not login, create a new user
-			aul := &model.CreateUserRequest{
-				RegisterUserRequest: model.RegisterUserRequest{
+			aul := &CreateUserRequest{
+				RegisterUserRequest: RegisterUserRequest{
 					Name:     wxres.OpenID,
 					Password: util.RandomString(32),
 				},
 			}
 			operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
 			var response *model.ApiJson
-			if database.DB.Transaction(func(tx *gorm.DB) error {
-				user, err = dao.CreateUser(aul, operator)
+			if mctx.Database.Transaction(func(tx *gorm.DB) error {
+				user, err = dbCreateUser(aul, operator)
 				if err != nil {
 					response = model.ErrorInsertDatabase(err)
 					return err
 				}
-				if err := dao.AttachOpenIDToUser(user.ID, wxres.OpenID); err != nil {
+				if err := dbAttachOpenIDToUser(user.ID, wxres.OpenID); err != nil {
 					response = model.ErrorUpdateDatabase(err)
 					return err
 				}
@@ -211,7 +209,7 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 		id = user.ID
 	}
 
-	if err := dao.ForceLogin(id, ip); err != nil {
+	if err := dbForceLogin(id, ip); err != nil {
 		return model.ErrorUpdateDatabase(fmt.Errorf("登录失败"))
 	}
 	token, err := util.GetJwtString(id, user.Name, user.RoleName)
@@ -221,7 +219,7 @@ func WxUserLogin(aul *model.WxLoginRequest, ip string, auth *model.AuthInfo) *mo
 	return model.Success(token, "登陆成功")
 }
 
-func WxUserRegister(aul *model.WxRegisterRequest, ip string, auth *model.AuthInfo) *model.ApiJson {
+func wxUserRegisterService(aul *WxRegisterRequest, ip string, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
@@ -235,28 +233,28 @@ func WxUserRegister(aul *model.WxRegisterRequest, ip string, auth *model.AuthInf
 		"js_code":    aul.Code,
 		"grant_type": "authorization_code",
 	}
-	wxres, err := util.HTTPRequest[model.WxLoginResponse](wxURL, "GET", params)
+	wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
 	if err != nil {
-		logger.Logger.Debugf("wx login error: %+v", err)
+		mctx.Logger.Debugf("wx login error: %+v", err)
 		return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
 	}
 	if wxres.ErrCode != 0 {
 		return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
 	}
 
-	req := &model.CreateUserRequest{
+	req := &CreateUserRequest{
 		RegisterUserRequest: aul.RegisterUserRequest,
 	}
 	operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
 	var response *model.ApiJson
-	var user *model.User
-	if database.DB.Transaction(func(tx *gorm.DB) error {
-		user, err = dao.CreateUser(req, operator)
+	var user *User
+	if mctx.Database.Transaction(func(tx *gorm.DB) error {
+		user, err = dbCreateUser(req, operator)
 		if err != nil {
 			response = model.ErrorInsertDatabase(err)
 			return err
 		}
-		if err := dao.AttachOpenIDToUser(user.ID, wxres.OpenID); err != nil {
+		if err := dbAttachOpenIDToUser(user.ID, wxres.OpenID); err != nil {
 			response = model.ErrorUpdateDatabase(err)
 			return err
 		}
@@ -265,7 +263,7 @@ func WxUserRegister(aul *model.WxRegisterRequest, ip string, auth *model.AuthInf
 		return response
 	}
 
-	if err := dao.ForceLogin(user.ID, ip); err != nil {
+	if err := dbForceLogin(user.ID, ip); err != nil {
 		return model.ErrorUpdateDatabase(fmt.Errorf("登录失败"))
 	}
 	token, err := util.GetJwtString(user.ID, user.Name, user.RoleName)
@@ -275,31 +273,31 @@ func WxUserRegister(aul *model.WxRegisterRequest, ip string, auth *model.AuthInf
 	return model.Success(token, "登陆成功")
 }
 
-func UserLogin(aul *model.LoginRequest, ip string, auth *model.AuthInfo) *model.ApiJson {
-	var user *model.User
+func userLoginService(aul *LoginRequest, ip string, auth *model.AuthInfo) *model.ApiJson {
+	var user *User
 	var err error
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
 	if util.EmailRegex.MatchString(aul.Account) {
-		user, err = dao.GetUserByEmail(aul.Account)
+		user, err = dbGetUserByEmail(aul.Account)
 		if err != nil {
 			return model.ErrorNotFound(fmt.Errorf("邮箱不存在"))
 		}
 	} else if util.PhoneRegex.MatchString(aul.Account) {
-		user, err = dao.GetUserByPhone(aul.Account)
+		user, err = dbGetUserByPhone(aul.Account)
 		if err != nil {
 			return model.ErrorNotFound(fmt.Errorf("手机号不存在"))
 		}
 	} else {
-		user, err = dao.GetUserByName(aul.Account)
+		user, err = dbGetUserByName(aul.Account)
 		if err != nil {
 			return model.ErrorNotFound(fmt.Errorf("用户名不存在"))
 		}
 	}
 
 	user.LoginIP = ip
-	if err := dao.CheckLogin(user, aul.Password); err != nil {
+	if err := dbCheckLogin(user, aul.Password); err != nil {
 		return model.ErrorVerification(fmt.Errorf("密码错误"))
 	}
 	token, err := util.GetJwtString(user.ID, user.Name, user.RoleName)
@@ -309,15 +307,15 @@ func UserLogin(aul *model.LoginRequest, ip string, auth *model.AuthInfo) *model.
 	return model.Success(token, "登陆成功")
 }
 
-func UserRenew(id uint, ip string, auth *model.AuthInfo) *model.ApiJson {
-	user, err := dao.GetUserByID(id)
+func userRenewService(id uint, ip string, auth *model.AuthInfo) *model.ApiJson {
+	user, err := dbGetUserByID(id)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorNotFound(err)
 		}
 		return model.ErrorQueryDatabase(err)
 	}
-	if err := dao.ForceLogin(id, ip); err != nil {
+	if err := dbForceLogin(id, ip); err != nil {
 		return model.ErrorUpdateDatabase(fmt.Errorf("登录失败"))
 	}
 	token, err := util.GetJwtString(id, user.Name, user.RoleName)
@@ -327,16 +325,16 @@ func UserRenew(id uint, ip string, auth *model.AuthInfo) *model.ApiJson {
 	return model.Success(token, "登陆成功")
 }
 
-func UserToJson(user *model.User) *model.UserJson {
+func userToJson(user *User) *UserJson {
 	if user == nil {
 		return nil
 	} else {
-		return &model.UserJson{
+		return &UserJson{
 			ID:          user.ID,
 			Name:        user.Name,
 			DisplayName: user.DisplayName,
 			RoleName:    user.RoleName,
-			Division:    DivisionToJson(user.Division),
+			Division:    divisionToJson(user.Division),
 			Phone:       user.Phone,
 			Email:       user.Email,
 			RealName:    user.RealName,

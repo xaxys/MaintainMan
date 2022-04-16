@@ -1,87 +1,87 @@
-package service
+package role
 
 import (
 	"fmt"
 
-	"github.com/xaxys/maintainman/core/dao"
 	"github.com/xaxys/maintainman/core/model"
+	"github.com/xaxys/maintainman/core/rbac"
 	"github.com/xaxys/maintainman/core/util"
 )
 
-func GetRoleByName(name string, auth *model.AuthInfo) *model.ApiJson {
-	role := dao.GetRole(name)
+func getRoleByNameService(name string, auth *model.AuthInfo) *model.ApiJson {
+	role := rbac.GetRole(name)
 	return model.Success(role, "获取成功")
 }
 
-func CreateRole(aul *model.CreateRoleRequest, auth *model.AuthInfo) *model.ApiJson {
+func createRoleService(aul *rbac.CreateRoleRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	if dao.GetRole(aul.Name) != nil {
+	if rbac.GetRole(aul.Name) != nil {
 		return model.ErrorInsertDatabase(fmt.Errorf("Role %s already exists", aul.Name))
 	}
 	if aul.DisplayName != "" {
 		aul.DisplayName = aul.Name
 	}
-	err := dao.CreateRole(aul)
+	err := rbac.CreateRole(aul)
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 	}
-	role := dao.GetRole(aul.Name)
+	role := rbac.GetRole(aul.Name)
 	return model.SuccessCreate(role, "创建成功")
 
 }
 
-func UpdateRole(name string, aul *model.UpdateRoleRequest, auth *model.AuthInfo) *model.ApiJson {
+func updateRoleService(name string, aul *rbac.UpdateRoleRequest, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	if dao.GetRole(name) != nil {
+	if rbac.GetRole(name) != nil {
 		return model.ErrorUpdateDatabase(fmt.Errorf("Role %s already exists", name))
 	}
 
-	err := dao.UpdateRole(name, aul)
+	err := rbac.UpdateRole(name, aul)
 	if err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
-	role := dao.GetRole(name)
+	role := rbac.GetRole(name)
 	return model.SuccessUpdate(role, "更新成功")
 }
 
-func DeleteRole(name string, auth *model.AuthInfo) *model.ApiJson {
-	if dao.GetRole(name) == nil {
+func deleteRoleService(name string, auth *model.AuthInfo) *model.ApiJson {
+	if rbac.GetRole(name) == nil {
 		return model.ErrorNotFound(fmt.Errorf("Role %s not found", name))
 	}
-	err := dao.DeleteRole(name)
+	err := rbac.DeleteRole(name)
 	if err != nil {
 		return model.ErrorDeleteDatabase(err)
 	}
 	return model.SuccessUpdate(nil, "删除成功")
 }
 
-func SetDefaultRole(name string, auth *model.AuthInfo) *model.ApiJson {
-	if dao.GetRole(name) == nil {
+func setDefaultRoleService(name string, auth *model.AuthInfo) *model.ApiJson {
+	if rbac.GetRole(name) == nil {
 		return model.ErrorNotFound(fmt.Errorf("Role %s not found", name))
 	}
-	err := dao.SetDefaultRole(name)
+	err := rbac.SetDefaultRole(name)
 	if err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
 	return model.SuccessUpdate(nil, "操作成功")
 }
 
-func SetGuestRole(name string, auth *model.AuthInfo) *model.ApiJson {
-	if dao.GetRole(name) == nil {
+func setGuestRoleService(name string, auth *model.AuthInfo) *model.ApiJson {
+	if rbac.GetRole(name) == nil {
 		return model.ErrorNotFound(fmt.Errorf("Role %s not found", name))
 	}
-	err := dao.SetGuestRole(name)
+	err := rbac.SetGuestRole(name)
 	if err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
 	return model.SuccessUpdate(nil, "操作成功")
 }
 
-func GetAllRoles(auth *model.AuthInfo) *model.ApiJson {
-	roles := dao.GetAllRoles()
+func getAllRolesService(auth *model.AuthInfo) *model.ApiJson {
+	roles := rbac.GetAllRoles()
 	return model.Success(roles, "操作成功")
 }

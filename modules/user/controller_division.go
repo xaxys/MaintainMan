@@ -1,14 +1,13 @@
-package controller
+package user
 
 import (
 	"github.com/xaxys/maintainman/core/model"
-	"github.com/xaxys/maintainman/core/service"
 	"github.com/xaxys/maintainman/core/util"
 
 	"github.com/kataras/iris/v12"
 )
 
-// GetDivision godoc
+// getDivision godoc
 // @Summary 获取某分组信息
 // @Description 通过ID获取某分组信息
 // @Tags division
@@ -22,14 +21,14 @@ import (
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/division/{id} [get]
-func GetDivision(ctx iris.Context) {
+func getDivision(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.GetDivision(id, auth)
+	response := getDivisionService(id, auth)
 	ctx.Values().Set("response", response)
 }
 
-// GetDivisionsByParentID godoc
+// getDivisionsByParentID godoc
 // @Summary 获取某分组下的子分组
 // @Description 通过父分组ID获取某分组下的子分组
 // @Tags division
@@ -43,14 +42,14 @@ func GetDivision(ctx iris.Context) {
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/division/{id}/children [get]
-func GetDivisionsByParentID(ctx iris.Context) {
+func getDivisionsByParentID(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.GetDivisionsByParentID(id, auth)
+	response := getDivisionsByParentIDService(id, auth)
 	ctx.Values().Set("response", response)
 }
 
-// CreateDivision godoc
+// createDivision godoc
 // @Summary 创建分组
 // @Description 创建分组
 // @Tags division
@@ -65,18 +64,18 @@ func GetDivisionsByParentID(ctx iris.Context) {
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/division [post]
-func CreateDivision(ctx iris.Context) {
-	aul := &model.CreateDivisionRequest{}
+func createDivision(ctx iris.Context) {
+	aul := &CreateDivisionRequest{}
 	if err := ctx.ReadJSON(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.CreateDivision(aul, auth)
+	response := createDivisionService(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
-// UpdateDivision godoc
+// updateDivision godoc
 // @Summary 更新分组
 // @Description 更新分组
 // @Tags division
@@ -91,19 +90,19 @@ func CreateDivision(ctx iris.Context) {
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/division/{id} [put]
-func UpdateDivision(ctx iris.Context) {
-	aul := &model.UpdateDivisionRequest{}
+func updateDivision(ctx iris.Context) {
+	aul := &UpdateDivisionRequest{}
 	if err := ctx.ReadJSON(aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.UpdateDivision(id, aul, auth)
+	response := updateDivisionService(id, aul, auth)
 	ctx.Values().Set("response", response)
 }
 
-// DeleteDivision godoc
+// deleteDivision godoc
 // @Summary 删除分组
 // @Description 删除分组
 // @Tags division
@@ -118,9 +117,9 @@ func UpdateDivision(ctx iris.Context) {
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/division/{id} [delete]
-func DeleteDivision(ctx iris.Context) {
+func deleteDivision(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.DeleteDivision(id, auth)
+	response := deleteDivisionService(id, auth)
 	ctx.Values().Set("response", response)
 }

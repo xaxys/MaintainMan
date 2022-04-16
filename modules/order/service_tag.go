@@ -4,8 +4,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/xaxys/maintainman/core/dao"
 	"github.com/xaxys/maintainman/core/model"
+	"github.com/xaxys/maintainman/core/rbac"
 	"github.com/xaxys/maintainman/core/util"
 
 	"gorm.io/gorm"
@@ -20,7 +20,7 @@ func getTagByIDService(id uint, auth *model.AuthInfo) *model.ApiJson {
 		return model.ErrorQueryDatabase(err)
 	}
 	role := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string { return v.Role }, "")
-	if err := dao.CheckPermission(role, fmt.Sprintf("tag.view.%d", tag.Level)); err != nil {
+	if err := rbac.CheckPermission(role, fmt.Sprintf("tag.view.%d", tag.Level)); err != nil {
 		return model.ErrorNoPermissions(err)
 	}
 	return model.Success(tagToJson(tag), "获取成功")
@@ -41,7 +41,7 @@ func getAllTagsBySortService(sort string, auth *model.AuthInfo) *model.ApiJson {
 	}
 	role := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string { return v.Role }, "")
 	ts := util.TransSlice(tags, func(t *Tag) *TagJson {
-		if dao.HasPermission(role, fmt.Sprintf("tag.view.%d", t.Level)) {
+		if rbac.HasPermission(role, fmt.Sprintf("tag.view.%d", t.Level)) {
 			return tagToJson(t)
 		}
 		return nil
@@ -71,7 +71,7 @@ func checkTagsService(tagIDs []uint, perm, role string) *model.ApiJson {
 		return model.ErrorQueryDatabase(err)
 	}
 	for _, t := range tags {
-		if err := dao.CheckPermission(role, fmt.Sprintf("%s.%d", perm, t.Level)); err != nil {
+		if err := rbac.CheckPermission(role, fmt.Sprintf("%s.%d", perm, t.Level)); err != nil {
 			return model.ErrorNoPermissions(err)
 		}
 	}

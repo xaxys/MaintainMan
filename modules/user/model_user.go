@@ -1,12 +1,15 @@
-package model
+package user
 
 import (
 	"database/sql"
 	"time"
+
+	"github.com/xaxys/maintainman/core/model"
+	"github.com/xaxys/maintainman/core/rbac"
 )
 
 type User struct {
-	BaseModel
+	model.BaseModel
 	Name        string        `gorm:"not null; size:50; unique; comment:用户名"`
 	Password    string        `gorm:"not null; size:191; comment:密码"`
 	DisplayName string        `gorm:"not null; size:191; comment:昵称"`
@@ -72,18 +75,18 @@ type UpdateUserRequest struct {
 type AllUserRequest struct {
 	Name        string `json:"name" url:"name" validate:"omitempty,gte=2,lte=50"`
 	DisplayName string `json:"display_name" url:"display_name" validate:"omitempty,lte=191"`
-	PageParam
+	model.PageParam
 }
 
 type UserJson struct {
-	ID          uint          `json:"id"`
-	Name        string        `json:"name"`
-	DisplayName string        `json:"display_name"` // 昵称
-	Division    *DivisionJson `json:"division"`
-	RoleName    string        `json:"user_role"`
-	Role        *RoleJson     `json:"role,omitempty"`
-	Phone       string        `json:"phone"`
-	Email       string        `json:"email"`
-	RealName    string        `json:"real_name"`
-	LoginTime   int64         `json:"login_time"` // unix timestamp in seconds (UTC)
+	ID          uint           `json:"id"`
+	Name        string         `json:"name"`
+	DisplayName string         `json:"display_name"` // 昵称
+	Division    *DivisionJson  `json:"division"`
+	RoleName    string         `json:"user_role"`
+	Role        *rbac.RoleJson `json:"role,omitempty"`
+	Phone       string         `json:"phone"`
+	Email       string         `json:"email"`
+	RealName    string         `json:"real_name"`
+	LoginTime   int64          `json:"login_time"` // unix timestamp in seconds (UTC)
 }

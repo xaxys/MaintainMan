@@ -1,14 +1,14 @@
-package controller
+package role
 
 import (
 	"github.com/xaxys/maintainman/core/model"
-	"github.com/xaxys/maintainman/core/service"
+	"github.com/xaxys/maintainman/core/rbac"
 	"github.com/xaxys/maintainman/core/util"
 
 	"github.com/kataras/iris/v12"
 )
 
-// GetRole godoc
+// getRole godoc
 // @Summary 获取当前用户角色信息
 // @Description 获取当前用户角色信息
 // @Tags role
@@ -21,13 +21,13 @@ import (
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role [get]
-func GetRole(ctx iris.Context) {
+func getRole(ctx iris.Context) {
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.GetRoleByName(auth.Role, auth)
+	response := getRoleByNameService(auth.Role, auth)
 	ctx.Values().Set("response", response)
 }
 
-// GetRoleByName godoc
+// getRoleByName godoc
 // @Summary 获取某角色信息
 // @Description 通过角色名获取某角色信息
 // @Tags role
@@ -41,20 +41,20 @@ func GetRole(ctx iris.Context) {
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role/{name} [get]
-func GetRoleByName(ctx iris.Context) {
+func getRoleByName(ctx iris.Context) {
 	name := ctx.Params().GetString("name")
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.GetRoleByName(name, auth)
+	response := getRoleByNameService(name, auth)
 	ctx.Values().Set("response", response)
 }
 
-// CreateRole godoc
+// createRole godoc
 // @Summary 创建角色
 // @Description 创建角色
 // @Tags role
 // @Accept  json
 // @Produce  json
-// @Param body body model.CreateRoleRequest true "创建角色请求"
+// @Param body body model.rbac.CreateRoleRequest true "创建角色请求"
 // @Success 201 {object} model.ApiJson{data=model.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
@@ -63,24 +63,24 @@ func GetRoleByName(ctx iris.Context) {
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role [post]
-func CreateRole(ctx iris.Context) {
-	aul := &model.CreateRoleRequest{}
+func createRole(ctx iris.Context) {
+	aul := &rbac.CreateRoleRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.CreateRole(aul, auth)
+	response := createRoleService(aul, auth)
 	ctx.Values().Set("response", response)
 }
 
-// UpdateRole godoc
+// updateRole godoc
 // @Summary 更新角色
 // @Description 更新角色
 // @Tags role
 // @Accept  json
 // @Produce  json
-// @Param body body model.UpdateRoleRequest true "更新角色请求"
+// @Param body body rbac.UpdateRoleRequest true "更新角色请求"
 // @Success 204 {object} model.ApiJson{data=model.RoleJson}
 // @Failure 400 {object} model.ApiJson{data=[]string}
 // @Failure 401 {object} model.ApiJson{data=[]string}
@@ -89,19 +89,19 @@ func CreateRole(ctx iris.Context) {
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role [put]
-func UpdateRole(ctx iris.Context) {
-	aul := &model.UpdateRoleRequest{}
+func updateRole(ctx iris.Context) {
+	aul := &rbac.UpdateRoleRequest{}
 	if err := ctx.ReadJSON(&aul); err != nil {
 		ctx.Values().Set("response", model.ErrorInvalidData(err))
 		return
 	}
 	name := ctx.Params().GetString("name")
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.UpdateRole(name, aul, auth)
+	response := updateRoleService(name, aul, auth)
 	ctx.Values().Set("response", response)
 }
 
-// SetDefaultRole godoc
+// setDefaultRole godoc
 // @Summary 设置默认角色
 // @Description 设置默认角色(用户注册时的默认角色)
 // @Tags role
@@ -116,14 +116,14 @@ func UpdateRole(ctx iris.Context) {
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role/{name}/default [put]
-func SetDefaultRole(ctx iris.Context) {
+func setDefaultRole(ctx iris.Context) {
 	name := ctx.Params().GetString("name")
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.SetDefaultRole(name, auth)
+	response := setDefaultRoleService(name, auth)
 	ctx.Values().Set("response", response)
 }
 
-// SetGuestRole godoc
+// setGuestRole godoc
 // @Summary 设置游客角色
 // @Description 设置游客角色(用户未登录时的默认角色)
 // @Tags role
@@ -138,14 +138,14 @@ func SetDefaultRole(ctx iris.Context) {
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role/{name}/guest [put]
-func SetGuestRole(ctx iris.Context) {
+func setGuestRole(ctx iris.Context) {
 	name := ctx.Params().GetString("name")
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.SetGuestRole(name, auth)
+	response := setGuestRoleService(name, auth)
 	ctx.Values().Set("response", response)
 }
 
-// DeleteRole godoc
+// deleteRole godoc
 // @Summary 删除角色
 // @Description 删除角色
 // @Tags role
@@ -160,14 +160,14 @@ func SetGuestRole(ctx iris.Context) {
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role/{name} [delete]
-func DeleteRole(ctx iris.Context) {
+func deleteRole(ctx iris.Context) {
 	name := ctx.Params().GetString("name")
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.DeleteRole(name, auth)
+	response := deleteRoleService(name, auth)
 	ctx.Values().Set("response", response)
 }
 
-// GetAllRoles godoc
+// getAllRoles godoc
 // @Summary 获取所有角色
 // @Description 获取所有角色 不分页
 // @Tags role
@@ -180,8 +180,8 @@ func DeleteRole(ctx iris.Context) {
 // @Failure 422 {object} model.ApiJson{data=[]string}
 // @Failure 500 {object} model.ApiJson{data=[]string}
 // @Router /v1/role/all [get]
-func GetAllRoles(ctx iris.Context) {
+func getAllRoles(ctx iris.Context) {
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
-	response := service.GetAllRoles(auth)
+	response := getAllRolesService(auth)
 	ctx.Values().Set("response", response)
 }

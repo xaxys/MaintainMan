@@ -1,4 +1,4 @@
-package dao
+package rbac
 
 import (
 	"fmt"
@@ -7,16 +7,27 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/xaxys/maintainman/core/model"
+	"github.com/spf13/viper"
 )
 
 func TestRole(t *testing.T) {
+	config := viper.New()
+	config.SetDefault("role", []any{
+		map[string]any{
+			"name":         "user",
+			"display_name": "普通用户",
+			"default":      true,
+			"permissions":  []string{},
+			"inheritance":  []string{},
+		},
+	})
+	LoadRole(config)
 	// test get all roles
 	roles := GetAllRoles()
 	fmt.Printf("all %d roles: %v\n", len(roles), roles)
 
 	// test creat role
-	aul := *&model.CreateRoleRequest{
+	aul := CreateRoleRequest{
 		Name:        "test role 1",
 		DisplayName: "test role 1",
 		Permissions: []string{"perm.test"},
@@ -26,7 +37,7 @@ func TestRole(t *testing.T) {
 		t.Error(err)
 	}
 
-	aul2 := *&model.CreateRoleRequest{
+	aul2 := CreateRoleRequest{
 		Name:        "test role 2",
 		Inheritance: []string{"test role 1"},
 	}
@@ -51,7 +62,7 @@ func TestRole(t *testing.T) {
 	fmt.Printf("role test role 1: %v\n", *role)
 
 	// test update role
-	aul3 := *&model.UpdateRoleRequest{
+	aul3 := UpdateRoleRequest{
 		DisplayName:    "test role 1 (new)",
 		AddPermissions: []string{"perm.test.2"},
 		DelPermissions: []string{"perm.test"},
@@ -67,7 +78,7 @@ func TestRole(t *testing.T) {
 		t.Error("test role 1 does not has test role 2 permission")
 	}
 
-	aul4 := *&model.UpdateRoleRequest{
+	aul4 := UpdateRoleRequest{
 		DelInheritance: []string{"test role 1"},
 	}
 	err = UpdateRole("test role 2", &aul4)
@@ -117,6 +128,17 @@ func TestRole(t *testing.T) {
 
 func TestRoleConcurrency(t *testing.T) {
 	runtime.GOMAXPROCS(runtime.NumCPU())
+	config := viper.New()
+	config.SetDefault("role", []any{
+		map[string]any{
+			"name":         "user",
+			"display_name": "普通用户",
+			"default":      true,
+			"permissions":  []string{},
+			"inheritance":  []string{},
+		},
+	})
+	LoadRole(config)
 
 	roles := GetAllRoles()
 	fmt.Printf("all %d roles: %v\n", len(roles), roles)
@@ -132,7 +154,7 @@ func TestRoleConcurrency(t *testing.T) {
 	createFunc := func(prefix string, i, n int) error {
 		Role1 := fmt.Sprintf("%s role %d", prefix, i)
 		Perm1 := fmt.Sprintf("%s perm %d", prefix, rand.Intn(n))
-		aul := model.CreateRoleRequest{
+		aul := CreateRoleRequest{
 			Name:        Role1,
 			DisplayName: Role1,
 			Permissions: []string{Perm1},
@@ -164,7 +186,7 @@ func TestRoleConcurrency(t *testing.T) {
 		fmt.Printf("[INFO] [TEST] [%d] GetRole(%s): %v\n", index, Role1, *role)
 
 		// test update role
-		aul3 := model.UpdateRoleRequest{
+		aul3 := UpdateRoleRequest{
 			DisplayName:    fmt.Sprintf("%s (update by %d)", Role1, index),
 			AddPermissions: []string{Perm2},
 			DelPermissions: []string{Perm1},
@@ -176,7 +198,7 @@ func TestRoleConcurrency(t *testing.T) {
 		fmt.Printf("[INFO] [TEST] [%d] UpdateRole(%s): Add:%v Del:%v\n", index, Role1, aul3.AddPermissions, aul3.DelPermissions)
 
 		if rand.Intn(n)%2 == 0 {
-			aul4 := model.UpdateRoleRequest{
+			aul4 := UpdateRoleRequest{
 				DelInheritance: []string{Role1},
 			}
 			err = UpdateRole(Role2, &aul4)
@@ -185,7 +207,7 @@ func TestRoleConcurrency(t *testing.T) {
 			}
 			fmt.Printf("[INFO] [TEST] [%d] UpdateRole(%s): Del:%v\n", index, Role2, aul3.DelPermissions)
 		} else {
-			aul4 := model.UpdateRoleRequest{
+			aul4 := UpdateRoleRequest{
 				AddInheritance: []string{Role1},
 			}
 			err = UpdateRole(Role2, &aul4)
@@ -277,7 +299,9 @@ func TestRoleConcurrency(t *testing.T) {
 	fmt.Println("[INFO] [TEST] all test done")
 
 	SetDefaultRole(defRole.Name)
-	SetGuestRole(guestRole.Name)
+	if guestRole != nil {
+		SetGuestRole(guestRole.Name)
+	}
 	fmt.Println("[INFO] [DELETE] start delete")
 	for i := n - 1; i >= 0; i-- {
 		index := i

@@ -11,11 +11,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/xaxys/maintainman/core/dao"
 	"github.com/xaxys/maintainman/core/model"
 	"github.com/xaxys/maintainman/core/util"
 	"github.com/xaxys/maintainman/modules/announce"
 	"github.com/xaxys/maintainman/modules/order"
+	"github.com/xaxys/maintainman/modules/user"
 
 	"github.com/kataras/iris/v12/httptest"
 	"github.com/spf13/cast"
@@ -31,10 +31,10 @@ func TestRegisterAndLoginRouter(t *testing.T) {
 		responseBody := e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated).Body()
 		t.Log(responseBody)
 	}
-	for _, user := range users {
-		responseBody := e.POST("/v1/login").WithJSON(model.LoginRequest{
-			Account:  user.Name,
-			Password: user.Password,
+	for _, u := range users {
+		responseBody := e.POST("/v1/login").WithJSON(user.LoginRequest{
+			Account:  u.Name,
+			Password: u.Password,
 		}).Expect().Status(httptest.StatusOK).Body()
 		t.Log(responseBody)
 	}
@@ -78,7 +78,7 @@ func TestUpdateUserRouter(t *testing.T) {
 	u := response.JSON().NotNull().Object().Value("data")
 	id := uint(u.Object().Value("id").NotNull().Raw().(float64))
 
-	responseBody := e.PUT("/v1/user/" + cast.ToString(id)).WithJSON(model.UpdateUserRequest{
+	responseBody := e.PUT("/v1/user/" + cast.ToString(id)).WithJSON(user.UpdateUserRequest{
 		Name:        testUser[0].Name + "_update",
 		Password:    testUser[0].Password + "_update",
 		DisplayName: testUser[0].DisplayName + "_update",
@@ -88,16 +88,16 @@ func TestUpdateUserRouter(t *testing.T) {
 	}).Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
-	for _, user := range users {
-		response = e.POST("/v1/register").WithJSON(user).Expect().Status(httptest.StatusCreated)
+	for _, usr := range users {
+		response = e.POST("/v1/register").WithJSON(usr).Expect().Status(httptest.StatusCreated)
 		t.Log(response.Body().Raw())
 		u = response.JSON().NotNull().Object().Value("data")
 		id = uint(u.Object().Value("id").NotNull().Raw().(float64))
 
-		responseBody = e.PUT("/v1/user/"+cast.ToString(id)).WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.UpdateUserRequest{
-			Name:        user.Name + "_update",
-			Password:    user.Password + "_update",
-			DisplayName: user.DisplayName + "_update",
+		responseBody = e.PUT("/v1/user/"+cast.ToString(id)).WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(user.UpdateUserRequest{
+			Name:        usr.Name + "_update",
+			Password:    usr.Password + "_update",
+			DisplayName: usr.DisplayName + "_update",
 			Phone:       "",
 			Email:       "",
 			RoleName:    "user",
@@ -124,17 +124,17 @@ func TestCreateUserRouter(t *testing.T) {
 	e := httptest.New(t, app)
 	users := generateRandomUsers("createUser", 10)
 	testUser := generateRandomUsers("forbidUser", 1)
-	responseBody := e.POST("/v1/user").WithJSON(model.CreateUserRequest{
+	responseBody := e.POST("/v1/user").WithJSON(user.CreateUserRequest{
 		RegisterUserRequest: testUser[0],
 		RoleName:            "user",
 	}).Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
-	for _, user := range users {
+	for _, usr := range users {
 		responseBody = e.POST("/v1/user").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
-			WithJSON(model.CreateUserRequest{
-				RegisterUserRequest: user,
+			WithJSON(user.CreateUserRequest{
+				RegisterUserRequest: usr,
 				RoleName:            "user",
 			}).Expect().Status(httptest.StatusCreated).Body().Raw()
 		t.Log(responseBody)
@@ -381,7 +381,7 @@ func TestGetRepairerOrdersRouter(t *testing.T) {
 
 	response := e.POST("/v1/user").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateUserRequest{
+		WithJSON(user.CreateUserRequest{
 			RegisterUserRequest: initUser("Test Repairer "+strconv.Itoa(rand.Intn(10000)), "12345678", "Test Repairer "+strconv.Itoa(rand.Intn(10000))),
 			RoleName:            "maintainer",
 		}).Expect().Status(httptest.StatusCreated)
@@ -416,7 +416,7 @@ func TestGetRepairerOrdersByIDRouter(t *testing.T) {
 
 	response := e.POST("/v1/user").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(model.CreateUserRequest{
+		WithJSON(user.CreateUserRequest{
 			RegisterUserRequest: initUser("Test Repairer "+strconv.Itoa(rand.Intn(10000)), "12345678", "Test Repairer "+strconv.Itoa(rand.Intn(10000))),
 			RoleName:            "maintainer",
 		}).Expect().Status(httptest.StatusCreated)
@@ -705,7 +705,7 @@ func TestAssignOrderRouter(t *testing.T) {
 	u := response.JSON().NotNull().Object().Value("data")
 	repairerId := uint(u.Object().Value("id").NotNull().Raw().(float64))
 
-	responseBody := e.PUT("/v1/user/"+cast.ToString(repairerId)).WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(model.UpdateUserRequest{
+	responseBody := e.PUT("/v1/user/"+cast.ToString(repairerId)).WithHeader("Authorization", "Bearer "+superAdminToken).WithJSON(user.UpdateUserRequest{
 		Name:        repairerCreated.Name + "_update",
 		Password:    repairerCreated.Password + "_update",
 		DisplayName: repairerCreated.DisplayName + "_update",
@@ -1802,77 +1802,78 @@ func TestHitAnnounceRouter(t *testing.T) {
 	t.Log(responseBody)
 }
 
-func TestMultiHitAnnounceRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
-	superAdminToken := getSuperAdminToken()
+// func TestMultiHitAnnounceRouter(t *testing.T) {
+// 	app := newApp()
+// 	e := httptest.New(t, app)
+// 	superAdminToken := getSuperAdminToken()
 
-	aids := []uint{}
-	for i := 0; i < 1000; i++ {
-		response := e.POST("/v1/announce").
-			WithHeader("Authorization", "Bearer "+superAdminToken).
-			WithJSON(announce.CreateAnnounceRequest{
-				Title:     util.RandomString(100),
-				Content:   util.RandomString(100),
-				StartTime: cast.ToInt64(time.Now().Unix()),
-				EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
-			}).Expect().Status(httptest.StatusCreated)
-		id := uint(response.JSON().Object().Value("data").Object().Value("id").NotNull().Raw().(float64))
-		aids = append(aids, uint(id))
-		if i%10 == 0 {
-			t.Log("create announce: ", i)
-		}
-	}
-	t.Log("create 1000 announces")
+// 	aids := []uint{}
+// 	for i := 0; i < 1000; i++ {
+// 		response := e.POST("/v1/announce").
+// 			WithHeader("Authorization", "Bearer "+superAdminToken).
+// 			WithJSON(announce.CreateAnnounceRequest{
+// 				Title:     util.RandomString(100),
+// 				Content:   util.RandomString(100),
+// 				StartTime: cast.ToInt64(time.Now().Unix()),
+// 				EndTime:   cast.ToInt64(time.Now().Unix()) + 10000,
+// 			}).Expect().Status(httptest.StatusCreated)
+// 		id := uint(response.JSON().Object().Value("data").Object().Value("id").NotNull().Raw().(float64))
+// 		aids = append(aids, uint(id))
+// 		if i%10 == 0 {
+// 			t.Log("create announce: ", i)
+// 		}
+// 	}
+// 	t.Log("create 1000 announces")
 
-	uids := []uint{}
-	users := generateRandomUsers("AnnounceHitTest", 25)
-	for i, user := range users {
-		u, err := dao.CreateUser(&model.CreateUserRequest{RegisterUserRequest: user}, 0)
-		if err != nil {
-			t.Error(err)
-		}
-		uids = append(uids, u.ID)
-		if i%10 == 0 {
-			t.Log("create user: ", i)
-		}
-	}
-	t.Log("create 25 users")
+// 	uids := []uint{}
+// 	users := generateRandomUsers("AnnounceHitTest", 25)
+// 	for i, user := range users {
+// 		response := e.POST("/v1/user").
+// 			WithHeader("Authorization", "Bearer "+superAdminToken).
+// 			WithJSON(user).Expect().Status(httptest.StatusCreated)
+// 		u := response.JSON().NotNull().Object().Value("data")
+// 		id := uint(u.Object().Value("id").NotNull().Raw().(float64))
+// 		uids = append(uids, id)
+// 		if i%10 == 0 {
+// 			t.Log("create user: ", i)
+// 		}
+// 	}
+// 	t.Log("create 25 users")
 
-	for i, uid := range uids {
-		token, err := util.GetJwtString(uid, "", "user")
-		if err != nil {
-			t.Error(err)
-		}
-		for j, aid := range aids {
-			e.GET("/v1/announce/"+cast.ToString(aid)+"/hit").
-				WithHeader("Authorization", "Bearer "+token).
-				Expect().Status(http.StatusNoContent).Body().Raw()
+// 	for i, uid := range uids {
+// 		token, err := util.GetJwtString(uid, "", "user")
+// 		if err != nil {
+// 			t.Error(err)
+// 		}
+// 		for j, aid := range aids {
+// 			e.GET("/v1/announce/"+cast.ToString(aid)+"/hit").
+// 				WithHeader("Authorization", "Bearer "+token).
+// 				Expect().Status(http.StatusNoContent).Body().Raw()
 
-			if j%50 == 0 {
-				t.Logf("%d/%d", i, j)
-			}
-		}
-	}
-	t.Log("all users hit all announces")
+// 			if j%50 == 0 {
+// 				t.Logf("%d/%d", i, j)
+// 			}
+// 		}
+// 	}
+// 	t.Log("all users hit all announces")
 
-	for i, uid := range uids {
-		token, err := util.GetJwtString(uid, "", "user")
-		if err != nil {
-			t.Error(err)
-		}
-		for j, aid := range aids {
-			e.GET("/v1/announce/"+cast.ToString(aid)+"/hit").
-				WithHeader("Authorization", "Bearer "+token).
-				Expect().Status(http.StatusOK).Body().Raw()
+// 	for i, uid := range uids {
+// 		token, err := util.GetJwtString(uid, "", "user")
+// 		if err != nil {
+// 			t.Error(err)
+// 		}
+// 		for j, aid := range aids {
+// 			e.GET("/v1/announce/"+cast.ToString(aid)+"/hit").
+// 				WithHeader("Authorization", "Bearer "+token).
+// 				Expect().Status(http.StatusOK).Body().Raw()
 
-			if j%50 == 0 {
-				t.Logf("%d/%d", i, j)
-			}
-		}
-	}
-	t.Log("all users hit all announces again")
-}
+// 			if j%50 == 0 {
+// 				t.Logf("%d/%d", i, j)
+// 			}
+// 		}
+// 	}
+// 	t.Log("all users hit all announces again")
+// }
 
 // Test Utils
 func getSuperAdminToken() string {
@@ -1965,7 +1966,7 @@ func getTestTags() []order.CreateTagRequest {
 	}
 }
 
-func generateRandomUsers(prefix string, num uint) (usersRegister []model.RegisterUserRequest) {
+func generateRandomUsers(prefix string, num uint) (usersRegister []user.RegisterUserRequest) {
 	for i := uint(1); i <= num; i++ {
 		usersRegister = append(usersRegister, initUser(prefix+strconv.Itoa(int(i))+util.RandomString(5), "12345678", "Random name user"+strconv.Itoa(int(i))))
 	}
@@ -1993,8 +1994,8 @@ func generateRandomOrders(baseTitle string, baseName string, num uint) (orders [
 	return
 }
 
-func initUser(name string, password string, displayName string) model.RegisterUserRequest {
-	return model.RegisterUserRequest{
+func initUser(name string, password string, displayName string) user.RegisterUserRequest {
+	return user.RegisterUserRequest{
 		Name:        name,
 		Password:    password,
 		DisplayName: displayName,

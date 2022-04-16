@@ -1,10 +1,8 @@
-package model
+package rbac
 
 import (
 	"encoding/json"
 	"sync"
-
-	"github.com/xaxys/maintainman/core/util"
 )
 
 type RoleInfo struct {
@@ -18,7 +16,7 @@ type RoleInfo struct {
 
 type Role struct {
 	*RoleInfo
-	PermSet  *util.PermSet
+	PermSet  *PermSet
 	InheRole []*Role
 	sync.RWMutex
 }
@@ -52,4 +50,9 @@ type RoleJson struct {
 	Guest       bool              `json:"guest"`
 	Permissions []*PermissionJson `json:"permissions,omitempty"`
 	Inheritance []string          `json:"inheritance,omitempty"`
+}
+
+type PermissionJson struct {
+	Name        string `json:"name"`
+	DisplayName string `json:"display_name"`
 }

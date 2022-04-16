@@ -28,6 +28,7 @@ type Module struct {
 	ModuleEnv     map[string]any // unexported functions or variables, only accessible to system
 	ModuleExport  map[string]any // exported functions or variables, accessible to all modules
 	ModuleRoute   string         // route prefix
+	ModulePerm    map[string]string
 	EntryPoint    func(mctx *ModuleContext)
 }
 

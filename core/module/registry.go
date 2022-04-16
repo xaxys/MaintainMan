@@ -4,6 +4,7 @@ import (
 	"github.com/xaxys/maintainman/core/cache"
 	"github.com/xaxys/maintainman/core/config"
 	"github.com/xaxys/maintainman/core/database"
+	"github.com/xaxys/maintainman/core/rbac"
 	"github.com/xaxys/maintainman/core/router"
 	"github.com/xaxys/maintainman/core/storage"
 )
@@ -23,11 +24,11 @@ func NewRegistry(server *Server) *Registry {
 }
 
 func (r *Registry) Register(module ...*Module) {
+	model := []any{}
 	for _, m := range module {
 		r.modules[m.ModuleName] = m
-	}
-	for _, m := range module {
-		database.SyncModel(m.getModel()...)
+		model = append(model, m.getModel()...)
+		rbac.RegisterPerm(m.ModuleName, m.ModulePerm)
 		if m.ModuleConfig != nil {
 			m.ModuleConfig.SetConfigName(m.ModuleName)
 			m.ModuleConfig.SetConfigType("yaml")
@@ -37,6 +38,9 @@ func (r *Registry) Register(module ...*Module) {
 			m.ModuleConfig.AddConfigPath("$HOME/.maintainman/")
 			config.ReadAndUpdateConfig(m.ModuleConfig, m.ModuleName, m.ModuleVersion)
 		}
+	}
+	database.SyncModel(model...)
+	for _, m := range module {
 		mctx := &ModuleContext{
 			Server:  r.server,
 			Route:   router.APIRoute.Party(m.ModuleRoute),

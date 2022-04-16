@@ -7,16 +7,17 @@ import (
 
 	"github.com/xaxys/maintainman/core/config"
 	"github.com/xaxys/maintainman/core/database"
-	"github.com/xaxys/maintainman/core/initialize"
 	"github.com/xaxys/maintainman/core/logger"
+	"github.com/xaxys/maintainman/core/module"
 	"github.com/xaxys/maintainman/core/router"
 	"github.com/xaxys/maintainman/core/service"
 	"github.com/xaxys/maintainman/core/util"
-	"github.com/xaxys/maintainman/module"
 	"github.com/xaxys/maintainman/modules/announce"
 	"github.com/xaxys/maintainman/modules/imagehost"
 	"github.com/xaxys/maintainman/modules/order"
+	"github.com/xaxys/maintainman/modules/role"
 	"github.com/xaxys/maintainman/modules/sysinfo"
+	"github.com/xaxys/maintainman/modules/user"
 )
 
 var (
@@ -46,14 +47,15 @@ func printBanner() {
 func main() {
 	printBanner()
 	app := newApp()
-	app.Logger().SetLevel(config.AppConfig.GetString("app.loglevel"))
 	app.Listen(config.AppConfig.GetString("app.listen"))
 }
 
+var logLevel = config.AppConfig.GetString("app.loglevel")
+
 func newApp() *iris.Application {
 	app := iris.New()
+	app.Logger().SetLevel(logLevel)
 	logger.Logger = app.Logger()
-	initialize.InitDefaultData()
 	router.Register(app)
 	server := module.Server{
 		Validator: util.Validator,
@@ -63,6 +65,8 @@ func newApp() *iris.Application {
 	}
 	registry := module.NewRegistry(&server)
 	registry.Register(
+		&role.Module,
+		&user.Module,
 		&imagehost.Module,
 		&announce.Module,
 		&order.Module,

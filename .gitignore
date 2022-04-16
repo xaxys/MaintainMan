@@ -13,12 +13,12 @@ lib
 *.out
 app.yaml
 role.yaml
-permission.yaml
+user.yaml
 image.yaml
 announce.yaml
 app.yml
 role.yml
-permission.yml
+user.yml
 image.yml
 announce.yml
 maintainman

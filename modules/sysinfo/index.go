@@ -4,9 +4,9 @@ import (
 	_ "embed"
 
 	"github.com/kataras/iris/v12"
-	"github.com/xaxys/maintainman/core/middleware"
 	"github.com/xaxys/maintainman/core/model"
-	"github.com/xaxys/maintainman/module"
+	"github.com/xaxys/maintainman/core/module"
+	"github.com/xaxys/maintainman/core/rbac"
 )
 
 var Module = module.Module{
@@ -14,12 +14,15 @@ var Module = module.Module{
 	ModuleVersion: "1.0.0",
 	ModuleEnv:     map[string]any{},
 	ModuleExport:  map[string]any{},
-	EntryPoint:    entry,
+	ModulePerm: map[string]string{
+		"sysinfo.view": "查看系统信息",
+	},
+	EntryPoint: entry,
 }
 
 func entry(mctx *module.ModuleContext) {
 	mctx.Route.PartyFunc("/sysinfo", func(sysinfo iris.Party) {
-		sysinfo.Get("/", middleware.PermInterceptor("sysinfo.view"), getSysInfo)
+		sysinfo.Get("/", rbac.PermInterceptor("sysinfo.view"), getSysInfo)
 	})
 }
 
