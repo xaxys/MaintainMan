@@ -75,6 +75,7 @@ func createOrderService(aul *CreateOrderRequest, auth *model.AuthInfo) *model.Ap
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 	}
+	go mctx.EventBus.Emit("order:create", order.ID)
 	return model.SuccessCreate(orderToJson(order), "创建成功")
 }
 

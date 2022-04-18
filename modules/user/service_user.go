@@ -156,7 +156,7 @@ func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *m
 	}
 	wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
 	if err != nil {
-		mctx.Logger.Debugf("wx login error: %+v", err)
+		mctx.Logger.Warnf("WeChatLoginErr: %+v", err)
 		return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
 	}
 	if wxres.ErrCode != 0 {
@@ -234,7 +234,7 @@ func wxUserRegisterService(aul *WxRegisterRequest, ip string, auth *model.AuthIn
 	}
 	wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
 	if err != nil {
-		mctx.Logger.Debugf("wx login error: %+v", err)
+		mctx.Logger.Warnf("WeChatLoginErr: %+v", err)
 		return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
 	}
 	if wxres.ErrCode != 0 {
