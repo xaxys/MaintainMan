@@ -4,6 +4,7 @@ import (
 	"github.com/go-co-op/gocron"
 	"github.com/go-playground/validator"
 	"github.com/kataras/golog"
+	"github.com/olebedev/emitter"
 	"gorm.io/gorm"
 )
 
@@ -12,6 +13,6 @@ type Server struct {
 	Logger    *golog.Logger
 	Scheduler *gocron.Scheduler
 	Database  *gorm.DB
-
-	Registry *Registry
+	EventBus  *emitter.Emitter
+	Registry  *Registry
 }

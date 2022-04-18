@@ -64,6 +64,7 @@ func newApp() *iris.Application {
 		Validator: util.Validator,
 		Logger:    app.Logger(),
 		Scheduler: service.Scheduler,
+		EventBus:  service.Bus,
 		Database:  database.DB,
 	}
 	registry := module.NewRegistry(&server)
