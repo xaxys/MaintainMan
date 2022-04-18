@@ -1,5 +1,7 @@
 # MaintainMan
 
+[![Build and Test](https://github.com/xaxys/MaintainMan/actions/workflows/main.yml/badge.svg)](https://github.com/xaxys/MaintainMan/actions/workflows/main.yml)
+
 MaintainMan is a logistic report management system powered by iris.
 
 ## Feature
