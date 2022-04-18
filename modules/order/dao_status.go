@@ -14,7 +14,7 @@ import (
 func dbGetOrderByRepairer(id uint, json *RepairerOrderRequest) (orders []*Order, count uint, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if orders, count, err = txGetOrderByRepairer(tx, id, json); err != nil {
-			mctx.Logger.Debugf("GetOrderByRepairer: %v\n", err)
+			mctx.Logger.Warnf("GetOrderByRepairer: %v\n", err)
 		}
 		return err
 	})
@@ -63,7 +63,7 @@ func txGetAppraiseTimeoutOrder(tx *gorm.DB) (ids []uint, err error) {
 	exp := time.Now().Add(-timeout)
 
 	if err = tx.Where(status).Where("created_at <= (?)", exp).Find(&statuses).Error; err != nil {
-		mctx.Logger.Debugf("GetAppraiseTimeoutOrderErr: %v\n", err)
+		mctx.Logger.Warnf("GetAppraiseTimeoutOrderErr: %v\n", err)
 		return
 	}
 

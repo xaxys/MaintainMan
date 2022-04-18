@@ -155,6 +155,7 @@ require (
 	github.com/jameskeane/bcrypt v0.0.0-20120420032655-c3cd44c1e20f
 	github.com/kataras/iris/v12 v12.2.0-alpha9
 	github.com/mitchellh/goamz v0.0.0-20150317174335-caaaea8b30ee
+	github.com/olebedev/emitter v0.0.0-20190110104742-e8d1457e6aee
 	gopkg.in/go-playground/assert.v1 v1.2.1 // indirect
 	gorm.io/driver/mysql v1.3.2
 	gorm.io/driver/sqlite v1.3.1

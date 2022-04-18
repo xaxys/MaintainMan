@@ -44,6 +44,9 @@ func printBanner() {
 	fmt.Println()
 }
 
+// @title         MaintainMan API
+// @version       1.0.0-rc3
+// @license.name  MIT
 func main() {
 	printBanner()
 	app := newApp()
@@ -61,6 +64,7 @@ func newApp() *iris.Application {
 		Validator: util.Validator,
 		Logger:    app.Logger(),
 		Scheduler: service.Scheduler,
+		EventBus:  service.Bus,
 		Database:  database.DB,
 	}
 	registry := module.NewRegistry(&server)

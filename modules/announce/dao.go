@@ -15,7 +15,7 @@ func dbGetAnnounceCount() (count uint, err error) {
 func txGetAnnounceCount(tx *gorm.DB) (uint, error) {
 	count := int64(0)
 	if err := tx.Model(&Announce{}).Count(&count).Error; err != nil {
-		mctx.Logger.Debugf("GetAnnounceCountErr: %v\n", err)
+		mctx.Logger.Warnf("GetAnnounceCountErr: %v\n", err)
 		return 0, err
 	}
 	return uint(count), nil
@@ -28,7 +28,7 @@ func dbGetAnnounceByID(id uint) (announce *Announce, err error) {
 func txGetAnnounceByID(tx *gorm.DB, id uint) (*Announce, error) {
 	announce := &Announce{}
 	if err := tx.First(announce, id).Error; err != nil {
-		mctx.Logger.Debugf("GetAnnounceByIDErr: %v\n", err)
+		mctx.Logger.Warnf("GetAnnounceByIDErr: %v\n", err)
 		return nil, err
 	}
 	return announce, nil
@@ -41,7 +41,7 @@ func dbGetAnnounceByTitle(title string) (announce *Announce, err error) {
 func txGetAnnounceByTitle(tx *gorm.DB, title string) (*Announce, error) {
 	announce := &Announce{Title: title}
 	if err := tx.Where(announce).First(announce).Error; err != nil {
-		mctx.Logger.Debugf("GetAnnounceByTitleErr: %v\n", err)
+		mctx.Logger.Warnf("GetAnnounceByTitleErr: %v\n", err)
 		return nil, err
 	}
 	return announce, nil
@@ -50,7 +50,7 @@ func txGetAnnounceByTitle(tx *gorm.DB, title string) (*Announce, error) {
 func dbGetAllAnnouncesWithParam(aul *AllAnnounceRequest) (announces []*Announce, count uint, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if announces, count, err = txGetAllAnnouncesWithParam(tx, aul); err != nil {
-			mctx.Logger.Debugf("GetAllAnnouncesWithParamErr: %v\n", err)
+			mctx.Logger.Warnf("GetAllAnnouncesWithParamErr: %v\n", err)
 		}
 		return err
 	})
@@ -109,7 +109,7 @@ func txCreateAnnounce(tx *gorm.DB, json *ModifyAnnounceRequest, operator uint) (
 	announce.CreatedBy = operator
 
 	if err := tx.Create(announce).Error; err != nil {
-		mctx.Logger.Debugf("CreateAnnounceErr: %v\n", err)
+		mctx.Logger.Warnf("CreateAnnounceErr: %v\n", err)
 		return nil, err
 	}
 	return announce, nil
@@ -125,7 +125,7 @@ func txUpdateAnnounce(tx *gorm.DB, id uint, json *ModifyAnnounceRequest, operato
 	announce.UpdatedBy = operator
 
 	if err := tx.Model(announce).Updates(announce).Error; err != nil {
-		mctx.Logger.Debugf("UpdateAnnounceErr: %v\n", err)
+		mctx.Logger.Warnf("UpdateAnnounceErr: %v\n", err)
 		return nil, err
 	}
 	return announce, nil
@@ -137,7 +137,7 @@ func dbDeleteAnnounce(id uint) error {
 
 func txDeleteAnnounce(tx *gorm.DB, id uint) error {
 	if err := tx.Delete(&Announce{}, id).Error; err != nil {
-		mctx.Logger.Debugf("DeleteAnnounceErr: %v\n", err)
+		mctx.Logger.Warnf("DeleteAnnounceErr: %v\n", err)
 		return err
 	}
 	return nil
@@ -151,7 +151,7 @@ func txHitAnnounce(tx *gorm.DB, id uint) error {
 	announce := &Announce{}
 	announce.ID = id
 	if err := tx.Model(announce).Update("hits", gorm.Expr("hits + ?", 1)).Error; err != nil {
-		mctx.Logger.Debugf("HitAnnounceErr: %v\n", err)
+		mctx.Logger.Warnf("HitAnnounceErr: %v\n", err)
 		return err
 	}
 	return nil

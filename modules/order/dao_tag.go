@@ -14,7 +14,7 @@ func dbGetTagByID(id uint) (*Tag, error) {
 func txGetTagByID(tx *gorm.DB, id uint) (*Tag, error) {
 	tag := &Tag{}
 	if err := tx.First(tag, id).Error; err != nil {
-		mctx.Logger.Debugf("GetTagByIDErr: %v\n", err)
+		mctx.Logger.Warnf("GetTagByIDErr: %v\n", err)
 		return nil, err
 	}
 	return tag, nil
@@ -41,7 +41,7 @@ func dbGetAllTagSorts() ([]string, error) {
 
 func txGetAllTagSorts(tx *gorm.DB) (sorts []string, err error) {
 	if err = tx.Model(&Tag{}).Distinct().Pluck("Sort", &sorts).Error; err != nil {
-		mctx.Logger.Debugf("GetAllTagSortsErr: %v\n", err)
+		mctx.Logger.Warnf("GetAllTagSortsErr: %v\n", err)
 	}
 	return
 }
@@ -55,7 +55,7 @@ func txGetAllTagsBySort(tx *gorm.DB, sort string) (tags []*Tag, err error) {
 		Sort: sort,
 	}
 	if err = tx.Where(tag).Find(&tags).Error; err != nil {
-		mctx.Logger.Debugf("GetAllTagsBySortErr: %v\n", err)
+		mctx.Logger.Warnf("GetAllTagsBySortErr: %v\n", err)
 	}
 	return
 }
@@ -72,7 +72,7 @@ func txCreateTag(tx *gorm.DB, aul *CreateTagRequest, operator uint) (tag *Tag, e
 		Name: tag.Name,
 	}
 	if err = tx.Where(cond).Attrs(tag).FirstOrCreate(tag).Error; err != nil {
-		mctx.Logger.Debugf("CreateTagErr: %v\n", err)
+		mctx.Logger.Warnf("CreateTagErr: %v\n", err)
 	}
 	return
 }
@@ -86,7 +86,7 @@ func txUpdateTag(tx *gorm.DB, id uint, aul *CreateTagRequest, operator uint) (ta
 	tag.ID = id
 	tag.UpdatedBy = operator
 	if err = tx.Model(tag).Updates(tag).Error; err != nil {
-		mctx.Logger.Debugf("UpdateTagErr: %v\n", err)
+		mctx.Logger.Warnf("UpdateTagErr: %v\n", err)
 	}
 	return
 }
@@ -97,7 +97,7 @@ func dbDeleteTag(id uint) error {
 
 func txDeleteTag(tx *gorm.DB, id uint) (err error) {
 	if err = tx.Select(clause.Associations).Delete(&Tag{}, id).Error; err != nil {
-		mctx.Logger.Debugf("DeleteTagErr: %v\n", err)
+		mctx.Logger.Warnf("DeleteTagErr: %v\n", err)
 	}
 	return
 }

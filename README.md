@@ -129,7 +129,7 @@ storage:
   # storage type (local, s3).
   driver: "local"
   local:
-    path: "./images"
+    path: "./files"
   # if s3 connection defined here, module config without s3 connection
   # will use the connection defined here.
   s3:
@@ -149,6 +149,9 @@ cache:
     host: "localhost"
     port: 6379
     password: ""
+
+# channel size of event bus (message bus).
+bus_buffer: 1000
 
 ```
 

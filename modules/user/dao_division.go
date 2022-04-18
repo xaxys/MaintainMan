@@ -13,7 +13,7 @@ func dbGetDivisionByID(id uint) (*Division, error) {
 func txGetDivisionByID(tx *gorm.DB, id uint) (*Division, error) {
 	division := &Division{}
 	if err := tx.Preload("Children").First(division, id).Error; err != nil {
-		mctx.Logger.Debugf("GetDivisionByIDErr: %v\n", err)
+		mctx.Logger.Warnf("GetDivisionByIDErr: %v\n", err)
 		return nil, err
 	}
 	return division, nil
@@ -30,7 +30,7 @@ func txGetDivisionsByParentID(tx *gorm.DB, id uint) (divisions []*Division, err 
 		tx = tx.Where("parent_id is null")
 	}
 	if err = tx.Find(&divisions).Error; err != nil {
-		mctx.Logger.Debugf("GetDivisionsByParentIDErr: %v\n", err)
+		mctx.Logger.Warnf("GetDivisionsByParentIDErr: %v\n", err)
 	}
 	return
 }
@@ -45,7 +45,7 @@ func txCreateDivision(tx *gorm.DB, aul *CreateDivisionRequest) (*Division, error
 		ParentID: sql.NullInt64{Int64: int64(aul.ParentID), Valid: aul.ParentID != 0},
 	}
 	if err := tx.Create(division).Error; err != nil {
-		mctx.Logger.Debugf("CreateDivisionErr: %v\n", err)
+		mctx.Logger.Warnf("CreateDivisionErr: %v\n", err)
 		return nil, err
 	}
 	return division, nil
@@ -66,7 +66,7 @@ func txUpdateDivision(tx *gorm.DB, id uint, aul *UpdateDivisionRequest) (*Divisi
 		tx = tx.Update("parent_id", sql.NullInt64{Int64: int64(aul.ParentID), Valid: aul.ParentID != -1})
 	}
 	if err := tx.Error; err != nil {
-		mctx.Logger.Debugf("UpdateDivisionErr: %v\n", err)
+		mctx.Logger.Warnf("UpdateDivisionErr: %v\n", err)
 		return nil, err
 	}
 	return division, nil
@@ -78,7 +78,7 @@ func dbDeleteDivision(id uint) error {
 
 func txDeleteDivision(tx *gorm.DB, id uint) (err error) {
 	if err = tx.Delete(&Division{}, id).Error; err != nil {
-		mctx.Logger.Debugf("DeleteDivisionErr: %v\n", err)
+		mctx.Logger.Warnf("DeleteDivisionErr: %v\n", err)
 	}
 	return
 }

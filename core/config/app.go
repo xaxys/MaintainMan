@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const AppConfigVersion = "1.2.2"
+const AppConfigVersion = "1.3.0"
 
 var (
 	AppConfig *viper.Viper
@@ -44,11 +44,13 @@ func init() {
 	AppConfig.SetDefault("cache.redis.password", "")
 
 	AppConfig.SetDefault("storage.driver", "local")
-	AppConfig.SetDefault("storage.local.path", "./images")
+	AppConfig.SetDefault("storage.local.path", "./files")
 	AppConfig.SetDefault("storage.s3.access_key", "ACCESS_KEY")
 	AppConfig.SetDefault("storage.s3.secret_key", "SECRET_KEY")
 	AppConfig.SetDefault("storage.s3.bucket", "BUCKET")
 	AppConfig.SetDefault("storage.s3.region", "REGION")
+
+	AppConfig.SetDefault("bus_buffer", 1000)
 
 	ReadAndUpdateConfig(AppConfig, "app", AppConfigVersion)
 }

@@ -22,7 +22,7 @@ func dbGetUserCount() (uint, error) {
 func txGetUserCount(tx *gorm.DB) (uint, error) {
 	count := int64(0)
 	if err := tx.Model(&User{}).Count(&count).Error; err != nil {
-		mctx.Logger.Debugf("GetUserCountErr: %v\n", err)
+		mctx.Logger.Warnf("GetUserCountErr: %v\n", err)
 		return 0, err
 	}
 	return uint(count), nil
@@ -35,7 +35,7 @@ func dbGetUserByID(id uint) (*User, error) {
 func txGetUserByID(tx *gorm.DB, id uint) (*User, error) {
 	user := &User{}
 	if err := tx.First(user, id).Error; err != nil {
-		mctx.Logger.Debugf("GetUserByIDErr: %v\n", err)
+		mctx.Logger.Warnf("GetUserByIDErr: %v\n", err)
 		return nil, err
 	}
 	return user, nil
@@ -48,7 +48,7 @@ func dbGetUserByName(name string) (*User, error) {
 func txGetUserByName(tx *gorm.DB, name string) (*User, error) {
 	user := &User{Name: name}
 	if err := tx.Where(user).First(user).Error; err != nil {
-		mctx.Logger.Debugf("GetUserByNameErr: %v\n", err)
+		mctx.Logger.Warnf("GetUserByNameErr: %v\n", err)
 		return nil, err
 	}
 	return user, nil
@@ -61,7 +61,7 @@ func dbGetUserByEmail(email string) (*User, error) {
 func txGetUserByEmail(tx *gorm.DB, email string) (*User, error) {
 	user := &User{Email: email}
 	if err := tx.Where(user).First(user).Error; err != nil {
-		mctx.Logger.Debugf("GetUserByEmailErr: %v\n", err)
+		mctx.Logger.Warnf("GetUserByEmailErr: %v\n", err)
 		return nil, err
 	}
 	return user, nil
@@ -74,7 +74,7 @@ func dbGetUserByPhone(phone string) (*User, error) {
 func txGetUserByPhone(tx *gorm.DB, phone string) (*User, error) {
 	user := &User{Phone: phone}
 	if err := tx.Where(user).First(user).Error; err != nil {
-		mctx.Logger.Debugf("GetUserByPhoneErr: %v\n", err)
+		mctx.Logger.Warnf("GetUserByPhoneErr: %v\n", err)
 		return nil, err
 	}
 	return user, nil
@@ -87,7 +87,7 @@ func dbGetUserByOpenID(openid string) (*User, error) {
 func txGetUserByOpenID(tx *gorm.DB, openid string) (*User, error) {
 	user := &User{OpenID: openid}
 	if err := tx.Where(user).First(user).Error; err != nil {
-		mctx.Logger.Debugf("GetUserByOpenIDErr: %v\n", err)
+		mctx.Logger.Warnf("GetUserByOpenIDErr: %v\n", err)
 		return nil, err
 	}
 	return user, nil
@@ -96,7 +96,7 @@ func txGetUserByOpenID(tx *gorm.DB, openid string) (*User, error) {
 func dbGetUsersByDivision(id uint, param *model.PageParam) (users []*User, count uint, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if users, count, err = txGetUserByDivision(tx, id, param); err != nil {
-			mctx.Logger.Debugf("GetUsersByDivisionErr: %v\n", err)
+			mctx.Logger.Warnf("GetUsersByDivisionErr: %v\n", err)
 		}
 		return err
 	})
@@ -124,7 +124,7 @@ func txGetUserByDivision(tx *gorm.DB, id uint, param *model.PageParam) (users []
 func dbGetAllUsersWithParam(aul *AllUserRequest) (users []*User, count uint, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if users, count, err = txGetAllUsersWithParam(tx, aul); err != nil {
-			mctx.Logger.Debugf("GetAllUsersWithParamErr: %v\n", err)
+			mctx.Logger.Warnf("GetAllUsersWithParamErr: %v\n", err)
 		}
 		return err
 	})
@@ -165,7 +165,7 @@ func txCreateUser(tx *gorm.DB, json *CreateUserRequest, operator uint) (*User, e
 	user.CreatedBy = operator
 
 	if err := tx.Create(user).Error; err != nil {
-		mctx.Logger.Debugf("CreateUserErr: %v\n", err)
+		mctx.Logger.Warnf("CreateUserErr: %v\n", err)
 		return nil, err
 	}
 	return user, nil
@@ -192,7 +192,7 @@ func txUpdateUser(tx *gorm.DB, id uint, json *UpdateUserRequest, operator uint) 
 		tx = tx.Update("division_id", sql.NullInt64{Int64: int64(json.DivisionID), Valid: json.DivisionID != -1})
 	}
 	if err := tx.Error; err != nil {
-		mctx.Logger.Debugf("UpdateUserErr: %v\n", err)
+		mctx.Logger.Warnf("UpdateUserErr: %v\n", err)
 		return nil, err
 	}
 	return user, nil
@@ -206,7 +206,7 @@ func txAttachOpenIDToUser(tx *gorm.DB, id uint, openid string) error {
 	user := &User{}
 	user.ID = id
 	if err := tx.Model(user).Update("open_id", openid).Error; err != nil {
-		mctx.Logger.Debugf("AttachOpenIDToUserErr: %v\n", err)
+		mctx.Logger.Warnf("AttachOpenIDToUserErr: %v\n", err)
 		return err
 	}
 	return nil
@@ -218,7 +218,7 @@ func dbDeleteUser(id uint) error {
 
 func txDeleteUser(tx *gorm.DB, id uint) (err error) {
 	if err = tx.Delete(&User{}, id).Error; err != nil {
-		mctx.Logger.Debugf("DeleteUserByIdErr: %v\n", err)
+		mctx.Logger.Warnf("DeleteUserByIdErr: %v\n", err)
 	}
 	return
 }
@@ -241,7 +241,7 @@ func txForceLogin(tx *gorm.DB, id uint, ip string) error {
 	}
 	user.ID = id
 	if err := tx.Model(user).Updates(user).Error; err != nil {
-		mctx.Logger.Debugf("ForceLoginErr: %v\n", err)
+		mctx.Logger.Warnf("ForceLoginErr: %v\n", err)
 		return err
 	}
 	return nil
