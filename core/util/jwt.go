@@ -23,7 +23,11 @@ func init() {
 }
 
 func GetJwtString(id uint, name, role string) (string, error) {
-	token := jwt.NewTokenWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	return GetJwtStringWithClaims(id, name, role, nil)
+}
+
+func GetJwtStringWithClaims(id uint, name, role string, custom map[string]any) (string, error) {
+	claims := jwt.MapClaims{
 		"user_id":   id,
 		"user_name": name,
 		"user_role": role,
@@ -31,12 +35,18 @@ func GetJwtString(id uint, name, role string) (string, error) {
 		"iss": config.AppConfig.GetString("app.name"),
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(expire).Unix(),
-	})
+	}
+	for k, v := range custom {
+		claims[k] = v
+	}
+	return GetRawJwtString(claims)
+}
 
+func GetRawJwtString(claims jwt.MapClaims) (string, error) {
+	token := jwt.NewTokenWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString(key)
 	if err != nil {
 		return "", err
 	}
-
 	return tokenString, nil
 }

@@ -30,7 +30,7 @@ type LoginRequest struct {
 }
 
 type WxLoginRequest struct {
-	Code string `json:"code" validate:"required"`
+	Code string `json:"code"`
 }
 
 type WxLoginResponse struct {
@@ -59,6 +59,7 @@ type CreateUserRequest struct {
 	RegisterUserRequest
 	RoleName   string `json:"role_name" validate:"omitempty,lte=50"`
 	DivisionID uint   `json:"division_id"`
+	OpenID     string `json:"-"`
 }
 
 type UpdateUserRequest struct {

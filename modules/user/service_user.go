@@ -143,28 +143,39 @@ func getAllUsersService(aul *AllUserRequest, auth *model.AuthInfo) *model.ApiJso
 	return model.SuccessPaged(us, count, "获取成功")
 }
 
+const wxURL = "https://api.weixin.qq.com/sns/jscode2session"
+
 func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *model.ApiJson {
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	const wxURL = "https://api.weixin.qq.com/sns/jscode2session"
-	params := map[string]string{
-		"appid":      userConfig.GetString("wechat.appid"),
-		"secret":     userConfig.GetString("wechat.secret"),
-		"js_code":    aul.Code,
-		"grant_type": "authorization_code",
+
+	openID := ""
+	if auth.Other["openid"] != nil {
+		openID, _ = auth.Other["openid"].(string)
+	} else if aul.Code != "" {
+		params := map[string]string{
+			"appid":      userConfig.GetString("wechat.appid"),
+			"secret":     userConfig.GetString("wechat.secret"),
+			"js_code":    aul.Code,
+			"grant_type": "authorization_code",
+		}
+		wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
+		if err != nil {
+			mctx.Logger.Warnf("WeChatLoginErr: %+v", err)
+			return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
+		}
+		if wxres.ErrCode != 0 {
+			return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
+		}
+		openID = wxres.OpenID
 	}
-	wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
-	if err != nil {
-		mctx.Logger.Warnf("WeChatLoginErr: %+v", err)
-		return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
-	}
-	if wxres.ErrCode != 0 {
-		return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
+	if openID == "" {
+		return model.ErrorInvalidData(fmt.Errorf("未获取到openid"))
 	}
 
 	id := uint(0)
-	user, err := dbGetUserByOpenID(wxres.OpenID)
+	user, err := dbGetUserByOpenID(openID)
 	if err != nil {
 		// If user related to openid not found, attach openid to current user OR create a new one
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
@@ -172,7 +183,7 @@ func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *m
 		}
 		if auth != nil {
 			// If already login, attach openid to current user
-			if err := dbAttachOpenIDToUser(auth.User, wxres.OpenID); err != nil {
+			if err := dbAttachOpenIDToUser(auth.User, openID); err != nil {
 				return model.ErrorUpdateDatabase(err)
 			}
 			id = auth.User
@@ -180,7 +191,7 @@ func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *m
 			// If not login, create a new user
 			aul := &CreateUserRequest{
 				RegisterUserRequest: RegisterUserRequest{
-					Name:     wxres.OpenID,
+					Name:     "微信用户" + openID,
 					Password: util.RandomString(32),
 				},
 			}
@@ -192,7 +203,7 @@ func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *m
 					response = model.ErrorInsertDatabase(err)
 					return err
 				}
-				if err := dbAttachOpenIDToUser(user.ID, wxres.OpenID); err != nil {
+				if err := dbAttachOpenIDToUser(user.ID, openID); err != nil {
 					response = model.ErrorUpdateDatabase(err)
 					return err
 				}
@@ -202,7 +213,11 @@ func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *m
 				return response
 			}
 		} else {
-			return model.ErrorVerification(fmt.Errorf("未绑定微信，请先绑定微信"))
+			jwt, err := util.GetJwtStringWithClaims(0, "未登录用户", "", map[string]any{"openid": openID})
+			if err != nil {
+				return model.ErrorBuildJWT(err)
+			}
+			return model.Fail(jwt, "未绑定微信账号，请先绑定微信账号")
 		}
 	} else {
 		id = user.ID
@@ -225,20 +240,29 @@ func wxUserRegisterService(aul *WxRegisterRequest, ip string, auth *model.AuthIn
 	if util.EmailRegex.MatchString(aul.Name) || util.PhoneRegex.MatchString(aul.Name) {
 		return model.ErrorValidation(errors.New("用户名不能为邮箱或手机号"))
 	}
-	const wxURL = "https://api.weixin.qq.com/sns/jscode2session"
-	params := map[string]string{
-		"appid":      userConfig.GetString("wechat.appid"),
-		"secret":     userConfig.GetString("wechat.secret"),
-		"js_code":    aul.Code,
-		"grant_type": "authorization_code",
+
+	openID := ""
+	if auth.Other["openid"] != nil {
+		openID, _ = auth.Other["openid"].(string)
+	} else if aul.Code != "" {
+		params := map[string]string{
+			"appid":      userConfig.GetString("wechat.appid"),
+			"secret":     userConfig.GetString("wechat.secret"),
+			"js_code":    aul.Code,
+			"grant_type": "authorization_code",
+		}
+		wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
+		if err != nil {
+			mctx.Logger.Warnf("WeChatLoginErr: %+v", err)
+			return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
+		}
+		if wxres.ErrCode != 0 {
+			return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
+		}
+		openID = wxres.OpenID
 	}
-	wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
-	if err != nil {
-		mctx.Logger.Warnf("WeChatLoginErr: %+v", err)
-		return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
-	}
-	if wxres.ErrCode != 0 {
-		return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
+	if openID == "" {
+		return model.ErrorInvalidData(fmt.Errorf("未获取到openid"))
 	}
 
 	req := &CreateUserRequest{
@@ -247,13 +271,13 @@ func wxUserRegisterService(aul *WxRegisterRequest, ip string, auth *model.AuthIn
 	operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
 	var response *model.ApiJson
 	var user *User
-	if mctx.Database.Transaction(func(tx *gorm.DB) error {
-		user, err = dbCreateUser(req, operator)
+	if err := mctx.Database.Transaction(func(tx *gorm.DB) error {
+		user, err := dbCreateUser(req, operator)
 		if err != nil {
 			response = model.ErrorInsertDatabase(err)
 			return err
 		}
-		if err := dbAttachOpenIDToUser(user.ID, wxres.OpenID); err != nil {
+		if err := dbAttachOpenIDToUser(user.ID, openID); err != nil {
 			response = model.ErrorUpdateDatabase(err)
 			return err
 		}
