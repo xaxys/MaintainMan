@@ -150,25 +150,20 @@ func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *m
 		return model.ErrorValidation(err)
 	}
 
-	openID := ""
-	if auth.Other["openid"] != nil {
-		openID, _ = auth.Other["openid"].(string)
-	} else if aul.Code != "" {
-		params := map[string]string{
-			"appid":      userConfig.GetString("wechat.appid"),
-			"secret":     userConfig.GetString("wechat.secret"),
-			"js_code":    aul.Code,
-			"grant_type": "authorization_code",
+	openID := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string {
+		if id := v.Other["openid"]; id != nil {
+			if openID, ok := id.(string); ok {
+				return openID
+			}
 		}
-		wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
+		return ""
+	}, "")
+	if aul.Code != "" {
+		id, err := getWxUserOpenID(aul.Code)
 		if err != nil {
-			mctx.Logger.Warnf("WeChatLoginErr: %+v", err)
-			return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
+			return model.ErrorValidation(err)
 		}
-		if wxres.ErrCode != 0 {
-			return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
-		}
-		openID = wxres.OpenID
+		openID = id
 	}
 	if openID == "" {
 		return model.ErrorInvalidData(fmt.Errorf("未获取到openid"))
@@ -181,7 +176,7 @@ func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *m
 		if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return model.ErrorQueryDatabase(err)
 		}
-		if auth != nil {
+		if auth != nil && auth.User != 0 {
 			// If already login, attach openid to current user
 			if err := dbAttachOpenIDToUser(auth.User, openID); err != nil {
 				return model.ErrorUpdateDatabase(err)
@@ -196,22 +191,11 @@ func wxUserLoginService(aul *WxLoginRequest, ip string, auth *model.AuthInfo) *m
 				},
 			}
 			operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
-			var response *model.ApiJson
-			if mctx.Database.Transaction(func(tx *gorm.DB) error {
-				user, err = dbCreateUser(aul, operator)
-				if err != nil {
-					response = model.ErrorInsertDatabase(err)
-					return err
-				}
-				if err := dbAttachOpenIDToUser(user.ID, openID); err != nil {
-					response = model.ErrorUpdateDatabase(err)
-					return err
-				}
-				id = user.ID
-				return nil
-			}); err != nil {
+			u, response := createUserWithOpenID(aul, openID, operator)
+			if response != nil {
 				return response
 			}
+			id = u.ID
 		} else {
 			jwt, err := util.GetJwtStringWithClaims(0, "未登录用户", "", map[string]any{"openid": openID})
 			if err != nil {
@@ -241,48 +225,29 @@ func wxUserRegisterService(aul *WxRegisterRequest, ip string, auth *model.AuthIn
 		return model.ErrorValidation(errors.New("用户名不能为邮箱或手机号"))
 	}
 
-	openID := ""
-	if auth.Other["openid"] != nil {
-		openID, _ = auth.Other["openid"].(string)
-	} else if aul.Code != "" {
-		params := map[string]string{
-			"appid":      userConfig.GetString("wechat.appid"),
-			"secret":     userConfig.GetString("wechat.secret"),
-			"js_code":    aul.Code,
-			"grant_type": "authorization_code",
+	openID := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string {
+		if id := v.Other["openid"]; id != nil {
+			if openID, ok := id.(string); ok {
+				return openID
+			}
 		}
-		wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
+		return ""
+	}, "")
+	if aul.Code != "" {
+		id, err := getWxUserOpenID(aul.Code)
 		if err != nil {
-			mctx.Logger.Warnf("WeChatLoginErr: %+v", err)
-			return model.ErrorVerification(fmt.Errorf("请求微信登录失败"))
+			return model.ErrorValidation(err)
 		}
-		if wxres.ErrCode != 0 {
-			return model.ErrorVerification(fmt.Errorf(wxres.ErrMsg))
-		}
-		openID = wxres.OpenID
+		openID = id
 	}
 	if openID == "" {
 		return model.ErrorInvalidData(fmt.Errorf("未获取到openid"))
 	}
 
-	req := &CreateUserRequest{
-		RegisterUserRequest: aul.RegisterUserRequest,
-	}
+	req := &CreateUserRequest{RegisterUserRequest: aul.RegisterUserRequest}
 	operator := util.NilOrBaseValue(auth, func(v *model.AuthInfo) uint { return v.User }, 0)
-	var response *model.ApiJson
-	var user *User
-	if err := mctx.Database.Transaction(func(tx *gorm.DB) error {
-		user, err := dbCreateUser(req, operator)
-		if err != nil {
-			response = model.ErrorInsertDatabase(err)
-			return err
-		}
-		if err := dbAttachOpenIDToUser(user.ID, openID); err != nil {
-			response = model.ErrorUpdateDatabase(err)
-			return err
-		}
-		return nil
-	}); err != nil {
+	user, response := createUserWithOpenID(req, openID, operator)
+	if response != nil {
 		return response
 	}
 
@@ -327,6 +292,17 @@ func userLoginService(aul *LoginRequest, ip string, auth *model.AuthInfo) *model
 	if err != nil {
 		return model.ErrorBuildJWT(err)
 	}
+	openID := util.NilOrBaseValue(auth, func(v *model.AuthInfo) string {
+		if id := v.Other["openid"]; id != nil {
+			if openID, ok := id.(string); ok {
+				return openID
+			}
+		}
+		return ""
+	}, "")
+	if openID != "" && user.OpenID == "" {
+		dbAttachOpenIDToUser(user.ID, openID)
+	}
 	return model.Success(token, "登陆成功")
 }
 
@@ -346,6 +322,40 @@ func userRenewService(id uint, ip string, auth *model.AuthInfo) *model.ApiJson {
 		return model.ErrorBuildJWT(err)
 	}
 	return model.Success(token, "登陆成功")
+}
+
+func getWxUserOpenID(code string) (string, error) {
+	params := map[string]string{
+		"appid":      userConfig.GetString("wechat.appid"),
+		"secret":     userConfig.GetString("wechat.secret"),
+		"js_code":    code,
+		"grant_type": "authorization_code",
+	}
+	wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
+	if err != nil {
+		mctx.Logger.Warnf("WeChatLoginErr: %+v", err)
+		return "", err
+	}
+	if wxres.ErrCode != 0 {
+		return "", fmt.Errorf(wxres.ErrMsg)
+	}
+	return wxres.OpenID, nil
+}
+
+func createUserWithOpenID(aul *CreateUserRequest, openID string, operator uint) (user *User, response *model.ApiJson) {
+	mctx.Database.Transaction(func(tx *gorm.DB) error {
+		user, err := dbCreateUser(aul, operator)
+		if err != nil {
+			response = model.ErrorInsertDatabase(err)
+			return err
+		}
+		if err := dbAttachOpenIDToUser(user.ID, openID); err != nil {
+			response = model.ErrorUpdateDatabase(err)
+			return err
+		}
+		return nil
+	})
+	return
 }
 
 func userToJson(user *User) *UserJson {
