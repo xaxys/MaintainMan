@@ -480,7 +480,7 @@ func TestUpdateOrderByUserRouter(t *testing.T) {
 	orderCreated := response.JSON().NotNull().Object().Value("data")
 	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
 
-	responseBody := e.PUT("/v1/order/" + cast.ToString(id) + "/update").
+	responseBody := e.PUT("/v1/order/" + cast.ToString(id)).
 		WithJSON(order.UpdateOrderRequest{
 			Title:        "TestUpdateOrder " + randomNumToString,
 			Content:      testOrder.Content + "_updated",
@@ -495,7 +495,7 @@ func TestUpdateOrderByUserRouter(t *testing.T) {
 
 	addWrongBuildingTag := 4 - testOrder.Tags[0]
 	addWrongEmergencyTag := 9 - testOrder.Tags[1]
-	responseBody = e.PUT("/v1/order/"+cast.ToString(id)+"/update").
+	responseBody = e.PUT("/v1/order/"+cast.ToString(id)).
 		WithHeader("Authorization", "Bearer "+superAdminToken).
 		WithJSON(order.UpdateOrderRequest{
 			Title:        "TestUpdateOrder " + randomNumToString,
@@ -518,7 +518,7 @@ func TestUpdateOrderByUserRouter(t *testing.T) {
 	delBuildingTag := testOrder.Tags[0]
 	addEmergencyTag := 9 - testOrder.Tags[1]
 	delEmergencyTag := testOrder.Tags[1]
-	responseBody = e.PUT("/v1/order/"+cast.ToString(id)+"/update").
+	responseBody = e.PUT("/v1/order/"+cast.ToString(id)).
 		WithHeader("Authorization", "Bearer "+superAdminToken).
 		WithJSON(order.UpdateOrderRequest{
 			Title:        "TestUpdateOrder " + randomNumToString,
@@ -553,7 +553,7 @@ func TestForceUpdateOrderRouter(t *testing.T) {
 	orderCreated := response.JSON().NotNull().Object().Value("data")
 	id := uint(orderCreated.Object().Value("id").NotNull().Raw().(float64))
 
-	responseBody := e.PUT("/v1/order/1/update/force").
+	responseBody := e.PUT("/v1/order/1/force").
 		WithJSON(order.UpdateOrderRequest{
 			Title:        "TestUpdateOrder " + randomNumToString,
 			Content:      testOrder.Content + "_updated",
@@ -566,7 +566,7 @@ func TestForceUpdateOrderRouter(t *testing.T) {
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
-	responseBody = e.PUT("/v1/order/"+cast.ToString(id)+"/update/force").
+	responseBody = e.PUT("/v1/order/"+cast.ToString(id)+"/force").
 		WithHeader("Authorization", "Bearer "+superAdminToken).
 		WithJSON(order.UpdateOrderRequest{
 			Title:        "TestUpdateOrder " + randomNumToString,
