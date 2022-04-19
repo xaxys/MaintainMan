@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"math/rand"
+	"reflect"
 	"regexp"
 )
 
@@ -174,4 +175,51 @@ func FormatBytes(bytes uint64) string {
 	} else {
 		return fmt.Sprintf("%d B", bytes)
 	}
+}
+
+// NotEmptyFieldName Get the json tag name of a struct field that is not empty
+func NotEmptyFieldName(s any) (names []string) {
+	v := reflect.ValueOf(s)
+	if v.Kind() == reflect.Ptr {
+		v = v.Elem()
+	}
+	if v.Kind() != reflect.Struct {
+		return
+	}
+	t := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		field := v.Field(i)
+		ok := false
+		switch field.Kind() {
+		case reflect.String, reflect.Slice, reflect.Map, reflect.Array:
+			ok = field.Len() > 0
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			ok = field.Int() != 0
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			ok = field.Uint() != 0
+		case reflect.Float32, reflect.Float64:
+			ok = field.Float() != 0
+		case reflect.Bool:
+			ok = field.Bool()
+		case reflect.Struct:
+			ok = NotEmptyFieldName(field.Interface()) != nil
+		case reflect.Ptr:
+			ok = field.Elem().IsValid()
+		}
+		name := ""
+		if !ok {
+			continue
+		}
+		for _, tag := range []string{"json", "yaml", "toml", "xml", "bson", "url"} {
+			name = t.Field(i).Tag.Get(tag)
+			if name != "" {
+				break
+			}
+		}
+		if name == "" {
+			name = t.Field(i).Name
+		}
+		names = append(names, name)
+	}
+	return names
 }

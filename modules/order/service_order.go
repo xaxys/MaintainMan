@@ -108,6 +108,11 @@ func forceUpdateOrderService(id uint, aul *UpdateOrderRequest, auth *model.AuthI
 	if err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
+	fields := util.NotEmptyFieldName(aul)
+	for _, field := range fields {
+		event := fmt.Sprintf("order:update:%s", field)
+		go mctx.EventBus.Emit(event, order.ID)
+	}
 	return model.SuccessUpdate(orderToJson(order), "更新成功")
 }
 
