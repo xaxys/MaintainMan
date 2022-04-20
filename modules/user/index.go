@@ -48,6 +48,7 @@ func entry(ctx *module.ModuleContext) {
 	mctx.Route.Post("/register", rbac.PermInterceptor("user.register"), userRegister)
 	mctx.Route.Post("/wxregister", rbac.PermInterceptor("user.wxregister"), wxUserRegister)
 	mctx.Route.Get("/renew", rbac.PermInterceptor("user.renew"), userRenew)
+	mctx.Route.Get("/wxappid", getAppID)
 
 	mctx.Route.PartyFunc("/user", func(user iris.Party) {
 		user.Get("/", rbac.PermInterceptor("user.view"), getUser)
@@ -67,4 +68,15 @@ func entry(ctx *module.ModuleContext) {
 		division.Put("/{id:uint}", rbac.PermInterceptor("division.update"), updateDivision)
 		division.Delete("/{id:uint}", rbac.PermInterceptor("division.delete"), deleteDivision)
 	})
+}
+
+// getAppID godoc
+// @Summary 获取微信AppID
+// @Description 获取微信AppID
+// @Tags user
+// @Produce text/plain
+// @Success 200 {string} string "微信AppID"
+// @Router /v1/wxappid [get]
+func getAppID(ctx iris.Context) {
+	ctx.Write([]byte(userConfig.GetString("wechat.appid")))
 }
