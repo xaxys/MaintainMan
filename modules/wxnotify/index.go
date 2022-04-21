@@ -1,7 +1,6 @@
 package wxnotify
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/xaxys/maintainman/core/module"
@@ -72,6 +71,7 @@ func listener() {
 
 	for {
 		select {
+		// order status changed notification
 		case ch := <-mctx.EventBus.On("order:update:status:*"):
 			if statusTmplID == "" {
 				continue
@@ -99,6 +99,7 @@ func listener() {
 				continue
 			}
 
+			// get template data
 			data := map[string]string{}
 			if keyStatusOrder != "" {
 				data[keyStatusOrder] = fmt.Sprintf("%d", odr.ID)
@@ -113,6 +114,7 @@ func listener() {
 				data[keyStatusTime] = odr.UpdatedAt.Local().Format("2006-01-02 15:04:05")
 			}
 			if keyStatusOther != "" && status == order.StatusAssigned && odr.Status == uint(status) {
+				// add repairer info if status is assigned
 				repairerID := util.LastElem(odr.StatusList).RepairerID
 				if repairerID.Int64 == 0 || repairerID.Valid == false {
 					mctx.Logger.Errorf("repairer id not found")
@@ -125,20 +127,19 @@ func listener() {
 				}
 				data[keyStatusOther] = fmt.Sprintf("维修师傅 %s 将尽快为您维修", repairer.Name)
 			}
-			dataJSON, err := json.Marshal(data)
-			if err != nil {
-				mctx.Logger.Errorf("json marshal failed: %s", err)
-				continue
-			}
 
+			// send notification
 			param := map[string]string{
 				"access_token": getAccessToken(),
-				"touser":       usr.OpenID,
-				"template_id":  statusTmplID,
-				"data":         string(dataJSON),
 			}
 
-			wxResp, err := util.HTTPRequest[wxSendMessageResponse](sendMessageURL, "POST", param, nil)
+			payload := map[string]any{
+				"touser":      usr.OpenID,
+				"template_id": statusTmplID,
+				"data":        data,
+			}
+
+			wxResp, err := util.HTTPRequest[wxSendMessageResponse](sendMessageURL, "POST", param, payload)
 			if err != nil {
 				mctx.Logger.Warnf("send wechat message failed: %s", err)
 				continue
@@ -147,6 +148,7 @@ func listener() {
 				mctx.Logger.Warnf("send wechat message failed: %s", wxResp.ErrMsg)
 				continue
 			}
+		// order comment notification
 		case ch := <-mctx.EventBus.On("order:update:comment"):
 			if commentTmplID == "" {
 				continue
@@ -164,6 +166,7 @@ func listener() {
 				continue
 			}
 
+			// get template data
 			data := map[string]string{}
 			if keyCommentTitle != "" {
 				data[keyCommentTitle] = odr.Title
@@ -177,13 +180,9 @@ func listener() {
 			if keyCommentTime != "" {
 				data[keyCommentTime] = comment.CreatedAt.Local().Format("2006-01-02 15:04:05")
 			}
-			dataJSON, err := json.Marshal(data)
-			if err != nil {
-				mctx.Logger.Errorf("json marshal failed: %s", err)
-				continue
-			}
 
 			openIDs := []string{}
+			// send notification to user
 			if odr.UserID != comment.UserID {
 				usr, err := user.GetUserByID(odr.UserID)
 				if err != nil {
@@ -194,6 +193,7 @@ func listener() {
 					openIDs = append(openIDs, usr.OpenID)
 				}
 			}
+			// send notification to current repairer
 			if odr.Status == order.StatusAssigned {
 				repairerID := util.LastElem(odr.StatusList).RepairerID
 				if repairerID.Int64 == 0 || repairerID.Valid == false {
@@ -213,15 +213,18 @@ func listener() {
 				}
 			}
 
+			// send notification
 			for _, openID := range openIDs {
 				param := map[string]string{
 					"access_token": getAccessToken(),
-					"touser":       openID,
-					"template_id":  commentTmplID,
-					"data":         string(dataJSON),
+				}
+				payload := map[string]any{
+					"touser":      openID,
+					"template_id": statusTmplID,
+					"data":        data,
 				}
 
-				wxResp, err := util.HTTPRequest[wxSendMessageResponse](sendMessageURL, "POST", param, nil)
+				wxResp, err := util.HTTPRequest[wxSendMessageResponse](sendMessageURL, "POST", param, payload)
 				if err != nil {
 					mctx.Logger.Warnf("send wechat message failed: %s", err)
 					continue
