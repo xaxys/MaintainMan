@@ -79,17 +79,17 @@ var mctx *module.ModuleContext
 func entry(ctx *module.ModuleContext) {
 	mctx = ctx
 
-	Module.ModuleExport["wechat.tmpl"] = orderConfig.GetString("notify.wechat.status.tmpl")
-	Module.ModuleExport["wechat.order"] = orderConfig.GetString("notify.wechat.status.order")
-	Module.ModuleExport["wechat.title"] = orderConfig.GetString("notify.wechat.status.title")
-	Module.ModuleExport["wechat.status"] = orderConfig.GetString("notify.wechat.status.status")
-	Module.ModuleExport["wechat.time"] = orderConfig.GetString("notify.wechat.status.time")
-	Module.ModuleExport["wechat.other"] = orderConfig.GetString("notify.wechat.status.other")
+	Module.ModuleExport["wechat.status.tmpl"] = orderConfig.GetString("notify.wechat.status.tmpl")
+	Module.ModuleExport["wechat.status.order"] = orderConfig.GetString("notify.wechat.status.order")
+	Module.ModuleExport["wechat.status.title"] = orderConfig.GetString("notify.wechat.status.title")
+	Module.ModuleExport["wechat.status.status"] = orderConfig.GetString("notify.wechat.status.status")
+	Module.ModuleExport["wechat.status.time"] = orderConfig.GetString("notify.wechat.status.time")
+	Module.ModuleExport["wechat.status.other"] = orderConfig.GetString("notify.wechat.status.other")
 
 	Module.ModuleExport["wechat.comment.tmpl"] = orderConfig.GetString("notify.wechat.comment.tmpl")
 	Module.ModuleExport["wechat.comment.title"] = orderConfig.GetString("notify.wechat.comment.title")
 	Module.ModuleExport["wechat.comment.name"] = orderConfig.GetString("notify.wechat.comment.name")
-	Module.ModuleExport["wechat.comment.messgae"] = orderConfig.GetString("notify.wechat.comment.messgae")
+	Module.ModuleExport["wechat.comment.message"] = orderConfig.GetString("notify.wechat.comment.message")
 	Module.ModuleExport["wechat.comment.time"] = orderConfig.GetString("notify.wechat.comment.time")
 
 	mctx.Scheduler.Every(orderConfig.GetString("appraise.purge")).SingletonMode().Do(autoAppraiseOrderService)
