@@ -18,6 +18,7 @@ import (
 	"github.com/xaxys/maintainman/modules/role"
 	"github.com/xaxys/maintainman/modules/sysinfo"
 	"github.com/xaxys/maintainman/modules/user"
+	"github.com/xaxys/maintainman/modules/wxnotify"
 )
 
 var (
@@ -74,6 +75,7 @@ func newApp() *iris.Application {
 		&imagehost.Module,
 		&announce.Module,
 		&order.Module,
+		&wxnotify.Module,
 		&sysinfo.Module,
 	)
 	service.Scheduler.StartAsync()

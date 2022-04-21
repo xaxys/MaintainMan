@@ -331,7 +331,7 @@ func getWxUserOpenID(code string) (string, error) {
 		"js_code":    code,
 		"grant_type": "authorization_code",
 	}
-	wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params)
+	wxres, err := util.HTTPRequest[WxLoginResponse](wxURL, "GET", params, nil)
 	if err != nil {
 		mctx.Logger.Warnf("WeChatLoginErr: %+v", err)
 		return "", err

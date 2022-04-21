@@ -1,13 +1,15 @@
 package util
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"strings"
 )
 
-func HTTPRequest[T any](url string, method string, params map[string]string) (response *T, err error) {
+func HTTPRequest[T any](url string, method string, params map[string]string, payload map[string]any) (response *T, err error) {
 	kvset := []string{}
 	for k, v := range params {
 		kvset = append(kvset, k+"="+v)
@@ -16,7 +18,15 @@ func HTTPRequest[T any](url string, method string, params map[string]string) (re
 	url = url + "?" + param
 
 	client := &http.Client{}
-	req, err := http.NewRequest(method, url, nil)
+	var bodyReader io.Reader
+	if len(payload) > 0 {
+		body, err := json.Marshal(payload)
+		if err != nil {
+			return nil, err
+		}
+		bodyReader = bytes.NewReader(body)
+	}
+	req, err := http.NewRequest(method, url, bodyReader)
 	if err != nil {
 		return
 	}

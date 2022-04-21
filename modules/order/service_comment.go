@@ -50,6 +50,7 @@ func forceCreateCommentService(id uint, aul *CreateCommentRequest, auth *model.A
 	if err != nil {
 		return model.ErrorInsertDatabase(err)
 	}
+	go mctx.EventBus.Emit("order:update:comment", id, comment.ID)
 	return model.SuccessCreate(commentToJson(comment), "创建成功")
 }
 
