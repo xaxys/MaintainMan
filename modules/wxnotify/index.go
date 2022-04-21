@@ -115,12 +115,8 @@ func listener() {
 			}
 			if keyStatusOther != "" && status == order.StatusAssigned && odr.Status == uint(status) {
 				// add repairer info if status is assigned
-				repairerID := util.LastElem(odr.StatusList).RepairerID
-				if repairerID.Int64 == 0 || repairerID.Valid == false {
-					mctx.Logger.Errorf("repairer id not found")
-					continue
-				}
-				repairer, err := user.GetUserByID(uint(repairerID.Int64))
+				repairerID, _ := ch.Args[2].(uint)
+				repairer, err := user.GetUserByID(repairerID)
 				if err != nil {
 					mctx.Logger.Errorf("get repairer failed: %s", err)
 					continue
