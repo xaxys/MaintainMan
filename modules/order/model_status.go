@@ -20,6 +20,31 @@ const (
 	StatusAppraised
 )
 
+func StatusName(status int) string {
+	switch status {
+	case StatusIllegal:
+		return "非法状态"
+	case StatusWaiting:
+		return "待处理"
+	case StatusAssigned:
+		return "已接单"
+	case StatusCompleted:
+		return "已完成"
+	case StatusReported:
+		return "上报中"
+	case StatusHold:
+		return "挂单中"
+	case StatusCanceled:
+		return "已取消"
+	case StatusRejected:
+		return "已拒绝"
+	case StatusAppraised:
+		return "已评价"
+	default:
+		return "未知状态"
+	}
+}
+
 // immutable
 type Status struct {
 	model.BaseModel

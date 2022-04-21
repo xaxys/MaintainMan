@@ -16,11 +16,13 @@ role.yaml
 user.yaml
 image.yaml
 announce.yaml
+order.yaml
 app.yml
 role.yml
 user.yml
 image.yml
 announce.yml
+order.yml
 maintainman
 
 dist/

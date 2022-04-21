@@ -212,17 +212,22 @@ func txChangeOrderStatus(tx *gorm.DB, id uint, status *Status) error {
 	if err := tx.Model(order).Updates(order).Error; err != nil {
 		return err
 	}
+
 	or, err := txGetOrderWithLastStatus(tx, id)
 	if err != nil {
 		return err
 	}
-	statusList := or.StatusList
 	lastStatus := util.LastElem(or.StatusList)
-	lastStatus.UpdatedBy = status.CreatedBy
-	lastStatus.Current = false
+
+	lstatus := &Status{}
+	lstatus.UpdatedBy = status.CreatedBy
+	lstatus.Current = false
+	if err := tx.Model(lastStatus).Updates(lstatus).Error; err != nil {
+		return err
+	}
+
 	status.SequenceNum = lastStatus.SequenceNum + 1
-	statusList = append(statusList, status)
-	if err := tx.Model(order).Association("StatusList").Replace(statusList); err != nil {
+	if err := tx.Model(order).Association("StatusList").Append(status); err != nil {
 		return err
 	}
 	return nil
