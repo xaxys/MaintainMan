@@ -2,7 +2,7 @@ package wxnotify
 
 import "github.com/xaxys/maintainman/core/util"
 
-const accessTokenURL = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=%s&secret=%s"
+const accessTokenURL = "https://api.weixin.qq.com/cgi-bin/token"
 
 var accessToken util.AtomPtr[string]
 
