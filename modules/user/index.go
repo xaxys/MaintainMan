@@ -50,7 +50,7 @@ func entry(ctx *module.ModuleContext) {
 	mctx = ctx
 	initDefaultData()
 	Module.ModuleExport["appid"] = userConfig.GetString("wechat.appid")
-	Module.ModuleExport["appsecret"] = userConfig.GetString("wechat.appsecret")
+	Module.ModuleExport["appsecret"] = userConfig.GetString("wechat.secret")
 
 	mctx.Route.Post("/login", rbac.PermInterceptor("user.login"), userLogin)
 	mctx.Route.Post("/wxlogin", rbac.PermInterceptor("user.wxlogin"), wxUserLogin)
