@@ -711,7 +711,7 @@ func TestAssignOrderRouter(t *testing.T) {
 		DisplayName: repairerCreated.DisplayName + "_update",
 		Phone:       "",
 		Email:       "",
-		RoleName:    "repairer",
+		RoleName:    "maintainer",
 	}).Expect().Status(httptest.StatusNoContent).Body().Raw()
 	t.Log(responseBody)
 
