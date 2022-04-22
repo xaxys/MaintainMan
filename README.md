@@ -1,5 +1,11 @@
 # MaintainMan
 
+[![OurEDA 2022](https://img.shields.io/badge/OurEDA-2022-00ffcc)](https://img.shields.io/badge/OurEDA-2022-00ffcc)
+[![Licence](https://img.shields.io/github/license/xaxys/maintainman)](https://github.com/xaxys/MaintainMan/blob/master/LICENSE)
+[![Contributors](https://img.shields.io/github/contributors/xaxys/maintainman)](https://github.com/xaxys/MaintainMan/graphs/contributors)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/xaxys/maintainman)](https://github.com/xaxys/MaintainMan/blob/master/go.mod)
+[![Release](https://img.shields.io/github/v/release/xaxys/maintainman)](https://github.com/xaxys/MaintainMan/releases)
+[![Downloads](https://img.shields.io/github/downloads/xaxys/maintainman/total)](https://github.com/xaxys/MaintainMan/releases)
 [![Build and Test](https://github.com/xaxys/MaintainMan/actions/workflows/main.yml/badge.svg)](https://github.com/xaxys/MaintainMan/actions/workflows/main.yml)
 
 MaintainMan is a logistic report management system powered by iris.
@@ -178,6 +184,13 @@ wechat:
   # if true, a unregistered user will be registered on wechat login.
   # username will be open_id and user will be assigned a random password.
   fastlogin: true
+
+cache:
+  # cache type (local, redis).
+  driver: local
+  # cache limit.
+  limit: 268435456 # 256M
+  # if redis, connection has been configured in app.yml
 
 # the admin user configuration.
 # only apply at first initialization.
@@ -486,4 +499,4 @@ You can help to make the project better by creating an issue or pull request.
 
 ## License
 
-Released under [**Modified** MIT License](https://github.com/xaxys/MaintainMan/blob/master/LICENSE).
+Released under [MIT License](https://github.com/xaxys/MaintainMan/blob/master/LICENSE). We also provide an additional [patent grant](https://github.com/xaxys/MaintainMan/blob/master/PATENTS).
