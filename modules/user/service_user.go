@@ -367,7 +367,6 @@ func userToJson(user *User) *UserJson {
 			Name:        user.Name,
 			DisplayName: user.DisplayName,
 			RoleName:    user.RoleName,
-			Division:    divisionToJson(user.Division),
 			Phone:       user.Phone,
 			Email:       user.Email,
 			RealName:    user.RealName,

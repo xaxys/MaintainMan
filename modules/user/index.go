@@ -11,7 +11,7 @@ var Module module.Module
 func init() {
 	Module = module.Module{
 		ModuleName:    "user",
-		ModuleVersion: "1.0.0",
+		ModuleVersion: "1.1.0",
 		ModuleConfig:  userConfig,
 		ModuleEnv: map[string]any{
 			"orm.model": []any{

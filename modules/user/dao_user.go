@@ -28,8 +28,19 @@ func txGetUserCount(tx *gorm.DB) (uint, error) {
 	return uint(count), nil
 }
 
-func dbGetUserByID(id uint) (*User, error) {
-	return txGetUserByID(mctx.Database, id)
+func dbGetUserByID(id uint) (user *User, err error) {
+	if user, err = cacheGetUserByID(id); err == nil {
+		return
+	}
+	mctx.Logger.Debugf("CacheGetUserByIDErr: %v", err)
+	user, err = txGetUserByID(mctx.Database, id)
+	if err != nil {
+		return
+	}
+	if err := cacheSaveUser(user); err != nil {
+		mctx.Logger.Warnf("CacheSaveUserErr: %v", err)
+	}
+	return
 }
 
 func txGetUserByID(tx *gorm.DB, id uint) (*User, error) {
@@ -157,7 +168,12 @@ func txCreateUser(tx *gorm.DB, json *CreateUserRequest, operator uint) (*User, e
 	hash, _ := bcrypt.Hash(json.Password, salt)
 	json.Password = string(hash)
 	json.DisplayName = util.NotEmpty(json.DisplayName, json.Name)
-	json.RoleName = util.NotEmpty(json.RoleName, rbac.GetDefaultRoleName())
+
+	if json.RoleName == "" {
+		json.RoleName = rbac.GetDefaultRoleName()
+	} else if rbac.GetRole(json.RoleName) == nil {
+		return nil, fmt.Errorf("role %s not found", json.RoleName)
+	}
 
 	user := &User{}
 	copier.Copy(user, json)
@@ -171,8 +187,13 @@ func txCreateUser(tx *gorm.DB, json *CreateUserRequest, operator uint) (*User, e
 	return user, nil
 }
 
-func dbUpdateUser(id uint, json *UpdateUserRequest, operator uint) (*User, error) {
-	return txUpdateUser(mctx.Database, id, json, operator)
+func dbUpdateUser(id uint, json *UpdateUserRequest, operator uint) (user *User, err error) {
+	user, err = txUpdateUser(mctx.Database, id, json, operator)
+	if err != nil {
+		return
+	}
+	cacheDeleteUser(id)
+	return
 }
 
 func txUpdateUser(tx *gorm.DB, id uint, json *UpdateUserRequest, operator uint) (*User, error) {
@@ -180,6 +201,9 @@ func txUpdateUser(tx *gorm.DB, id uint, json *UpdateUserRequest, operator uint) 
 		salt, _ := bcrypt.Salt(10)
 		hash, _ := bcrypt.Hash(json.Password, salt)
 		json.Password = string(hash)
+	}
+	if json.RoleName != "" && rbac.GetRole(json.RoleName) == nil {
+		return nil, fmt.Errorf("role %s not found", json.RoleName)
 	}
 
 	user := &User{}
@@ -199,7 +223,12 @@ func txUpdateUser(tx *gorm.DB, id uint, json *UpdateUserRequest, operator uint) 
 }
 
 func dbAttachOpenIDToUser(id uint, openid string) error {
-	return txAttachOpenIDToUser(mctx.Database, id, openid)
+	err := txAttachOpenIDToUser(mctx.Database, id, openid)
+	if err != nil {
+		return err
+	}
+	cacheDeleteUser(id)
+	return nil
 }
 
 func txAttachOpenIDToUser(tx *gorm.DB, id uint, openid string) error {
@@ -213,7 +242,12 @@ func txAttachOpenIDToUser(tx *gorm.DB, id uint, openid string) error {
 }
 
 func dbDeleteUser(id uint) error {
-	return txDeleteUser(mctx.Database, id)
+	err := txDeleteUser(mctx.Database, id)
+	if err != nil {
+		return err
+	}
+	cacheDeleteUser(id)
+	return nil
 }
 
 func txDeleteUser(tx *gorm.DB, id uint) (err error) {
@@ -231,7 +265,12 @@ func dbCheckLogin(user *User, password string) error {
 }
 
 func dbForceLogin(id uint, ip string) error {
-	return txForceLogin(mctx.Database, id, ip)
+	err := txForceLogin(mctx.Database, id, ip)
+	if err != nil {
+		return err
+	}
+	cacheDeleteUser(id)
+	return nil
 }
 
 func txForceLogin(tx *gorm.DB, id uint, ip string) error {

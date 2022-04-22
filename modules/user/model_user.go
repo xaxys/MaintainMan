@@ -83,7 +83,6 @@ type UserJson struct {
 	ID          uint           `json:"id"`
 	Name        string         `json:"name"`
 	DisplayName string         `json:"display_name"` // 昵称
-	Division    *DivisionJson  `json:"division"`
 	RoleName    string         `json:"user_role"`
 	Role        *rbac.RoleJson `json:"role,omitempty"`
 	Phone       string         `json:"phone"`
