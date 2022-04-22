@@ -1,11 +1,12 @@
 # MaintainMan
 
-[![OurEDA 2022](https://img.shields.io/badge/OurEDA-2022-00ffcc)](https://img.shields.io/badge/OurEDA-2022-00ffcc)
-[![Licence](https://img.shields.io/github/license/xaxys/maintainman)](https://github.com/xaxys/MaintainMan/blob/master/LICENSE)
-[![Contributors](https://img.shields.io/github/contributors/xaxys/maintainman)](https://github.com/xaxys/MaintainMan/graphs/contributors)
-[![Go Version](https://img.shields.io/github/go-mod/go-version/xaxys/maintainman)](https://github.com/xaxys/MaintainMan/blob/master/go.mod)
-[![Release](https://img.shields.io/github/v/release/xaxys/maintainman)](https://github.com/xaxys/MaintainMan/releases)
-[![Downloads](https://img.shields.io/github/downloads/xaxys/maintainman/total)](https://github.com/xaxys/MaintainMan/releases)
+[![OurEDA 2022](https://img.shields.io/badge/OurEDA-2022-00ffcc.svg)](https://img.shields.io/badge/OurEDA-2022-00ffcc)
+[![License](https://img.shields.io/badge/license-MIT%20with%20PATENTS-green.svg)](https://github.com/xaxys/MaintainMan/blob/master/LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/xaxys/MaintainMan/pulls)
+[![Contributors](https://img.shields.io/github/contributors/xaxys/maintainman.svg)](https://github.com/xaxys/MaintainMan/graphs/contributors)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/xaxys/maintainman.svg)](https://github.com/xaxys/MaintainMan/blob/master/go.mod)
+[![Release](https://img.shields.io/github/v/release/xaxys/maintainman.svg)](https://github.com/xaxys/MaintainMan/releases)
+[![Downloads](https://img.shields.io/github/downloads/xaxys/maintainman/total.svg)](https://github.com/xaxys/MaintainMan/releases)
 [![Build and Test](https://github.com/xaxys/MaintainMan/actions/workflows/main.yml/badge.svg)](https://github.com/xaxys/MaintainMan/actions/workflows/main.yml)
 
 MaintainMan is a logistic report management system powered by iris.
