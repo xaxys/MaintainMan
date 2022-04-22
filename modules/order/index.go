@@ -159,6 +159,7 @@ func entry(ctx *module.ModuleContext) {
 // @Tags order
 // @Produce text/plain
 // @Success 200 {string} string "模板ID"
+// @Router /wxtmpl/status [get]
 func getWxStatusTemplateID(ctx iris.Context) {
 	ctx.WriteString(orderConfig.GetString("notify.wechat.status.tmpl"))
 }
@@ -169,6 +170,7 @@ func getWxStatusTemplateID(ctx iris.Context) {
 // @Tags order
 // @Produce text/plain
 // @Success 200 {string} string "模板ID"
+// @Router /wxtmpl/comment [get]
 func getWxCommentTemplateID(ctx iris.Context) {
 	ctx.WriteString(orderConfig.GetString("notify.wechat.comment.tmpl"))
 }
