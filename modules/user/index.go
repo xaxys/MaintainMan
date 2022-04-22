@@ -87,5 +87,5 @@ func entry(ctx *module.ModuleContext) {
 // @Success 200 {string} string "微信AppID"
 // @Router /v1/wxappid [get]
 func getAppID(ctx iris.Context) {
-	ctx.Write([]byte(userConfig.GetString("wechat.appid")))
+	ctx.WriteString(userConfig.GetString("wechat.appid"))
 }

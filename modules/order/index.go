@@ -93,6 +93,10 @@ func entry(ctx *module.ModuleContext) {
 	Module.ModuleExport["wechat.comment.time"] = orderConfig.GetString("notify.wechat.comment.time")
 
 	mctx.Scheduler.Every(orderConfig.GetString("appraise.purge")).SingletonMode().Do(autoAppraiseOrderService)
+
+	mctx.Route.Get("/wxtmpl/status", getWxStatusTemplateID)
+	mctx.Route.Get("/wxtmpl/comment", getWxCommentTemplateID)
+
 	mctx.Route.PartyFunc("/order", func(order iris.Party) {
 		order.Get("/user", rbac.PermInterceptor("order.view"), getUserOrders)
 		order.Get("/repairer", rbac.PermInterceptor("order.viewfix"), getRepairerOrders)
@@ -147,4 +151,24 @@ func entry(ctx *module.ModuleContext) {
 		comment.Delete("/{id:uint}", rbac.PermInterceptor("comment.delete"), deleteComment)
 		comment.Delete("/{id:uint}/force", rbac.PermInterceptor("comment.deleteall"), forceDeleteComment)
 	})
+}
+
+// getWxStatusTemplateID godoc
+// @Summary 获取 微信 订单状态提醒 模板ID
+// @Description 获取 微信 订单状态提醒 模板ID
+// @Tags order
+// @Produce text/plain
+// @Success 200 {string} string "模板ID"
+func getWxStatusTemplateID(ctx iris.Context) {
+	ctx.WriteString(orderConfig.GetString("notify.wechat.status.tmpl"))
+}
+
+// getWxCommentTemplateID godoc
+// @Summary 获取 微信 订单留言提醒 模板ID
+// @Description 获取 微信 订单留言提醒 模板ID
+// @Tags order
+// @Produce text/plain
+// @Success 200 {string} string "模板ID"
+func getWxCommentTemplateID(ctx iris.Context) {
+	ctx.WriteString(orderConfig.GetString("notify.wechat.comment.tmpl"))
 }
