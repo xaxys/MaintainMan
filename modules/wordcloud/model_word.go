@@ -4,23 +4,23 @@ import (
 	"strings"
 
 	"github.com/xaxys/maintainman/core/model"
-	"github.com/yanyiwu/gojieba"
 	"github.com/xaxys/maintainman/modules/order"
+	"github.com/yanyiwu/gojieba"
 )
 
 type Word struct {
 	model.BaseModel
-	Content string `gorm:"not null; unique;"`
-	WordClass string `gorm:"not null"; size:10;`
-	Count int `gorm:"not null"; default:0;`
-	OrderId int `gorm:"not null";`
-	Order order.Order `gorm:"foreignKey:OrderId"`
+	Content   string      `gorm:"not null; unique;"`
+	WordClass string      `gorm:"not null; size:10;"`
+	Count     int         `gorm:"not null; default:0;"`
+	OrderId   int         `gorm:"not null;"`
+	Order     order.Order `gorm:"foreignKey:OrderId"`
 }
 
 type WordJson struct {
-	Content string `json:"content"`
+	Content   string `json:"content"`
 	WordClass string `json:"wordclass"`
-	Count int `json:"count"`
+	Count     int    `json:"count"`
 }
 
 type WordCollector struct {
@@ -32,12 +32,12 @@ func NewWordCollectorWithStr(str string) *WordCollector {
 	defer wordAnalyzer.Free()
 	words := wordAnalyzer.Tag(str)
 	roots, wordClass := getWordClass(words)
-    wordCounter := getWordCounter(roots)
-	return NewWordCollectorWithSet(generateWordSet(roots, wordClass, wordCounter)) 
+	wordCounter := getWordCounter(roots)
+	return NewWordCollectorWithSet(generateWordSet(roots, wordClass, wordCounter))
 
 }
 
-func NewWordCollectorWithSet(wordSet []WordJson) *WordCollector{
+func NewWordCollectorWithSet(wordSet []WordJson) *WordCollector {
 	return &WordCollector{
 		wordSet: wordSet,
 	}
@@ -83,19 +83,19 @@ func accumulateWords(words []*WordJson) []*WordJson {
 
 	for word, count := range wordCounter {
 		ans = append(ans, &WordJson{
-			Content: word,
+			Content:   word,
 			WordClass: classMap[word],
-			Count: count,
+			Count:     count,
 		})
 	}
 
 	return ans
 }
 
-func generateWordSet(roots []string, wordclass []string, wordCounter map[string] int) []WordJson {
+func generateWordSet(roots []string, wordclass []string, wordCounter map[string]int) []WordJson {
 	length := len(roots)
 	ans := make([]WordJson, 0)
-	uniqueMap := make(map[string] bool)
+	uniqueMap := make(map[string]bool)
 	for i := 0; i < length; i++ {
 		if _, ok := wordCounter[roots[i]]; ok {
 			if ok := uniqueMap[roots[i]]; !ok {
@@ -140,4 +140,3 @@ type GetWordsByOrderIdRequest struct {
 	model.PageParam
 	OrderId uint
 }
-
