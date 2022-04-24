@@ -15,6 +15,7 @@ func init() {
 	imageConfig.SetDefault("save_as_jpeg", false)
 
 	imageConfig.SetDefault("upload.async", false)
+	imageConfig.SetDefault("upload.throttling.enable", true)
 	imageConfig.SetDefault("upload.throttling.burst", 20)
 	imageConfig.SetDefault("upload.throttling.rate", 5)
 	imageConfig.SetDefault("upload.throttling.purge", "1m")

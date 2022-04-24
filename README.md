@@ -337,6 +337,7 @@ upload:
   max_pixels: 15000000    # 15 million pixels
   # the throttling rate control.
   throttling:
+    enable: true
     # the max number of requests allowed in a period.
     burst: 20
     # the duration between requests.
