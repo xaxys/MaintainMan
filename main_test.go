@@ -1803,6 +1803,9 @@ func TestHitAnnounceRouter(t *testing.T) {
 }
 
 func TestMultiHitAnnounceRouter(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping TestMultiHitAnnounceRouter in short mode")
+	}
 	app := newApp()
 	e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()

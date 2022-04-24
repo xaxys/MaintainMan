@@ -36,12 +36,21 @@ build:
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
 		-o $(TARGET) $(PWD)/main.go
 
-test: clean
+test: test-short
+
+test-full: clean
 	@echo "Testing MaintainMan ..."
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) test \
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
 		-timeout=30m -coverprofile=coverage.out ./...
+
+test-short: clean
+	@echo "Testing MaintainMan ..."
+	@$(GO) env -w CGO_ENABLED="1"
+	@$(GO) test \
+		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
+		-timeout=30m -short -coverprofile=coverage.out ./...
 
 clean:
 	@echo "Cleaning MaintainMan ..."
@@ -52,4 +61,4 @@ clean:
 	@$(RM_CMD_1) "*.out"      $(RM_CMD_2)
 	@$(RM_CMD_1) "*.yaml"     $(RM_CMD_2)
 
-.PHONY: all test clean
+.PHONY: all test test-full test-short clean
