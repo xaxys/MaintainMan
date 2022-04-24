@@ -12,4 +12,7 @@ func init() {
 	userConfig.SetDefault("admin.display_name", "maintainman default admin")
 	userConfig.SetDefault("admin.password", "12345678")
 	userConfig.SetDefault("admin.role_name", "super_admin")
+
+	userConfig.SetDefault("cache.driver", "local")
+	userConfig.SetDefault("cache.limit", 268435456) // 256MB
 }

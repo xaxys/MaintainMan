@@ -42,10 +42,11 @@ func init() {
 			name := jwtInfo["user_name"].(string)
 			role := jwtInfo["user_role"].(string)
 			auth := &model.AuthInfo{
-				User: uid,
-				Name: name,
-				Role: role,
-				IP:   ctx.Request().RemoteAddr,
+				User:  uid,
+				Name:  name,
+				Role:  role,
+				IP:    ctx.Request().RemoteAddr,
+				Other: jwtInfo,
 			}
 			ctx.Values().Set("auth", auth)
 		}

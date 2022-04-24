@@ -108,6 +108,11 @@ func forceUpdateOrderService(id uint, aul *UpdateOrderRequest, auth *model.AuthI
 	if err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
+	fields := util.NotEmptyFieldName(aul)
+	for _, field := range fields {
+		event := fmt.Sprintf("order:update:%s", field)
+		go mctx.EventBus.Emit(event, order.ID)
+	}
 	return model.SuccessUpdate(orderToJson(order), "更新成功")
 }
 
@@ -129,6 +134,7 @@ func releaseOrderService(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err := dbChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
+	go mctx.EventBus.Emit("order:update:status:waiting", order.ID, StatusWaiting)
 	return model.SuccessUpdate(nil, "释放成功")
 }
 
@@ -153,6 +159,7 @@ func assignOrderService(id, repairer uint, auth *model.AuthInfo) *model.ApiJson 
 	if err := dbChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
+	go mctx.EventBus.Emit("order:update:status:assigned", order.ID, StatusAssigned, repairer)
 	return model.SuccessUpdate(nil, "指派成功")
 }
 
@@ -177,6 +184,7 @@ func completeOrderService(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err := dbChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
+	go mctx.EventBus.Emit("order:update:status:completed", order.ID, StatusCompleted)
 	return model.SuccessUpdate(nil, "结单成功")
 }
 
@@ -198,6 +206,7 @@ func cancelOrderService(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err := dbChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
+	go mctx.EventBus.Emit("order:update:status:canceled", order.ID, StatusCanceled)
 	return model.SuccessUpdate(nil, "取消成功")
 }
 
@@ -219,6 +228,7 @@ func rejectOrderService(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err := dbChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
+	go mctx.EventBus.Emit("order:update:status:rejected", order.ID, StatusRejected)
 	return model.SuccessUpdate(nil, "拒绝成功")
 }
 
@@ -242,6 +252,7 @@ func appraiseOrderService(id, appraisal uint, auth *model.AuthInfo) *model.ApiJs
 	if err := dbAppraiseOrder(id, appraisal, auth.User); err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
+	go mctx.EventBus.Emit("order:update:status:appraised", order.ID, StatusAppraised)
 	return model.SuccessUpdate(nil, "评价成功")
 }
 
@@ -266,6 +277,7 @@ func reportOrderService(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err := dbChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
+	go mctx.EventBus.Emit("order:update:status:reported", order.ID, StatusReported)
 	return model.SuccessUpdate(nil, "上报成功")
 }
 
@@ -287,6 +299,7 @@ func holdOrderService(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if err := dbChangeOrderStatus(id, status); err != nil {
 		return model.ErrorUpdateDatabase(err)
 	}
+	go mctx.EventBus.Emit("order:update:status:hold", order.ID, StatusHold)
 	return model.SuccessUpdate(nil, "挂单成功")
 }
 
@@ -299,6 +312,7 @@ func autoAppraiseOrderService() {
 		for _, order := range orders {
 			def := util.ToUint(orderConfig.GetInt("appraise.default"))
 			_ = dbAppraiseOrder(order, def, 0)
+			go mctx.EventBus.Emit("order:update:status:appraised", order, StatusAppraised)
 		}
 		return nil
 	})

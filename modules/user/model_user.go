@@ -21,7 +21,7 @@ type User struct {
 	LoginIP     string        `gorm:"not null; size:40; default:0.0.0.0; comment:最后登录IP"`
 	LoginTime   time.Time     `gorm:"not null; comment:最后登录时间"`
 	RealName    string        `gorm:"not null; size:191; comment:真实姓名"`
-	OpenID      string        `gorm:"not null; size:191; index; comment:微信openid"` //TODO: 更改open_id的orm格式
+	OpenID      string        `gorm:"not null; size:191; index; comment:微信openid"`
 }
 
 type LoginRequest struct {
@@ -30,7 +30,7 @@ type LoginRequest struct {
 }
 
 type WxLoginRequest struct {
-	Code string `json:"code" validate:"required"`
+	Code string `json:"code"`
 }
 
 type WxLoginResponse struct {
@@ -51,7 +51,7 @@ type RegisterUserRequest struct {
 }
 
 type WxRegisterRequest struct {
-	WxLoginRequest
+	Code string `json:"code"`
 	RegisterUserRequest
 }
 
@@ -59,6 +59,7 @@ type CreateUserRequest struct {
 	RegisterUserRequest
 	RoleName   string `json:"role_name" validate:"omitempty,lte=50"`
 	DivisionID uint   `json:"division_id"`
+	OpenID     string `json:"-"`
 }
 
 type UpdateUserRequest struct {
@@ -82,7 +83,6 @@ type UserJson struct {
 	ID          uint           `json:"id"`
 	Name        string         `json:"name"`
 	DisplayName string         `json:"display_name"` // 昵称
-	Division    *DivisionJson  `json:"division"`
 	RoleName    string         `json:"user_role"`
 	Role        *rbac.RoleJson `json:"role,omitempty"`
 	Phone       string         `json:"phone"`

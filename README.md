@@ -1,5 +1,14 @@
 # MaintainMan
 
+[![OurEDA 2022](https://img.shields.io/badge/OurEDA-2022-00ffcc.svg)](https://img.shields.io/badge/OurEDA-2022-00ffcc)
+[![License](https://img.shields.io/badge/license-MIT%20with%20PATENTS-green.svg)](https://github.com/xaxys/MaintainMan/blob/master/LICENSE)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/xaxys/MaintainMan/pulls)
+[![Contributors](https://img.shields.io/github/contributors/xaxys/maintainman.svg)](https://github.com/xaxys/MaintainMan/graphs/contributors)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/xaxys/maintainman.svg)](https://github.com/xaxys/MaintainMan/blob/master/go.mod)
+[![Release](https://img.shields.io/github/v/release/xaxys/maintainman.svg)](https://github.com/xaxys/MaintainMan/releases)
+[![Downloads](https://img.shields.io/github/downloads/xaxys/maintainman/total.svg)](https://github.com/xaxys/MaintainMan/releases)
+[![Build and Test](https://github.com/xaxys/MaintainMan/actions/workflows/main.yml/badge.svg)](https://github.com/xaxys/MaintainMan/actions/workflows/main.yml)
+
 MaintainMan is a logistic report management system powered by iris.
 
 ## Feature
@@ -176,6 +185,13 @@ wechat:
   # if true, a unregistered user will be registered on wechat login.
   # username will be open_id and user will be assigned a random password.
   fastlogin: true
+
+cache:
+  # cache type (local, redis).
+  driver: local
+  # cache limit.
+  limit: 268435456 # 256M
+  # if redis, connection has been configured in app.yml
 
 # the admin user configuration.
 # only apply at first initialization.
@@ -435,6 +451,23 @@ appraise:
   # the default appraise score of timeouted unappraised order.
   default: 5
 
+notify:
+  wechat:
+    status:
+      tmpl:   "微信订阅消息模板id"
+      order:  "模板中 订单编号 字段名"
+      title:  "模板中 订单标题 字段名"
+      status: "模板中 订单状态 字段名"
+      time:   "模板中 订单更新时间 字段名"
+      other:  "模板中 备注 字段名 (用于传递维修工信息)"
+
+    comment:
+      tmpl:    "微信留言消息模板id"
+      title:   "模板中 订单标题 字段名"
+      name:    "模板中 留言人 字段名"
+      messgae: "模板中 留言内容 字段名"
+      time:    "模板中 留言时间 字段名"
+
 ```
 
 </details>
@@ -467,4 +500,4 @@ You can help to make the project better by creating an issue or pull request.
 
 ## License
 
-Released under [**Modified** MIT License](https://github.com/xaxys/MaintainMan/blob/master/LICENSE).
+Released under [MIT License](https://github.com/xaxys/MaintainMan/blob/master/LICENSE). We also provide an additional [patent grant](https://github.com/xaxys/MaintainMan/blob/master/PATENTS).

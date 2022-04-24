@@ -46,6 +46,11 @@ func SuccessCreate(objects interface{}, msg string) *ApiJson {
 	return ApiResponse(201, true, objects, msg)
 }
 
+// Fail 业务失败
+func Fail(objects interface{}, msg string) *ApiJson {
+	return ApiResponse(200, false, objects, msg)
+}
+
 // ErrorInsertDatabase 插入数据库失败
 func ErrorInsertDatabase(errs ...error) *ApiJson {
 	return ApiResponse(500, false, combineError(errs...), "插入数据库失败")

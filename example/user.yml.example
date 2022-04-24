@@ -10,6 +10,13 @@ wechat:
   # username will be open_id and user will be assigned a random password.
   fastlogin: true
 
+cache:
+  # cache type (local, redis).
+  driver: local
+  # cache limit.
+  limit: 268435456 # 256M
+  # if redis, connection has been configured in app.yml
+
 # the admin user configuration.
 # only apply at first initialization.
 # IMPORTANT! you'd better change it to some strong password and delete
