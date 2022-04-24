@@ -49,6 +49,7 @@ require (
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/spf13/cast v1.4.1
 	github.com/spf13/viper v1.10.1
+	github.com/yanyiwu/gojieba v1.1.3-0.20220131084353-a30c1dcd29bb
 	golang.org/x/image v0.0.0-20220321031419-a8550c1d254a
 )
 
