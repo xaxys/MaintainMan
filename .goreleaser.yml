@@ -8,6 +8,8 @@ builds:
   - id: darwin_amd64
     env:
       - CGO_ENABLED=1
+      - CGO_CFLAGS=-O3
+      - CGO_CXXFLAGS=-O3
       - CC=o64-clang
       - CXX=o64-clang++
     goos:
@@ -24,6 +26,8 @@ builds:
   - id: darwin_arm64
     env:
       - CGO_ENABLED=1
+      - CGO_CFLAGS=-O3
+      - CGO_CXXFLAGS=-O3
       - CC=oa64-clang
       - CXX=oa64-clang++
     goos:
@@ -40,6 +44,8 @@ builds:
   - id: linux_amd64
     env:
       - CGO_ENABLED=1
+      - CGO_CFLAGS=-O3
+      - CGO_CXXFLAGS=-O3
       - CC=gcc
       - CXX=g++
     goos:
@@ -47,8 +53,8 @@ builds:
     goarch:
       - amd64
     ldflags:
-      - -extldflags '-static'
       - -s -w 
+      - -extldflags '-static'
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
@@ -57,6 +63,8 @@ builds:
   - id: linux_arm64
     env:
       - CGO_ENABLED=1
+      - CGO_CFLAGS=-O3
+      - CGO_CXXFLAGS=-O3
       - CC=aarch64-linux-gnu-gcc
       - CXX=aarch64-linux-gnu-g++
     goos:
@@ -64,8 +72,8 @@ builds:
     goarch:
       - arm64
     ldflags:
-      - -extldflags '-static'
       - -s -w 
+      - -extldflags '-static'
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
@@ -74,14 +82,17 @@ builds:
   - id: windows_i686
     env:
       - CGO_ENABLED=1
-      - CC=i686-w64-mingw32-gcc -static-libgcc -static-libstdc++ -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive -Wl,-Bdynamic
-      - CXX=i686-w64-mingw32-g++ -static-libgcc -static-libstdc++ -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive -Wl,-Bdynamic
+      - CGO_CFLAGS=-O3
+      - CGO_CXXFLAGS=-O3
+      - CC=i686-w64-mingw32-gcc
+      - CXX=i686-w64-mingw32-g++
     goos:
       - windows
     goarch:
       - 386
     ldflags:
       - -s -w 
+      - -extldflags '-static'
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
@@ -90,14 +101,17 @@ builds:
   - id: windows_amd64
     env:
       - CGO_ENABLED=1
-      - CC=x86_64-w64-mingw32-gcc -static-libgcc -static-libstdc++ -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive -Wl,-Bdynamic
-      - CXX=x86_64-w64-mingw32-g++ -static-libgcc -static-libstdc++ -Wl,-Bstatic,--whole-archive -lwinpthread -Wl,--no-whole-archive -Wl,-Bdynamic
+      - CGO_CFLAGS=-O3
+      - CGO_CXXFLAGS=-O3
+      - CC=x86_64-w64-mingw32-gcc
+      - CXX=x86_64-w64-mingw32-g++
     goos:
       - windows
     goarch:
       - amd64
     ldflags:
       - -s -w 
+      - -extldflags '-static'
       - -X "main.BuildTags={{.Tag}}"
       - -X "main.BuildTime={{.Date}}"
       - -X "main.GitCommit={{.FullCommit}}"
