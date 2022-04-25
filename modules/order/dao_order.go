@@ -219,10 +219,11 @@ func txChangeOrderStatus(tx *gorm.DB, id uint, status *Status) error {
 	}
 	lastStatus := util.LastElem(or.StatusList)
 
-	lstatus := &Status{}
-	lstatus.UpdatedBy = status.CreatedBy
-	lstatus.Current = false
-	if err := tx.Model(lastStatus).Updates(lstatus).Error; err != nil {
+	updateStatus := map[string]any{
+		"current":    false,
+		"updated_by": status.CreatedBy,
+	}
+	if err := tx.Model(lastStatus).Select("current", "updated_by").Updates(updateStatus).Error; err != nil {
 		return err
 	}
 

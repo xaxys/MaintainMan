@@ -10,9 +10,11 @@ var (
 )
 
 func initLimiter() {
-	tRate := imageConfig.GetInt("upload.throttling.rate")
-	burst := imageConfig.GetInt("upload.throttling.burst")
-	purge := imageConfig.GetDuration("upload.throttling.purge")
-	expire := imageConfig.GetDuration("upload.throttling.expire")
-	rateLimiter = rate.Limit(float64(tRate), burst, rate.PurgeEvery(purge, expire))
+	if imageConfig.GetBool("upload.throttling.enable") {
+		tRate := imageConfig.GetInt("upload.throttling.rate")
+		burst := imageConfig.GetInt("upload.throttling.burst")
+		purge := imageConfig.GetDuration("upload.throttling.purge")
+		expire := imageConfig.GetDuration("upload.throttling.expire")
+		rateLimiter = rate.Limit(float64(tRate), burst, rate.PurgeEvery(purge, expire))
+	}
 }

@@ -9,7 +9,7 @@ import (
 
 var Module = module.Module{
 	ModuleName:    "image",
-	ModuleVersion: "1.0.0",
+	ModuleVersion: "1.1.0",
 	ModuleConfig:  imageConfig,
 	ModuleEnv: map[string]any{
 		"cache.evict": onEvict,
@@ -29,7 +29,11 @@ func entry(ctx *module.ModuleContext) {
 	mctx = ctx
 	initLimiter()
 	ctx.Route.PartyFunc("/image", func(image iris.Party) {
-		image.Post("/", rbac.PermInterceptor("image.upload"), rateLimiter, uploadImage)
+		if rateLimiter != nil {
+			image.Post("/", rbac.PermInterceptor("image.upload"), rateLimiter, uploadImage)
+		} else {
+			image.Post("/", rbac.PermInterceptor("image.upload"), uploadImage)
+		}
 		image.Get("/{id:uuid}", rbac.PermInterceptor("image.view"), getImage)
 	})
 
