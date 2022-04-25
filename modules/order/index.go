@@ -154,23 +154,23 @@ func entry(ctx *module.ModuleContext) {
 }
 
 // getWxStatusTemplateID godoc
-// @Summary 获取 微信 订单状态提醒 模板ID
-// @Description 获取 微信 订单状态提醒 模板ID
-// @Tags order
-// @Produce text/plain
-// @Success 200 {string} string "模板ID"
-// @Router /wxtmpl/status [get]
+// @Summary      获取 微信 订单状态提醒 模板ID
+// @Description  获取 微信 订单状态提醒 模板ID
+// @Tags         order
+// @Produce      text/plain
+// @Success      200  {string}  string  "模板ID"
+// @Router       /wxtmpl/status [get]
 func getWxStatusTemplateID(ctx iris.Context) {
 	ctx.WriteString(orderConfig.GetString("notify.wechat.status.tmpl"))
 }
 
 // getWxCommentTemplateID godoc
-// @Summary 获取 微信 订单留言提醒 模板ID
-// @Description 获取 微信 订单留言提醒 模板ID
-// @Tags order
-// @Produce text/plain
-// @Success 200 {string} string "模板ID"
-// @Router /wxtmpl/comment [get]
+// @Summary      获取 微信 订单留言提醒 模板ID
+// @Description  获取 微信 订单留言提醒 模板ID
+// @Tags         order
+// @Produce      text/plain
+// @Success      200  {string}  string  "模板ID"
+// @Router       /wxtmpl/comment [get]
 func getWxCommentTemplateID(ctx iris.Context) {
 	ctx.WriteString(orderConfig.GetString("notify.wechat.comment.tmpl"))
 }

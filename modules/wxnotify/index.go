@@ -86,12 +86,12 @@ func listener() {
 				odr, err = order.GetOrderByID(orderID)
 			}
 			if err != nil {
-				mctx.Logger.Errorf("get order failed: %s", err)
+				mctx.Logger.Warnf("get order failed: %s", err)
 				continue
 			}
 			usr, err := user.GetUserByID(odr.UserID)
 			if err != nil {
-				mctx.Logger.Errorf("get user failed: %s", err)
+				mctx.Logger.Warnf("get user failed: %s", err)
 				continue
 			}
 			if usr.OpenID == "" {
@@ -118,7 +118,7 @@ func listener() {
 				repairerID, _ := ch.Args[2].(uint)
 				repairer, err := user.GetUserByID(repairerID)
 				if err != nil {
-					mctx.Logger.Errorf("get repairer failed: %s", err)
+					mctx.Logger.Warnf("get repairer failed: %s", err)
 					continue
 				}
 				data[keyStatusOther] = fmt.Sprintf("维修师傅 %s 将尽快为您维修", repairer.Name)
@@ -153,12 +153,12 @@ func listener() {
 			commentID, _ := ch.Args[1].(uint)
 			comment, err := order.GetCommentByID(commentID)
 			if err != nil {
-				mctx.Logger.Errorf("get comment failed: %s", err)
+				mctx.Logger.Warnf("get comment failed: %s", err)
 				continue
 			}
 			odr, err := order.GetOrderWithLastStatus(orderID)
 			if err != nil {
-				mctx.Logger.Errorf("get order failed: %s", err)
+				mctx.Logger.Warnf("get order failed: %s", err)
 				continue
 			}
 
@@ -182,7 +182,7 @@ func listener() {
 			if odr.UserID != comment.UserID {
 				usr, err := user.GetUserByID(odr.UserID)
 				if err != nil {
-					mctx.Logger.Errorf("get user failed: %s", err)
+					mctx.Logger.Warnf("get user failed: %s", err)
 					continue
 				}
 				if usr.OpenID != "" {
@@ -193,7 +193,7 @@ func listener() {
 			if odr.Status == order.StatusAssigned {
 				repairerID := util.LastElem(odr.StatusList).RepairerID
 				if repairerID.Int64 == 0 || repairerID.Valid == false {
-					mctx.Logger.Errorf("repairer id not found")
+					mctx.Logger.Warnf("repairer id not found")
 					continue
 				}
 				if uint(repairerID.Int64) == comment.UserID {
@@ -201,7 +201,7 @@ func listener() {
 				}
 				repairer, err := user.GetUserByID(uint(repairerID.Int64))
 				if err != nil {
-					mctx.Logger.Errorf("get repairer failed: %s", err)
+					mctx.Logger.Warnf("get repairer failed: %s", err)
 					continue
 				}
 				if repairer.OpenID != "" {
