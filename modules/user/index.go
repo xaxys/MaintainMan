@@ -80,12 +80,12 @@ func entry(ctx *module.ModuleContext) {
 }
 
 // getAppID godoc
-// @Summary 获取微信AppID
-// @Description 获取微信AppID
-// @Tags user
-// @Produce text/plain
-// @Success 200 {string} string "微信AppID"
-// @Router /v1/wxappid [get]
+// @Summary      获取微信AppID
+// @Description  获取微信AppID
+// @Tags         user
+// @Produce      text/plain
+// @Success      200  {string}  string  "微信AppID"
+// @Router       /v1/wxappid [get]
 func getAppID(ctx iris.Context) {
 	ctx.WriteString(userConfig.GetString("wechat.appid"))
 }

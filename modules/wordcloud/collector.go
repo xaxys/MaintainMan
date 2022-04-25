@@ -3,25 +3,8 @@ package wordcloud
 import (
 	"strings"
 
-	"github.com/xaxys/maintainman/core/model"
-	"github.com/xaxys/maintainman/modules/order"
 	"github.com/yanyiwu/gojieba"
 )
-
-type Word struct {
-	model.BaseModel
-	Content   string      `gorm:"not null; unique;"`
-	WordClass string      `gorm:"not null; size:10;"`
-	Count     int         `gorm:"not null; default:0;"`
-	OrderId   int         `gorm:"not null;"`
-	Order     order.Order `gorm:"foreignKey:OrderId"`
-}
-
-type WordJson struct {
-	Content   string `json:"content"`
-	WordClass string `json:"wordclass"`
-	Count     int    `json:"count"`
-}
 
 type WordCollector struct {
 	wordSet []WordJson
@@ -54,8 +37,8 @@ func getWordClass(words []string) ([]string, []string) {
 	return roots, wordclass
 }
 
-func getWordCounter(words []string) map[string]int {
-	counter := make(map[string]int, 0)
+func getWordCounter(words []string) map[string]uint {
+	counter := make(map[string]uint, 0)
 	for _, word := range words {
 		_, ok := counter[word]
 		if !ok {
@@ -71,7 +54,7 @@ func accumulateWords(words []*WordJson) []*WordJson {
 	length := len(words)
 	ans := make([]*WordJson, 0)
 	classMap := make(map[string]string)
-	wordCounter := make(map[string]int)
+	wordCounter := make(map[string]uint)
 	for i := 0; i < length; i++ {
 		if _, ok := classMap[words[i].Content]; !ok {
 			wordCounter[words[i].Content] = words[i].Count
@@ -92,7 +75,7 @@ func accumulateWords(words []*WordJson) []*WordJson {
 	return ans
 }
 
-func generateWordSet(roots []string, wordclass []string, wordCounter map[string]int) []WordJson {
+func generateWordSet(roots []string, wordclass []string, wordCounter map[string]uint) []WordJson {
 	length := len(roots)
 	ans := make([]WordJson, 0)
 	uniqueMap := make(map[string]bool)
@@ -125,18 +108,4 @@ func (wc *WordCollector) Filter(filter Filter) *WordCollector {
 
 func (wc *WordCollector) ToSlice() []WordJson {
 	return wc.wordSet
-}
-
-type UploadWordsRequest struct {
-	Content string
-	OrderId uint
-}
-
-type GetAllWordsRequest struct {
-	model.PageParam
-}
-
-type GetWordsByOrderIdRequest struct {
-	model.PageParam
-	OrderId uint
 }

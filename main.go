@@ -18,6 +18,7 @@ import (
 	"github.com/xaxys/maintainman/modules/role"
 	"github.com/xaxys/maintainman/modules/sysinfo"
 	"github.com/xaxys/maintainman/modules/user"
+	"github.com/xaxys/maintainman/modules/wordcloud"
 	"github.com/xaxys/maintainman/modules/wxnotify"
 )
 
@@ -76,6 +77,7 @@ func newApp() *iris.Application {
 		&announce.Module,
 		&order.Module,
 		&wxnotify.Module,
+		&wordcloud.Module,
 		&sysinfo.Module,
 	)
 	service.Scheduler.StartAsync()

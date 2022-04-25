@@ -1,6 +1,10 @@
 package model
 
-import "github.com/xaxys/maintainman/core/util"
+import (
+	"fmt"
+
+	"github.com/xaxys/maintainman/core/util"
+)
 
 type Page struct {
 	Entries interface{} `json:"entries"`
@@ -23,7 +27,7 @@ func ApiResponse(code int, status bool, objects interface{}, msg string) *ApiJso
 }
 
 func combineError(errs ...error) (errMsg []string) {
-	return util.TransSlice(errs, func(err error) string { return err.Error() })
+	return util.TransSlice(errs, func(err error) string { return fmt.Sprint(err) })
 }
 
 // Success 成功

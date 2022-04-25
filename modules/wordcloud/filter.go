@@ -2,7 +2,7 @@ package wordcloud
 
 type Filter interface {
 	IsLegal(word WordJson) bool
-} 
+}
 
 type FilterWithDict struct {
 	Dictionary map[string]any
@@ -21,4 +21,10 @@ func NewWordFilter(dict map[string]any) *FilterWithDict {
 	return &FilterWithDict{
 		Dictionary: dict,
 	}
+}
+
+type LengthFilter struct{}
+
+func (lf *LengthFilter) IsLegal(word WordJson) bool {
+	return len(word.Content) >= 4
 }
