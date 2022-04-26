@@ -2,7 +2,6 @@ package wordcloud
 
 import (
 	"github.com/xaxys/maintainman/core/dao"
-	"github.com/xaxys/maintainman/core/logger"
 	"github.com/xaxys/maintainman/core/model"
 	"gorm.io/gorm"
 )
@@ -10,7 +9,7 @@ import (
 func dbUploadWord(id uint, json *WordJson) (err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if err = txUploadWord(tx, id, json); err != nil {
-			logger.Logger.Warnf("UploadWordErr: %+v", err)
+			mctx.Logger.Warnf("UploadWordErr: %+v", err)
 		}
 		return err
 	})
@@ -32,7 +31,7 @@ func txUploadWord(tx *gorm.DB, id uint, word *WordJson) error {
 func dbUploadOrderWord(id uint, json *WordJson) (word *OrderWord, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if word, err = txUploadOrderWord(tx, id, json); err != nil {
-			logger.Logger.Warnf("UploadOrderWordErr: %+v", err)
+			mctx.Logger.Warnf("UploadOrderWordErr: %+v", err)
 		}
 		return err
 	})
@@ -59,7 +58,7 @@ func txUploadOrderWord(tx *gorm.DB, id uint, json *WordJson) (*OrderWord, error)
 func dbUploadGlobalWord(json *WordJson) (word *GlobalWord, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if word, err = txUploadGlobalWord(tx, json); err != nil {
-			logger.Logger.Warnf("UploadGlobalWordErr: %+v", err)
+			mctx.Logger.Warnf("UploadGlobalWordErr: %+v", err)
 		}
 		return err
 	})
@@ -84,7 +83,7 @@ func txUploadGlobalWord(tx *gorm.DB, json *WordJson) (*GlobalWord, error) {
 func dbGetAllWords(aul *model.PageParam) (words []*GlobalWord, count uint, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if words, count, err = txGetAllWords(tx, aul); err != nil {
-			logger.Logger.Warnf("GetAllWordsErr: %+v", err)
+			mctx.Logger.Warnf("GetAllWordsErr: %+v", err)
 		}
 		return err
 	})
@@ -108,7 +107,7 @@ func txGetAllWords(tx *gorm.DB, aul *model.PageParam) (words []*GlobalWord, coun
 func dbGetOrderWords(id uint, aul *model.PageParam) (words []*OrderWord, count uint, err error) {
 	mctx.Database.Transaction(func(tx *gorm.DB) error {
 		if words, count, err = txGetOrderWords(tx, id, aul); err != nil {
-			logger.Logger.Warnf("GetOrderWordsErr: %+v", err)
+			mctx.Logger.Warnf("GetOrderWordsErr: %+v", err)
 		}
 		return err
 	})
