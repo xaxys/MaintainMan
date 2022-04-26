@@ -343,8 +343,8 @@ func getWxUserOpenID(code string) (string, error) {
 }
 
 func createUserWithOpenID(aul *CreateUserRequest, openID string, operator uint) (user *User, response *model.ApiJson) {
-	mctx.Database.Transaction(func(tx *gorm.DB) error {
-		user, err := dbCreateUser(aul, operator)
+	mctx.Database.Transaction(func(tx *gorm.DB) (err error) {
+		user, err = dbCreateUser(aul, operator)
 		if err != nil {
 			response = model.ErrorInsertDatabase(err)
 			return err
