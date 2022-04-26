@@ -16,11 +16,11 @@ type Order struct {
 	ContactPhone string     `gorm:"not null; size:191; comment:联系电话"`
 	Status       uint       `gorm:"not null; size:5; default:0; index:idx_order_user_status,priority:2; comment:状态 0:非法 1:待处理 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价"`
 	StatusList   []*Status  `gorm:"foreignkey:OrderID"`
-	AllowComment uint       `gorm:"not null; size:2 default:1; comment:是否允许评论 1:允许 2:不允许"`
+	AllowComment uint       `gorm:"not null; size:2; default:1; comment:是否允许评论 1:允许 2:不允许"`
 	Comments     []*Comment `gorm:"foreignkey:OrderID"`
 	ItemLogs     []*ItemLog `gorm:"foreignkey:OrderID"`
 	Tags         []*Tag     `gorm:"many2many:order_tags;"`
-	Appraisal    uint       `gorm:"not null; size:5 default:0; comment:评价 0:未评价 1-5:已评价"`
+	Appraisal    uint       `gorm:"not null; size:5; default:0; comment:评价 0:未评价 1-5:已评价"`
 }
 
 type CreateOrderRequest struct {

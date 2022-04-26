@@ -9,11 +9,14 @@ import (
 
 func getCommentsByOrderService(id uint, param *model.PageParam, auth *model.AuthInfo) *model.ApiJson {
 	order, err := dbGetOrderWithLastStatus(id)
-	if err != nil {
+	if err != nil || order.ID == 0 {
 		return model.ErrorNotFound(err)
 	}
-	if order.UserID != auth.User && uint(util.LastElem(order.StatusList).RepairerID.Int64) != auth.User {
-		return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能查看评论"))
+	if order.UserID != auth.User {
+		repairer := util.LastElem(order.StatusList).RepairerID
+		if repairer != nil && *repairer != auth.User {
+			return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能查看评论"))
+		}
 	}
 	return forceGetCommentsByOrderService(id, param, auth)
 }
@@ -30,11 +33,14 @@ func forceGetCommentsByOrderService(id uint, param *model.PageParam, auth *model
 
 func createCommentService(id uint, aul *CreateCommentRequest, auth *model.AuthInfo) *model.ApiJson {
 	order, err := dbGetOrderWithLastStatus(id)
-	if err != nil {
+	if err != nil || order.ID == 0 {
 		return model.ErrorNotFound(err)
 	}
-	if order.UserID != auth.User && uint(util.LastElem(order.StatusList).RepairerID.Int64) != auth.User {
-		return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能创建评论"))
+	if order.UserID != auth.User {
+		repairer := util.LastElem(order.StatusList).RepairerID
+		if repairer != nil && *repairer != auth.User {
+			return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能创建评论"))
+		}
 	}
 	if order.AllowComment == CommentDisallow {
 		return model.ErrorNoPermissions(fmt.Errorf("该订单不允许评论"))

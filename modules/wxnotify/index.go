@@ -192,14 +192,14 @@ func listener() {
 			// send notification to current repairer
 			if odr.Status == order.StatusAssigned {
 				repairerID := util.LastElem(odr.StatusList).RepairerID
-				if repairerID.Int64 == 0 || repairerID.Valid == false {
+				if repairerID == nil || *repairerID == 0 {
 					mctx.Logger.Warnf("repairer id not found")
 					continue
 				}
-				if uint(repairerID.Int64) == comment.UserID {
+				if *repairerID == comment.UserID {
 					continue
 				}
-				repairer, err := user.GetUserByID(uint(repairerID.Int64))
+				repairer, err := user.GetUserByID(*repairerID)
 				if err != nil {
 					mctx.Logger.Warnf("get repairer failed: %s", err)
 					continue

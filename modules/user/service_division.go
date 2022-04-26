@@ -64,7 +64,7 @@ func divisionToJson(division *Division) *DivisionJson {
 		return &DivisionJson{
 			ID:       division.ID,
 			Name:     division.Name,
-			ParentID: uint(division.ParentID.Int64),
+			ParentID: util.NilOrBaseValue(division.ParentID, func(t *uint) uint { return *t }, 0),
 			Children: util.TransSlice(division.Children, divisionToJson),
 		}
 	}

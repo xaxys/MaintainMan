@@ -1,8 +1,7 @@
 package user
 
 import (
-	"database/sql"
-
+	"github.com/xaxys/maintainman/core/util"
 	"gorm.io/gorm"
 )
 
@@ -42,7 +41,7 @@ func dbCreateDivision(aul *CreateDivisionRequest) (*Division, error) {
 func txCreateDivision(tx *gorm.DB, aul *CreateDivisionRequest) (*Division, error) {
 	division := &Division{
 		Name:     aul.Name,
-		ParentID: sql.NullInt64{Int64: int64(aul.ParentID), Valid: aul.ParentID != 0},
+		ParentID: util.Tenary(aul.ParentID != 0, &aul.ParentID, nil),
 	}
 	if err := tx.Create(division).Error; err != nil {
 		mctx.Logger.Warnf("CreateDivisionErr: %v\n", err)
@@ -56,14 +55,15 @@ func dbUpdateDivision(id uint, aul *UpdateDivisionRequest) (*Division, error) {
 }
 
 func txUpdateDivision(tx *gorm.DB, id uint, aul *UpdateDivisionRequest) (*Division, error) {
+	parentID := uint(aul.ParentID)
 	division := &Division{
 		Name:     aul.Name,
-		ParentID: sql.NullInt64{Int64: 0, Valid: false},
+		ParentID: util.Tenary(aul.ParentID > 0, &parentID, nil),
 	}
 	division.ID = id
 	tx = tx.Model(division).Updates(division)
-	if aul.ParentID != 0 {
-		tx = tx.Update("parent_id", sql.NullInt64{Int64: int64(aul.ParentID), Valid: aul.ParentID != -1})
+	if aul.ParentID == -1 {
+		tx = tx.Update("parent_id", nil)
 	}
 	if err := tx.Error; err != nil {
 		mctx.Logger.Warnf("UpdateDivisionErr: %v\n", err)

@@ -270,7 +270,8 @@ func reportOrderService(id uint, auth *model.AuthInfo) *model.ApiJson {
 	if order.Status != StatusAssigned {
 		return model.ErrorUpdateDatabase(fmt.Errorf("订单未指派，不能上报"))
 	}
-	if uint(util.LastElem(order.StatusList).RepairerID.Int64) != auth.User {
+	repairer := util.LastElem(order.StatusList).RepairerID
+	if repairer != nil && *repairer != auth.User {
 		return model.ErrorUpdateDatabase(fmt.Errorf("操作人不是订单指派人，不能上报"))
 	}
 	status := NewStatusReported(auth.User)

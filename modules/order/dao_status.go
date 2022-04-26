@@ -1,7 +1,6 @@
 package order
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/xaxys/maintainman/core/dao"
@@ -23,7 +22,7 @@ func dbGetOrderByRepairer(id uint, json *RepairerOrderRequest) (orders []*Order,
 
 func txGetOrderByRepairer(tx *gorm.DB, id uint, json *RepairerOrderRequest) (orders []*Order, count uint, err error) {
 	status := &Status{
-		RepairerID: sql.NullInt64{Int64: int64(id), Valid: true},
+		RepairerID: &id,
 		Current:    json.Current,
 	}
 	statuses := []*Status{}
@@ -75,7 +74,7 @@ func txGetAppraiseTimeoutOrder(tx *gorm.DB) (ids []uint, err error) {
 func NewStatus(status, repairer uint, operator uint) *Status {
 	return &Status{
 		Status:     status,
-		RepairerID: sql.NullInt64{Int64: int64(repairer), Valid: repairer != 0},
+		RepairerID: util.Tenary(repairer != 0, &repairer, nil),
 		Current:    true,
 		BaseModel: model.BaseModel{
 			CreatedBy: operator,

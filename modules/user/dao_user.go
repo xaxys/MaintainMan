@@ -1,7 +1,6 @@
 package user
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -116,7 +115,7 @@ func dbGetUsersByDivision(id uint, param *model.PageParam) (users []*User, count
 
 func txGetUserByDivision(tx *gorm.DB, id uint, param *model.PageParam) (users []*User, count uint, err error) {
 	user := &User{}
-	user.DivisionID = sql.NullInt64{Int64: int64(id), Valid: id != 0}
+	user.DivisionID = &id
 	tx = dao.TxPageFilter(tx, param).Where(user)
 	if id == 0 {
 		tx = tx.Where("division_id is null")
@@ -177,8 +176,9 @@ func txCreateUser(tx *gorm.DB, json *CreateUserRequest, operator uint) (*User, e
 
 	user := &User{}
 	copier.Copy(user, json)
-	user.DivisionID = sql.NullInt64{Int64: int64(json.DivisionID), Valid: json.DivisionID != 0}
+	user.DivisionID = util.Tenary(json.DivisionID != 0, &json.DivisionID, nil)
 	user.CreatedBy = operator
+	user.LoginTime = time.Now()
 
 	if err := tx.Create(user).Error; err != nil {
 		mctx.Logger.Warnf("CreateUserErr: %v\n", err)
@@ -210,10 +210,11 @@ func txUpdateUser(tx *gorm.DB, id uint, json *UpdateUserRequest, operator uint) 
 	copier.Copy(user, json)
 	user.ID = id
 	user.UpdatedBy = operator
-	user.DivisionID = sql.NullInt64{Int64: 0, Valid: false}
+	division := uint(json.DivisionID)
+	user.DivisionID = util.Tenary(json.DivisionID > 0, &division, nil)
 	tx = tx.Model(user).Updates(user)
-	if json.DivisionID != 0 {
-		tx = tx.Update("division_id", sql.NullInt64{Int64: int64(json.DivisionID), Valid: json.DivisionID != -1})
+	if json.DivisionID == -1 {
+		tx = tx.Update("division_id", nil)
 	}
 	if err := tx.Error; err != nil {
 		mctx.Logger.Warnf("UpdateUserErr: %v\n", err)

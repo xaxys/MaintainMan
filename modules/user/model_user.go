@@ -1,7 +1,6 @@
 package user
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/xaxys/maintainman/core/model"
@@ -10,18 +9,18 @@ import (
 
 type User struct {
 	model.BaseModel
-	Name        string        `gorm:"not null; size:50; unique; comment:用户名"`
-	Password    string        `gorm:"not null; size:191; comment:密码"`
-	DisplayName string        `gorm:"not null; size:191; comment:昵称"`
-	RoleName    string        `gorm:"not null; size:50; index; comment:所属角色"`
-	DivisionID  sql.NullInt64 `gorm:"comment:所属分组id"`
-	Division    *Division     `gorm:"foreignkey:DivisionID"`
-	Phone       string        `gorm:"not null; size:191; index; comment:手机号"`
-	Email       string        `gorm:"not null; size:191; index; comment:邮箱"`
-	LoginIP     string        `gorm:"not null; size:40; default:0.0.0.0; comment:最后登录IP"`
-	LoginTime   time.Time     `gorm:"not null; comment:最后登录时间"`
-	RealName    string        `gorm:"not null; size:191; comment:真实姓名"`
-	OpenID      string        `gorm:"not null; size:191; index; comment:微信openid"`
+	Name        string    `gorm:"not null; size:50; unique; comment:用户名"`
+	Password    string    `gorm:"not null; size:191; comment:密码"`
+	DisplayName string    `gorm:"not null; size:191; comment:昵称"`
+	RoleName    string    `gorm:"not null; size:50; index; comment:所属角色"`
+	DivisionID  *uint     `gorm:"comment:所属分组id"`
+	Division    *Division `gorm:"foreignkey:DivisionID"`
+	Phone       string    `gorm:"not null; size:191; index; comment:手机号"`
+	Email       string    `gorm:"not null; size:191; index; comment:邮箱"`
+	LoginIP     string    `gorm:"not null; size:40; default:0.0.0.0; comment:最后登录IP"`
+	LoginTime   time.Time `gorm:"not null; comment:最后登录时间"`
+	RealName    string    `gorm:"not null; size:191; comment:真实姓名"`
+	OpenID      string    `gorm:"not null; size:191; index; comment:微信openid"`
 }
 
 type LoginRequest struct {

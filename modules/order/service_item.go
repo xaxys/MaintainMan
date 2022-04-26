@@ -94,7 +94,8 @@ func consumeItemService(aul *ConsumeItemRequest, auth *model.AuthInfo) *model.Ap
 	if order.Status != StatusAssigned {
 		return model.ErrorNoPermissions(fmt.Errorf("订单未处于已接单状态"))
 	}
-	if uint(util.LastElem(order.StatusList).RepairerID.Int64) != auth.User {
+	repairer := util.LastElem(order.StatusList).RepairerID
+	if repairer != nil && *repairer != auth.User {
 		return model.ErrorNoPermissions(fmt.Errorf("您不是订单的当前维修员"))
 	}
 	itemlog := dbItemLogConsume(aul)
@@ -147,7 +148,7 @@ func itemLogToJson(itemLog *ItemLog) *ItemLogJson {
 		return &ItemLogJson{
 			ID:          itemLog.ID,
 			ItemID:      itemLog.ItemID,
-			OrderID:     itemLog.OrderID,
+			OrderID:     util.NilOrBaseValue(itemLog.OrderID, func(t *uint) uint { return *t }, 0),
 			ChangeNum:   itemLog.ChangeNum,
 			ChangePrice: itemLog.ChangePrice,
 			CreatedAt:   itemLog.CreatedAt.Unix(),

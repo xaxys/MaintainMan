@@ -12,6 +12,7 @@ func dbItemLogAdd(aul *AddItemRequest) *ItemLog {
 func dbItemLogConsume(aul *ConsumeItemRequest) *ItemLog {
 	itemlog := &ItemLog{
 		ItemID:      aul.ItemID,
+		OrderID:     &aul.OrderID,
 		ChangeNum:   -int(aul.Num),
 		ChangePrice: -aul.Price,
 	}
