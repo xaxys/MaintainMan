@@ -29,9 +29,6 @@ func initAccessToken() {
 	}
 	expAppid, appidOK := userModule.Export("appid")
 	expSecret, secretOK := userModule.Export("appsecret")
-	if !appidOK && !secretOK {
-		mctx.Logger.Infof("appid and appsecret not found, access token service will be unavailable")
-	}
 	if !appidOK {
 		mctx.Logger.Errorf("appid not found")
 		return
@@ -39,6 +36,9 @@ func initAccessToken() {
 	if !secretOK {
 		mctx.Logger.Errorf("appsecret not found")
 		return
+	}
+	if expAppid == "" || expSecret == "" {
+		mctx.Logger.Infof("appid or appsecret is empty, access token service will be unavailable")
 	}
 	appid, _ := expAppid.(string)
 	secret, _ := expSecret.(string)

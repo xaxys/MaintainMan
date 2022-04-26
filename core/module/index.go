@@ -25,6 +25,7 @@ type Module struct {
 	ModuleName    string
 	ModuleVersion string
 	ModuleConfig  *viper.Viper
+	ModuleDepends []string       // depend modules
 	ModuleEnv     map[string]any // unexported functions or variables, only accessible to system
 	ModuleExport  map[string]any // exported functions or variables, accessible to all modules
 	ModuleRoute   string         // route prefix

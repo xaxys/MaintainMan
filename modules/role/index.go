@@ -10,6 +10,7 @@ var Module = module.Module{
 	ModuleName:    "role",
 	ModuleVersion: "1.2.0",
 	ModuleConfig:  roleConfig,
+	ModuleDepends: []string{},
 	ModuleEnv:     map[string]any{},
 	ModuleExport:  map[string]any{},
 	ModulePerm: map[string]string{

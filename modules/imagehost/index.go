@@ -11,6 +11,9 @@ var Module = module.Module{
 	ModuleName:    "image",
 	ModuleVersion: "1.1.0",
 	ModuleConfig:  imageConfig,
+	ModuleDepends: []string{
+		"user",
+	},
 	ModuleEnv: map[string]any{
 		"cache.evict": onEvict,
 	},

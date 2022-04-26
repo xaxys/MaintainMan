@@ -12,6 +12,7 @@ import (
 var Module = module.Module{
 	ModuleName:    "sysinfo",
 	ModuleVersion: "1.0.0",
+	ModuleDepends: []string{},
 	ModuleEnv:     map[string]any{},
 	ModuleExport:  map[string]any{},
 	ModulePerm: map[string]string{

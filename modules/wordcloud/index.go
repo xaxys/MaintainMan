@@ -9,6 +9,9 @@ import (
 var Module = module.Module{
 	ModuleName:    "word",
 	ModuleVersion: "1.0.0",
+	ModuleDepends: []string{
+		"order",
+	},
 	ModuleEnv: map[string]any{
 		"orm.model": []any{
 			&OrderWord{},

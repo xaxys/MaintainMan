@@ -170,6 +170,17 @@ throttling:
   # the expiration duration.
   expire: 10m
 
+# enabled modules
+module:
+  role: true
+  user: true
+  image: true
+  announce: true
+  order: true
+  wxnotify: true
+  word: true
+  sysinfo: true
+
 # channel size of event bus (message bus).
 bus_buffer: 1000
 

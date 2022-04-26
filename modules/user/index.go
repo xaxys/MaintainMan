@@ -13,6 +13,7 @@ func init() {
 		ModuleName:    "user",
 		ModuleVersion: "1.1.0",
 		ModuleConfig:  userConfig,
+		ModuleDepends: []string{},
 		ModuleEnv: map[string]any{
 			"orm.model": []any{
 				&User{},

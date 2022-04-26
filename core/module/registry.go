@@ -1,9 +1,12 @@
 package module
 
 import (
+	"fmt"
+
 	"github.com/xaxys/maintainman/core/cache"
 	"github.com/xaxys/maintainman/core/config"
 	"github.com/xaxys/maintainman/core/database"
+	"github.com/xaxys/maintainman/core/logger"
 	"github.com/xaxys/maintainman/core/rbac"
 	"github.com/xaxys/maintainman/core/router"
 	"github.com/xaxys/maintainman/core/storage"
@@ -26,6 +29,11 @@ func NewRegistry(server *Server) *Registry {
 func (r *Registry) Register(module ...*Module) {
 	model := []any{}
 	for _, m := range module {
+		configKey := fmt.Sprintf("module.%s", m.ModuleName)
+		if config.AppConfig.Get(configKey) != nil && !config.AppConfig.GetBool(configKey) {
+			logger.Logger.Warnf("module disabled: %s", m.ModuleName)
+			continue
+		}
 		r.modules[m.ModuleName] = m
 		model = append(model, m.getModel()...)
 		rbac.RegisterPerm(m.ModuleName, m.ModulePerm)
@@ -41,6 +49,11 @@ func (r *Registry) Register(module ...*Module) {
 	}
 	database.SyncModel(model...)
 	for _, m := range module {
+		for _, dep := range m.ModuleDepends {
+			if r.modules[dep] == nil {
+				logger.Logger.Fatalf("module %s dependencies missing: %s", m.ModuleName, dep)
+			}
+		}
 		mctx := &ModuleContext{
 			Server:  r.server,
 			Route:   router.APIRoute.Party(m.ModuleRoute),
@@ -48,6 +61,7 @@ func (r *Registry) Register(module ...*Module) {
 			Cache:   cache.InitCache(m.ModuleName, m.ModuleConfig, m.getOnEvict()),
 		}
 		m.EntryPoint(mctx)
+		logger.Logger.Infof("module loaded: %s", m.ModuleName)
 	}
 }
 

@@ -11,6 +11,7 @@ var Module = module.Module{
 	ModuleName:    "announce",
 	ModuleVersion: "1.0.0",
 	ModuleConfig:  announceConfig,
+	ModuleDepends: []string{},
 	ModuleEnv: map[string]any{
 		"orm.model": []any{
 			&Announce{},

@@ -12,10 +12,14 @@ import (
 var Module = module.Module{
 	ModuleName:    "wxnotify",
 	ModuleVersion: "1.0.0",
-	ModuleEnv:     map[string]any{},
-	ModuleExport:  map[string]any{},
-	ModulePerm:    map[string]string{},
-	EntryPoint:    entry,
+	ModuleDepends: []string{
+		"user",
+		"order",
+	},
+	ModuleEnv:    map[string]any{},
+	ModuleExport: map[string]any{},
+	ModulePerm:   map[string]string{},
+	EntryPoint:   entry,
 }
 
 var mctx *module.ModuleContext
@@ -45,10 +49,6 @@ func listener() {
 	}
 
 	orderModule := mctx.Registry.Get("order")
-	if orderModule == nil {
-		mctx.Logger.Errorf("order module not found")
-		return
-	}
 
 	statusTmplID := getExportString(orderModule, "wechat.status.tmpl")
 	if statusTmplID == "" {

@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const AppConfigVersion = "1.3.1"
+const AppConfigVersion = "1.3.2"
 
 var (
 	AppConfig *viper.Viper
@@ -55,6 +55,15 @@ func init() {
 	AppConfig.SetDefault("throttling.rate", 10)
 	AppConfig.SetDefault("throttling.purge", "1m")
 	AppConfig.SetDefault("throttling.expire", "10m")
+
+	AppConfig.SetDefault("module.role", true)
+	AppConfig.SetDefault("module.user", true)
+	AppConfig.SetDefault("module.image", true)
+	AppConfig.SetDefault("module.announce", true)
+	AppConfig.SetDefault("module.order", true)
+	AppConfig.SetDefault("module.wxnotify", true)
+	AppConfig.SetDefault("module.word", true)
+	AppConfig.SetDefault("module.sysinfo", true)
 
 	AppConfig.SetDefault("bus_buffer", 1000)
 

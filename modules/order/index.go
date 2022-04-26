@@ -15,6 +15,9 @@ func init() {
 		ModuleName:    "order",
 		ModuleVersion: "1.1.0",
 		ModuleConfig:  orderConfig,
+		ModuleDepends: []string{
+			"user",
+		},
 		ModuleEnv: map[string]any{
 			"orm.model": []any{
 				&Tag{},
