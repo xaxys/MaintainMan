@@ -159,6 +159,17 @@ cache:
     port: 6379
     password: ""
 
+throttling:
+  enable: false
+  # the max number of requests allowed in a period.
+  burst: 100
+  # the duration between requests.
+  rate: 10
+  # the purge duration.
+  purge: 1m
+  # the expiration duration.
+  expire: 10m
+
 # channel size of event bus (message bus).
 bus_buffer: 1000
 
@@ -341,11 +352,11 @@ upload:
     # the max number of requests allowed in a period.
     burst: 20
     # the duration between requests.
-    rate: 1
+    rate: 5
     # the purge duration.
     purge: 1m
     # the expiration duration.
-    expire: 1m
+    expire: 5m
 
 cache:
   # cache type (local, redis).

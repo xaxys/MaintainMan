@@ -25,6 +25,9 @@ func Register(app *iris.Application) {
 
 	v1 := app.Party("/v1")
 	v1.Use(middleware.HeaderExtractor, middleware.TokenValidator)
+	if middleware.RateLimiter != nil {
+		v1.Use(middleware.RateLimiter)
+	}
 	v1.Done(middleware.ResponseHandler)
 	v1.SetExecutionRules(iris.ExecutionRules{Done: iris.ExecutionOptions{Force: true}})
 	APIRoute = v1

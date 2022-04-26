@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-const AppConfigVersion = "1.3.0"
+const AppConfigVersion = "1.3.1"
 
 var (
 	AppConfig *viper.Viper
@@ -49,6 +49,12 @@ func init() {
 	AppConfig.SetDefault("storage.s3.secret_key", "SECRET_KEY")
 	AppConfig.SetDefault("storage.s3.bucket", "BUCKET")
 	AppConfig.SetDefault("storage.s3.region", "REGION")
+
+	AppConfig.SetDefault("throttling.enable", false)
+	AppConfig.SetDefault("throttling.burst", 100)
+	AppConfig.SetDefault("throttling.rate", 10)
+	AppConfig.SetDefault("throttling.purge", "1m")
+	AppConfig.SetDefault("throttling.expire", "10m")
 
 	AppConfig.SetDefault("bus_buffer", 1000)
 
