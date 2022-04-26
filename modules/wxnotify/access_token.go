@@ -27,13 +27,16 @@ func initAccessToken() {
 		mctx.Logger.Errorf("user module not found")
 		return
 	}
-	expAppid, ok := userModule.Export("appid")
-	if !ok {
+	expAppid, appidOK := userModule.Export("appid")
+	expSecret, secretOK := userModule.Export("appsecret")
+	if !appidOK && !secretOK {
+		mctx.Logger.Infof("appid and appsecret not found, access token service will be unavailable")
+	}
+	if !appidOK {
 		mctx.Logger.Errorf("appid not found")
 		return
 	}
-	expSecret, ok := userModule.Export("appsecret")
-	if !ok {
+	if !secretOK {
 		mctx.Logger.Errorf("appsecret not found")
 		return
 	}

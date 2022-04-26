@@ -40,7 +40,7 @@ func listener() {
 		}
 	}()
 	if getAccessToken() == "" {
-		mctx.Logger.Errorf("access token is empty, wechat notification service will be unavailable")
+		mctx.Logger.Infof("access token is empty, wechat notification service will be unavailable")
 		return
 	}
 
