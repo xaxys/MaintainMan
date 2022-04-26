@@ -42,7 +42,7 @@ func dbGetOrderByID(id uint) (*Order, error) {
 
 func txGetOrderByID(tx *gorm.DB, id uint) (*Order, error) {
 	order := &Order{}
-	if err := tx.Preload("Tags").Preload("Comments").First(order, id).Error; err != nil {
+	if err := tx.Preload("Tags").Preload("Comments").Preload("StatusList", "current = true").First(order, id).Error; err != nil {
 		mctx.Logger.Warnf("TxGetOrderByIDErr: %v\n", err)
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func dbGetOrderWithLastStatus(id uint) (*Order, error) {
 
 func txGetOrderWithLastStatus(tx *gorm.DB, id uint) (*Order, error) {
 	order := &Order{}
-	if err := tx.Preload("StatusList", "current = TRUE").Model(order).Find(order, id).Error; err != nil {
+	if err := tx.Preload("StatusList", "current = true").Model(order).Find(order, id).Error; err != nil {
 		mctx.Logger.Warnf("GetOrderWithLastStatusErr: %v\n", err)
 		return nil, err
 	}

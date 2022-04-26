@@ -51,6 +51,21 @@ func txGetOrderByRepairer(tx *gorm.DB, id uint, json *RepairerOrderRequest) (ord
 	return
 }
 
+func dbGetStatusByOrder(id uint) (statuses []*Status, err error) {
+	return txGetStatusByOrder(mctx.Database, id)
+}
+
+func txGetStatusByOrder(tx *gorm.DB, id uint) (statuses []*Status, err error) {
+	status := &Status{
+		OrderID: id,
+	}
+	if err = tx.Preload("Repairer").Where(status).Find(&statuses).Order("sequence_num").Error; err != nil {
+		mctx.Logger.Warnf("GetStatusByOrderErr: %v\n", err)
+		return
+	}
+	return
+}
+
 func txGetAppraiseTimeoutOrder(tx *gorm.DB) (ids []uint, err error) {
 	status := &Status{
 		Status:  StatusCompleted,

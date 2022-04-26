@@ -6,19 +6,45 @@ import (
 
 	"github.com/xaxys/maintainman/core/model"
 	"github.com/xaxys/maintainman/core/util"
+	"github.com/xaxys/maintainman/modules/user"
 
 	"gorm.io/gorm"
 )
 
 func getOrderByIDService(id uint, auth *model.AuthInfo) *model.ApiJson {
-	order, err := dbGetOrderByID(id)
+	order, err := dbGetOrderWithLastStatus(id)
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return model.ErrorNotFound(err)
-		}
 		return model.ErrorQueryDatabase(err)
 	}
-	return model.Success(orderToJson(order), "获取成功")
+	if errors.Is(err, gorm.ErrRecordNotFound) || order.ID == 0 {
+		return model.ErrorNotFound(err)
+	}
+	if order.UserID != auth.User {
+		repairer := util.LastElem(order.StatusList).RepairerID
+		if repairer != nil && *repairer != auth.User {
+			return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能查看评论"))
+		}
+	}
+	return forceGetOrderByIDService(id, auth)
+}
+
+func forceGetOrderByIDService(id uint, auth *model.AuthInfo) *model.ApiJson {
+	order, err := dbGetOrderByID(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) || order.ID == 0 {
+		return model.ErrorNotFound(err)
+	}
+	json := orderToJson(order)
+	if rid := util.LastElem(order.StatusList).RepairerID; rid != nil {
+		repairer, err := user.GetUserByID(*rid)
+		if err != nil {
+			mctx.Logger.Warnf("获取订单%d的指派人%d失败: %+v", id, *rid, err)
+		}
+		json.Repairer = user.UserToJson(repairer)
+	}
+	return model.Success(json, "获取成功")
 }
 
 func getOrderByUserService(aul *UserOrderRequest, auth *model.AuthInfo) *model.ApiJson {
@@ -46,6 +72,35 @@ func getOrderByRepairerService(id uint, aul *RepairerOrderRequest, auth *model.A
 	}
 	os := util.TransSlice(orders, orderToJson)
 	return model.SuccessPaged(os, count, "获取成功")
+}
+
+func getOrderStatusService(id uint, auth *model.AuthInfo) *model.ApiJson {
+	order, err := dbGetOrderWithLastStatus(id)
+	if err != nil {
+		return model.ErrorQueryDatabase(err)
+	}
+	if errors.Is(err, gorm.ErrRecordNotFound) || order.ID == 0 {
+		return model.ErrorNotFound(err)
+	}
+	if order.UserID != auth.User {
+		repairer := util.LastElem(order.StatusList).RepairerID
+		if repairer != nil && *repairer != auth.User {
+			return model.ErrorNoPermissions(fmt.Errorf("您不是订单的创建者或指派人，不能查看评论"))
+		}
+	}
+	return forceGetOrderStatusService(id, auth)
+}
+
+func forceGetOrderStatusService(id uint, auth *model.AuthInfo) *model.ApiJson {
+	statuses, err := dbGetStatusByOrder(id)
+	if err != nil || len(statuses) == 0 {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return model.ErrorNotFound(err)
+		}
+		return model.ErrorQueryDatabase(err)
+	}
+	ss := util.TransSlice(statuses, statusToJson)
+	return model.Success(ss, "获取成功")
 }
 
 func getAllOrdersService(aul *AllOrderRequest, auth *model.AuthInfo) *model.ApiJson {
@@ -335,5 +390,18 @@ func orderToJson(order *Order) *OrderJson {
 		Tags:         util.TransSlice(order.Tags, tagToJson),
 		AllowComment: order.AllowComment == CommentAllow,
 		Comments:     util.TransSlice(order.Comments, commentToJson),
+	}
+}
+
+func statusToJson(status *Status) *StatusJson {
+	return &StatusJson{
+		Status:      status.Status,
+		SequenceNum: status.SequenceNum,
+		RepairerID:  util.NilOrBaseValue(status.RepairerID, func(t *uint) uint { return *t }, 0),
+		Repairer:    user.UserToJson(status.Repairer),
+		CreatedAt:   status.CreatedAt.Unix(),
+		CreatedBy:   status.CreatedBy,
+		UpdatedAt:   status.UpdatedAt.Unix(),
+		UpdatedBy:   status.UpdatedBy,
 	}
 }

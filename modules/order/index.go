@@ -105,7 +105,10 @@ func entry(ctx *module.ModuleContext) {
 		order.Post("/", rbac.PermInterceptor("order.create"), createOrder)
 
 		order.PartyFunc("/{id:uint}", func(orderID iris.Party) {
-			orderID.Get("/", rbac.PermInterceptor("order.viewall"), getOrderByID)
+			orderID.Get("/", rbac.PermInterceptor("order.view"), getOrderByID)
+			orderID.Get("/force", rbac.PermInterceptor("order.viewall"), forceGetOrderByID)
+			orderID.Get("/status", rbac.PermInterceptor("order.view"), getOrderStatus)
+			orderID.Get("/status/force", rbac.PermInterceptor("order.viewall"), forceGetOrderStatus)
 			orderID.Put("/", rbac.PermInterceptor("order.update"), updateOrder)
 			orderID.Put("/force", rbac.PermInterceptor("order.updateall"), forceUpdateOrder)
 			orderID.Post("/consume", rbac.PermInterceptor("item.consume"), consumeItem)

@@ -140,8 +140,8 @@ func getAllOrders(ctx iris.Context) {
 // @Description  通过ID获取某个订单
 // @Tags         order
 // @Produce      json
-// @Param        id   path      uint                           true  "订单ID"
-// @Success      200  {object}  model.ApiJson{data=OrderJson}  "返回结果 带Tag 带Comment"
+// @Param        id   path      uint                              true  "订单ID"
+// @Success      200  {object}  model.ApiJson{data=OrderJson}  "返回结果 带Tag 带Comment 带Repairer"
 // @Failure      400  {object}  model.ApiJson{data=[]string}
 // @Failure      401  {object}  model.ApiJson{data=[]string}
 // @Failure      403  {object}  model.ApiJson{data=[]string}
@@ -153,6 +153,69 @@ func getOrderByID(ctx iris.Context) {
 	id := ctx.Params().GetUintDefault("id", 0)
 	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
 	response := getOrderByIDService(id, auth)
+	ctx.Values().Set("response", response)
+}
+
+// forceGetOrderByID GetOrder godoc
+// @Summary      获取某个订单 (管理员)
+// @Description  通过ID获取某个订单 (管理员)
+// @Tags         order
+// @Produce      json
+// @Param        id   path      uint                              true  "订单ID"
+// @Success      200  {object}  model.ApiJson{data=OrderJson}  "返回结果 带Tag 带Comment 带Repairer"
+// @Failure      400  {object}  model.ApiJson{data=[]string}
+// @Failure      401  {object}  model.ApiJson{data=[]string}
+// @Failure      403  {object}  model.ApiJson{data=[]string}
+// @Failure      404  {object}  model.ApiJson{data=[]string}
+// @Failure      422  {object}  model.ApiJson{data=[]string}
+// @Failure      500  {object}  model.ApiJson{data=[]string}
+// @Router       /v1/order/{id}/force [get]
+func forceGetOrderByID(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := forceGetOrderByIDService(id, auth)
+	ctx.Values().Set("response", response)
+}
+
+// getOrderStatus godoc
+// @Summary      获取订单所有历史状态
+// @Description  获取订单所有历史状态
+// @Tags         order
+// @Produce      json
+// @Param        id   path      uint                           true  "订单ID"
+// @Success      200  {object}  model.ApiJson{data=[]StatusJson}  "返回结果"
+// @Failure      400  {object}  model.ApiJson{data=[]string}
+// @Failure      401  {object}  model.ApiJson{data=[]string}
+// @Failure      403  {object}  model.ApiJson{data=[]string}
+// @Failure      404  {object}  model.ApiJson{data=[]string}
+// @Failure      422  {object}  model.ApiJson{data=[]string}
+// @Failure      500  {object}  model.ApiJson{data=[]string}
+// @Router       /v1/order/{id}/status [get]
+func getOrderStatus(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := getOrderStatusService(id, auth)
+	ctx.Values().Set("response", response)
+}
+
+// forceGetOrderStatus godoc
+// @Summary      获取订单所有历史状态 (管理员)
+// @Description  通过ID获取订单所有历史状态 (管理员)
+// @Tags         order
+// @Produce      json
+// @Param        id   path      uint                           true  "订单ID"
+// @Success      200  {object}  model.ApiJson{data=[]StatusJson}  "返回结果"
+// @Failure      400  {object}  model.ApiJson{data=[]string}
+// @Failure      401  {object}  model.ApiJson{data=[]string}
+// @Failure      403  {object}  model.ApiJson{data=[]string}
+// @Failure      404  {object}  model.ApiJson{data=[]string}
+// @Failure      422  {object}  model.ApiJson{data=[]string}
+// @Failure      500  {object}  model.ApiJson{data=[]string}
+// @Router       /v1/order/{id}/status/force [get]
+func forceGetOrderStatus(ctx iris.Context) {
+	id := ctx.Params().GetUintDefault("id", 0)
+	auth := util.NilOrPtrCast[model.AuthInfo](ctx.Values().Get("auth"))
+	response := forceGetOrderStatusService(id, auth)
 	ctx.Values().Set("response", response)
 }
 

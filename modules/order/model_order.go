@@ -76,6 +76,7 @@ type OrderJson struct {
 	ContactName  string         `json:"contact_name"`
 	ContactPhone string         `json:"contact_phone"`
 	Status       uint           `json:"status"`
+	Repairer     *user.UserJson `json:"repairer,omitempty"`
 	AllowComment bool           `json:"allow_comment"`
 	CreatedAt    int64          `json:"created_at"` // unix timestamp in seconds (UTC)
 	UpdatedAt    int64          `json:"updated_at"` // unix timestamp in seconds (UTC)

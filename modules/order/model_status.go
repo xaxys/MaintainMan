@@ -56,12 +56,12 @@ type Status struct {
 }
 
 type StatusJson struct {
-	Status      uint       `json:"status"` // 状态 0:非法 1:待处理 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价
-	RepairerID  uint       `json:"repairer_id"`
-	Repairer    *user.User `json:"repairer"`
-	SequenceNum uint       `json:"sequence_num"` // 状态序号
-	CreatedAt   string     `json:"created_at"`   // unix timestamp in seconds (UTC)
-	UpdatedAt   string     `json:"updated_at"`   // unix timestamp in seconds (UTC)
-	CreatedBy   string     `json:"created_by"`   // unix timestamp in seconds (UTC)
-	UpdatedBy   string     `json:"updated_by"`   // unix timestamp in seconds (UTC)
+	SequenceNum uint           `json:"sequence_num"` // 状态序号
+	Status      uint           `json:"status"`       // 状态 0:非法 1:待处理 2:已接单 3:已完成 4:上报中 5:挂单 6:已取消 7:已拒绝 8:已评价
+	RepairerID  uint           `json:"repairer_id"`
+	Repairer    *user.UserJson `json:"repairer"`
+	CreatedAt   int64          `json:"created_at"` // unix timestamp in seconds (UTC)
+	UpdatedAt   int64          `json:"updated_at"` // unix timestamp in seconds (UTC)
+	CreatedBy   uint           `json:"created_by"`
+	UpdatedBy   uint           `json:"updated_by"`
 }
