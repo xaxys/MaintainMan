@@ -29,6 +29,7 @@ var mctx *module.ModuleContext
 
 func entry(ctx *module.ModuleContext) {
 	mctx = ctx
+	seg.LoadDictEmbed()
 	mctx.Route.PartyFunc("/word", func(word iris.Party) {
 		word.Get("/", rbac.PermInterceptor("word.view"), getAllWords)
 		word.Get("/{id:uint}", rbac.PermInterceptor("word.view"), getWordsByOrder)

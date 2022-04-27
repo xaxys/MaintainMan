@@ -49,7 +49,6 @@ require (
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
 	github.com/spf13/cast v1.4.1
 	github.com/spf13/viper v1.10.1
-	github.com/yanyiwu/gojieba v1.1.3-0.20220131084353-a30c1dcd29bb
 	golang.org/x/image v0.0.0-20220321031419-a8550c1d254a
 )
 
@@ -118,6 +117,7 @@ require (
 	github.com/tdewolff/parse/v2 v2.5.27 // indirect
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/vaughan0/go-ini v0.0.0-20130923145212-a98ad7ee00ec // indirect
+	github.com/vcaesar/cedar v0.20.0 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.3.5 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20180127040702-4e3ac2762d5f // indirect
@@ -150,6 +150,7 @@ require (
 require (
 	github.com/aymerick/raymond v2.0.3-0.20180322193309-b565731e1464+incompatible // indirect
 	github.com/g4s8/hexcolor v1.1.0
+	github.com/go-ego/gse v0.70.0
 	github.com/go-playground/validator v9.31.0+incompatible
 	github.com/iris-contrib/middleware/cors v0.0.0-20220218204641-8e282f24acb7
 	github.com/iris-contrib/middleware/jwt v0.0.0-20220301201128-27fa0f6a7d7e

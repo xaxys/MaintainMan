@@ -1,9 +1,11 @@
 package wordcloud
 
 import (
-	"strings"
+	"github.com/go-ego/gse"
+)
 
-	"github.com/yanyiwu/gojieba"
+var (
+	seg gse.Segmenter
 )
 
 type WordCollector struct {
@@ -11,43 +13,17 @@ type WordCollector struct {
 }
 
 func NewWordCollectorWithStr(str string) *WordCollector {
-	wordAnalyzer := gojieba.NewJieba()
-	defer wordAnalyzer.Free()
-	words := wordAnalyzer.Tag(str)
-	roots, wordClass := getWordClass(words)
-	wordCounter := getWordCounter(roots)
-	return NewWordCollectorWithSet(generateWordSet(roots, wordClass, wordCounter))
-
+	words := seg.Pos(str, true)
+	words = seg.TrimPos(words)
+	words = seg.TrimWithPos(words, "x", "m", "eng")
+	wordSet := newWordSet(words)
+	return NewWordCollectorWithSet(wordSet)
 }
 
 func NewWordCollectorWithSet(wordSet []WordJson) *WordCollector {
 	return &WordCollector{
 		wordSet: wordSet,
 	}
-}
-
-func getWordClass(words []string) ([]string, []string) {
-	roots := make([]string, 0)
-	wordclass := make([]string, 0)
-	for _, word := range words {
-		spilt := strings.Split(word, "/")
-		roots = append(roots, spilt[0])
-		wordclass = append(wordclass, spilt[1])
-	}
-	return roots, wordclass
-}
-
-func getWordCounter(words []string) map[string]uint {
-	counter := make(map[string]uint, 0)
-	for _, word := range words {
-		_, ok := counter[word]
-		if !ok {
-			counter[word] = 1
-		} else {
-			counter[word]++
-		}
-	}
-	return counter
 }
 
 func accumulateWords(words []*WordJson) []*WordJson {
@@ -75,24 +51,19 @@ func accumulateWords(words []*WordJson) []*WordJson {
 	return ans
 }
 
-func generateWordSet(roots []string, wordclass []string, wordCounter map[string]uint) []WordJson {
-	length := len(roots)
-	ans := make([]WordJson, 0)
-	uniqueMap := make(map[string]bool)
-	for i := 0; i < length; i++ {
-		if _, ok := wordCounter[roots[i]]; ok {
-			if ok := uniqueMap[roots[i]]; !ok {
-				uniqueMap[roots[i]] = true
-				ans = append(ans, WordJson{
-					Content:   roots[i],
-					WordClass: wordclass[i],
-					Count:     wordCounter[roots[i]],
-				})
-			}
-
-		}
+func newWordSet(words []gse.SegPos) (wordSet []WordJson) {
+	counter := map[gse.SegPos]uint{}
+	for _, word := range words {
+		counter[word]++
 	}
-	return ans
+	for word, count := range counter {
+		wordSet = append(wordSet, WordJson{
+			Content:   word.Text,
+			WordClass: word.Pos,
+			Count:     count,
+		})
+	}
+	return
 }
 
 func (wc *WordCollector) Filter(filter Filter) *WordCollector {
