@@ -25,9 +25,9 @@ func listener() {
 				mctx.Logger.Infof("Upload words success: [order: %d, content: %s]", odr.ID, odr.Title)
 			}
 			if res := uploadWordsService(odr.ID, odr.Content); !res.Status {
-				mctx.Logger.Warnf("Upload words failed: [order: %d, content: %s] errors: %v", odr.ID, odr.Title, res.Data)
+				mctx.Logger.Warnf("Upload words failed: [order: %d, content: %s] errors: %v", odr.ID, odr.Content, res.Data)
 			} else {
-				mctx.Logger.Infof("Upload words success: [order: %d, content: %s]", odr.ID, odr.Title)
+				mctx.Logger.Infof("Upload words success: [order: %d, content: %s]", odr.ID, odr.Content)
 			}
 		// order title changed
 		case ch := <-mctx.EventBus.On("order:update:title"):
@@ -51,9 +51,9 @@ func listener() {
 				continue
 			}
 			if res := uploadWordsService(odr.ID, odr.Content); !res.Status {
-				mctx.Logger.Warnf("Upload words failed: [order: %d, content: %s] errors: %v", odr.ID, odr.Title, res.Data)
+				mctx.Logger.Warnf("Upload words failed: [order: %d, content: %s] errors: %v", odr.ID, odr.Content, res.Data)
 			} else {
-				mctx.Logger.Infof("Upload words success: [order: %d, content: %s]", odr.ID, odr.Title)
+				mctx.Logger.Infof("Upload words success: [order: %d, content: %s]", odr.ID, odr.Content)
 			}
 		// order comment
 		case ch := <-mctx.EventBus.On("order:update:comment"):
