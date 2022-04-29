@@ -28,7 +28,6 @@ func ToUint[T ~int | ~int8 | ~int16 | ~int32 | ~int64](n T) uint {
 		return 0
 	}
 	return uint(n)
-
 }
 
 func NotEmpty(s, def string) string {
@@ -50,7 +49,6 @@ func NilOrValue[T, U any](v *T, obj *U) *U {
 		return nil
 	}
 	return obj
-
 }
 
 func NilOrLazyValue[T, U any](v *T, fn func(*T) *U) *U {
@@ -58,7 +56,6 @@ func NilOrLazyValue[T, U any](v *T, fn func(*T) *U) *U {
 		return nil
 	}
 	return fn(v)
-
 }
 
 func NilOrBaseValue[T, U any](v *T, fn func(*T) U, def U) U {
@@ -66,7 +63,6 @@ func NilOrBaseValue[T, U any](v *T, fn func(*T) U, def U) U {
 		return def
 	}
 	return fn(v)
-
 }
 
 func NilOrPtrCast[U any](v any) *U {
