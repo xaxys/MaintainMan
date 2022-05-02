@@ -47,7 +47,7 @@ func printBanner() {
 }
 
 // @title         MaintainMan API
-// @version       1.0.0-rc4
+// @version       1.0.0
 // @license.name  MIT With PATENTS
 func main() {
 	printBanner()
