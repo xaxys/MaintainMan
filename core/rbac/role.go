@@ -137,8 +137,8 @@ func hasPermission(role *Role, permission string) bool {
 		return has
 	}
 	for _, v := range role.InheRole {
-		if has, ok := v.PermSet.Find(permission); ok {
-			return has
+		if hasPermission(v, permission) {
+			return true
 		}
 	}
 	return false
