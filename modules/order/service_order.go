@@ -62,7 +62,7 @@ func getOrderByRepairerService(id uint, aul *RepairerOrderRequest, auth *model.A
 	if err := util.Validator.Struct(aul); err != nil {
 		return model.ErrorValidation(err)
 	}
-	aul.OrderBy = util.NotEmpty(aul.OrderBy, "id desc")
+	aul.OrderBy = util.NotEmpty(aul.OrderBy, "order_id desc")
 	orders, count, err := dbGetOrderByRepairer(id, aul)
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
