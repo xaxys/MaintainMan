@@ -27,8 +27,8 @@ func txGetOrderByRepairer(tx *gorm.DB, id uint, json *RepairerOrderRequest) (ord
 	}
 	statuses := []*Status{}
 	tx = dao.TxPageFilter(tx, &json.PageParam).Model(status).Where(status)
-	if json.Status != 0 {
-		tx = tx.Joins("Order", Order{Status: json.Status})
+	if json.Status != StatusIllegal {
+		tx = tx.Joins("INNER JOIN orders ON orders.id = statuses.order_id AND orders.status = (?)", json.Status)
 	}
 	if len(json.Tags) > 0 {
 		if json.Disjunctive {
