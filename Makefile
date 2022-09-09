@@ -30,7 +30,7 @@ endif
 all: build
 
 build:
-	@echo "Building MaintainMan ..."
+	@echo Building $(PACKAGE_NAME) ...
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) build \
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
@@ -39,21 +39,21 @@ build:
 test: test-short
 
 test-full: clean
-	@echo "Testing MaintainMan ..."
+	@echo Testing $(PACKAGE_NAME) ...
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) test \
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
 		-timeout=30m -coverprofile=coverage.out ./...
 
 test-short: clean
-	@echo "Testing MaintainMan ..."
+	@echo Testing $(PACKAGE_NAME) ...
 	@$(GO) env -w CGO_ENABLED="1"
 	@$(GO) test \
 		-ldflags="-X 'main.BuildTags=$(BUILD_TAGS)' -X 'main.BuildTime=$(BUILD_TIME)' -X 'main.GitCommit=$(GIT_COMMIT)' -X 'main.GoVersion=$(GO_VERSION)'" \
 		-timeout=30m -short -coverprofile=coverage.out ./...
 
 clean:
-	@echo "Cleaning MaintainMan ..."
+	@echo Cleaning $(PACKAGE_NAME) ...
 	@$(RM_CMD_1) $(TARGET)    $(RM_CMD_2)
 	@$(RM_CMD_1) coverage.out $(RM_CMD_2)
 	@$(RM_CMD_1) "*.db"       $(RM_CMD_2)
