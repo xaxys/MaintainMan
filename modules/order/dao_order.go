@@ -118,6 +118,7 @@ func txCreateOrder(tx *gorm.DB, aul *CreateOrderRequest, operator uint) (order *
 	order.UserID = operator
 	order.Status = StatusWaiting
 	tags, err := txGetTagsByIDs(tx, aul.Tags)
+	order.Tags = tags
 	if err != nil {
 		return
 	}

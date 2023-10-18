@@ -11,20 +11,30 @@ import (
 	"testing"
 	"time"
 
+	"github.com/iris-contrib/httpexpect/v2"
 	"github.com/xaxys/maintainman/core/model"
 	"github.com/xaxys/maintainman/core/util"
 	"github.com/xaxys/maintainman/modules/announce"
 	"github.com/xaxys/maintainman/modules/order"
 	"github.com/xaxys/maintainman/modules/user"
 
+	"github.com/kataras/iris/v12"
 	"github.com/kataras/iris/v12/httptest"
 	"github.com/spf13/cast"
 )
 
+var app *iris.Application
+var e *httpexpect.Expect
+
+func init() {
+	app = newApp()
+	e = httptest.New(t, app)
+}
+
 // Test User Router
 func TestRegisterAndLoginRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	users := generateRandomUsers("testUser", 10)
 
 	for _, user := range users {
@@ -41,8 +51,8 @@ func TestRegisterAndLoginRouter(t *testing.T) {
 }
 
 func TestUserReNewRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 
 	responseBody := e.GET("/v1/renew").
@@ -54,8 +64,8 @@ func TestUserReNewRouter(t *testing.T) {
 }
 
 func TestUserViewRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 
 	responseBody := e.GET("/v1/user").
@@ -67,8 +77,8 @@ func TestUserViewRouter(t *testing.T) {
 }
 
 func TestUpdateUserRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	users := generateRandomUsers("updateUser", 10)
 	superAdminToken := getSuperAdminToken()
 
@@ -108,8 +118,8 @@ func TestUpdateUserRouter(t *testing.T) {
 }
 
 func TestGetAllUsersRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	responseBody := e.GET("/v1/user/all").WithHeader("Authorization", "Bearer "+superAdminToken).WithQuery("offset", 0).WithQuery("limit", 50).Expect().Status(httptest.StatusOK).Body().Raw()
 	t.Log(responseBody)
@@ -119,9 +129,9 @@ func TestGetAllUsersRouter(t *testing.T) {
 }
 
 func TestCreateUserRouter(t *testing.T) {
-	app := newApp()
+	// app := newApp()
 	superAdminToken := getSuperAdminToken()
-	e := httptest.New(t, app)
+	// e := httptest.New(t, app)
 	users := generateRandomUsers("createUser", 10)
 	testUser := generateRandomUsers("forbidUser", 1)
 	responseBody := e.POST("/v1/user").WithJSON(user.CreateUserRequest{
@@ -143,8 +153,8 @@ func TestCreateUserRouter(t *testing.T) {
 }
 
 func TestForceDeleteUserRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	users := generateRandomUsers("deleteUser", 10)
 	superAdminToken := getSuperAdminToken()
 
@@ -169,8 +179,8 @@ func TestForceDeleteUserRouter(t *testing.T) {
 }
 
 func TestGetUserByIdRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	users := generateRandomUsers("getUser", 10)
 	superAdminToken := getSuperAdminToken()
 
@@ -194,11 +204,11 @@ func TestGetUserByIdRouter(t *testing.T) {
 
 // Test Tag Router
 func TestTagCreateRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 
-	tags := getTestTags()
+	tags := generateRandomTags("TagCreate Test", "TestTagCreate", 10)
 
 	responseBody := e.POST("/v1/tag").WithJSON(tags[0]).
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
@@ -214,15 +224,10 @@ func TestTagCreateRouter(t *testing.T) {
 }
 
 func TestTagSortsRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	for _, tag := range getTestTags() {
-		e.POST("/v1/tag").
-			WithHeader("Authorization", "Bearer "+superAdminToken).
-			WithJSON(tag).
-			Expect().Status(httptest.StatusCreated)
-	}
+	ensureTestTags(e)
 
 	responseBody := e.GET("/v1/tag/sort").
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
@@ -244,11 +249,11 @@ func TestTagSortsRouter(t *testing.T) {
 }
 
 func TestTagGetByIDRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	ids := []uint{}
-	for _, tag := range getTestTags() {
+	for _, tag := range generateRandomTags("TagGetByID Test", "TestTagGetByID", 10) {
 		response := e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
 			WithJSON(tag).
@@ -267,8 +272,8 @@ func TestTagGetByIDRouter(t *testing.T) {
 }
 
 func TestTagDeleteRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	ids := []uint{}
 	for _, tag := range generateRandomTags("randSorts ", "randName ", 30) {
@@ -294,11 +299,11 @@ func TestTagDeleteRouter(t *testing.T) {
 
 // Test Order Router
 func TestCreateOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	orders := generateRandomOrders("Add Order", "admin", 6)
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -311,8 +316,10 @@ func TestCreateOrderRouter(t *testing.T) {
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
 
+	wrongOrder := initWrongOrder("Test", "Test", "Earth", "Admin", 5)
+	t.Log(wrongOrder.Tags)
 	responseBody = e.POST("/v1/order").WithHeader("Authorization", "Bearer "+superAdminToken).
-		WithJSON(initWrongOrder("Test", "Test", "Earth", "Admin", 5)).
+		WithJSON(wrongOrder).
 		Expect().Status(httptest.StatusInternalServerError).Body().Raw()
 	t.Log(responseBody)
 
@@ -326,10 +333,10 @@ func TestCreateOrderRouter(t *testing.T) {
 }
 
 func TestGetUserOrdersRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -347,10 +354,10 @@ func TestGetUserOrdersRouter(t *testing.T) {
 }
 
 func TestGetAllOrdersRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -368,10 +375,10 @@ func TestGetAllOrdersRouter(t *testing.T) {
 }
 
 func TestGetRepairerOrdersRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -403,10 +410,10 @@ func TestGetRepairerOrdersRouter(t *testing.T) {
 }
 
 func TestGetRepairerOrdersByIDRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -440,13 +447,13 @@ func TestGetRepairerOrdersByIDRouter(t *testing.T) {
 }
 
 func TestGetOrderByIDRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	responseBody := e.GET("/v1/order/1").
 		Expect().Status(httptest.StatusForbidden).Body().Raw()
 	t.Log(responseBody)
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -461,12 +468,12 @@ func TestGetOrderByIDRouter(t *testing.T) {
 }
 
 func TestUpdateOrderByUserRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -534,12 +541,12 @@ func TestUpdateOrderByUserRouter(t *testing.T) {
 }
 
 func TestForceUpdateOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -582,12 +589,12 @@ func TestForceUpdateOrderRouter(t *testing.T) {
 }
 
 func TestConsumeItemRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -656,10 +663,10 @@ func TestConsumeItemRouter(t *testing.T) {
 }
 
 func TestReleaseOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -686,10 +693,10 @@ func TestReleaseOrderRouter(t *testing.T) {
 }
 
 func TestAssignOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -746,10 +753,10 @@ func TestAssignOrderRouter(t *testing.T) {
 }
 
 func TestSelfAssignOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -786,10 +793,10 @@ func TestSelfAssignOrderRouter(t *testing.T) {
 }
 
 func TestCompleteOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -831,10 +838,10 @@ func TestCompleteOrderRouter(t *testing.T) {
 }
 
 func TestCancelOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -871,10 +878,10 @@ func TestCancelOrderRouter(t *testing.T) {
 }
 
 func TestRejectOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -906,10 +913,10 @@ func TestRejectOrderRouter(t *testing.T) {
 }
 
 func TestReportOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -946,10 +953,10 @@ func TestReportOrderRouter(t *testing.T) {
 }
 
 func TestHoldOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -991,10 +998,10 @@ func TestHoldOrderRouter(t *testing.T) {
 }
 
 func TestAppraiseOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -1039,8 +1046,8 @@ func TestAppraiseOrderRouter(t *testing.T) {
 
 // Test Role Router
 func TestGetRoleRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	responseBody := e.GET("/v1/role").
 		Expect().Status(httptest.StatusForbidden).
@@ -1057,7 +1064,7 @@ func TestGetRoleRouter(t *testing.T) {
 // TODO: Allow Create Role Router
 //func TestCreateRoleRouter(t *testing.T) {
 //	app := newApp()
-//	e := httptest.New(t, app)
+//	// e := httptest.New(t, app)
 //	randomNumToString := cast.ToString(rand.Intn(10000))
 //	superAdminToken := getSuperAdminToken()
 //	responseBody := e.POST("/v1/role").
@@ -1093,8 +1100,8 @@ func TestGetRoleRouter(t *testing.T) {
 //}
 
 func TestGetAllRoles(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	responseBody := e.GET("/v1/role/all").
 		Expect().Status(httptest.StatusForbidden).
@@ -1110,8 +1117,8 @@ func TestGetAllRoles(t *testing.T) {
 
 // Test Permission Router
 func TestGetAllPermissionRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 
 	responseBody := e.GET("/v1/permission/all").
@@ -1125,8 +1132,8 @@ func TestGetAllPermissionRouter(t *testing.T) {
 }
 
 func TestGetPermissionRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 
 	responseBody := e.GET("/v1/permission/role.viewall").
@@ -1141,8 +1148,8 @@ func TestGetPermissionRouter(t *testing.T) {
 
 // Test Item Router
 func TestCreateItemRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1164,8 +1171,8 @@ func TestCreateItemRouter(t *testing.T) {
 }
 
 func TestGetAllItemRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 
 	responseBody := e.GET("/v1/item/all").
@@ -1179,8 +1186,8 @@ func TestGetAllItemRouter(t *testing.T) {
 }
 
 func TestGetItemByIDRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1209,8 +1216,8 @@ func TestGetItemByIDRouter(t *testing.T) {
 }
 
 func TestAddItemByIDRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1247,8 +1254,8 @@ func TestAddItemByIDRouter(t *testing.T) {
 }
 
 func TestDeleteItemByIDRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1277,8 +1284,8 @@ func TestDeleteItemByIDRouter(t *testing.T) {
 }
 
 func TestGetItemByNameRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1307,8 +1314,8 @@ func TestGetItemByNameRouter(t *testing.T) {
 }
 
 func TestGetItemByNameFuzzyRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1338,12 +1345,12 @@ func TestGetItemByNameFuzzyRouter(t *testing.T) {
 
 // Test Comment Router
 func TestCreateCommentRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -1372,12 +1379,12 @@ func TestCreateCommentRouter(t *testing.T) {
 }
 
 func TestGetCommentsByOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -1410,12 +1417,12 @@ func TestGetCommentsByOrderRouter(t *testing.T) {
 }
 
 func TestForceCreateCommentRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -1444,12 +1451,12 @@ func TestForceCreateCommentRouter(t *testing.T) {
 }
 
 func TestForceGetCommentsByOrderRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -1482,12 +1489,12 @@ func TestForceGetCommentsByOrderRouter(t *testing.T) {
 }
 
 func TestDeleteCommentRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -1521,12 +1528,12 @@ func TestDeleteCommentRouter(t *testing.T) {
 }
 
 func TestForceDeleteCommentRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 	testOrder := initOrder("TestUpdateOrder "+randomNumToString, "Test", "Earth", "Admin", 5)
-	tags := getTestTags()
+	tags := ensureTestTags(e)
 	for _, tag := range tags {
 		e.POST("/v1/tag").
 			WithHeader("Authorization", "Bearer "+superAdminToken).
@@ -1562,8 +1569,8 @@ func TestForceDeleteCommentRouter(t *testing.T) {
 // Test Announce Router
 
 func TestGetLatestAnnouncesRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1588,8 +1595,8 @@ func TestGetLatestAnnouncesRouter(t *testing.T) {
 }
 
 func TestCreateAnnounceRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1614,8 +1621,8 @@ func TestCreateAnnounceRouter(t *testing.T) {
 }
 
 func TestGetAnnounceByIDRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1644,8 +1651,8 @@ func TestGetAnnounceByIDRouter(t *testing.T) {
 }
 
 func TestGetAllAnnouncesRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 	responseBody := e.POST("/v1/announce").
@@ -1692,8 +1699,8 @@ func TestGetAllAnnouncesRouter(t *testing.T) {
 }
 
 func TestUpdateAnnounceRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1731,8 +1738,8 @@ func TestUpdateAnnounceRouter(t *testing.T) {
 }
 
 func TestDeleteAnnounceRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1770,8 +1777,8 @@ func TestDeleteAnnounceRouter(t *testing.T) {
 }
 
 func TestHitAnnounceRouter(t *testing.T) {
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 	randomNumToString := cast.ToString(rand.Intn(10000))
 
@@ -1806,8 +1813,8 @@ func TestMultiHitAnnounceRouter(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping TestMultiHitAnnounceRouter in short mode")
 	}
-	app := newApp()
-	e := httptest.New(t, app)
+	// app := newApp()
+	// e := httptest.New(t, app)
 	superAdminToken := getSuperAdminToken()
 
 	aids := []uint{}
@@ -1890,6 +1897,43 @@ func getSuperAdminAuthInfo() *model.AuthInfo {
 		Role: "super_admin",
 		IP:   getMyIPV6(),
 	}
+}
+
+func ensureTestTags(e *httpexpect.Expect) []order.CreateTagRequest {
+	superAdminToken := getSuperAdminToken()
+	tags := getTestTags()
+
+	ensureN := func(tag order.CreateTagRequest) {
+		e.POST("/v1/tag").
+			WithHeader("Authorization", "Bearer "+superAdminToken).
+			WithJSON(tag).
+			Expect().Status(httptest.StatusCreated)
+	}
+
+	for i, tag := range tags {
+		response := e.GET(fmt.Sprintf("/v1/tag/%d", i+1)).WithHeader("Authorization", "Bearer "+superAdminToken).Expect()
+		code := response.Raw().StatusCode
+		if code == http.StatusNotFound {
+			ensureN(tag)
+		} else {
+			response.Status(httptest.StatusOK)
+			resObj := response.JSON().NotNull().Object().Value("data").Object()
+			if resObj.Value("name").NotNull().Raw().(string) != tag.Name {
+				fmt.Errorf("tag %d name not match\n", i)
+			}
+			if resObj.Value("sort").NotNull().Raw().(string) != tag.Sort {
+				fmt.Errorf("tag %d sort not match\n", i)
+			}
+			if resObj.Value("level").NotNull().Raw().(float64) != float64(tag.Level) {
+				fmt.Errorf("tag %d level not match\n", i)
+			}
+			if resObj.Value("congener").NotNull().Raw().(float64) != float64(tag.Congener) {
+				fmt.Errorf("tag %d congener not match\n", i)
+			}
+		}
+	}
+
+	return tags
 }
 
 func getTestTags() []order.CreateTagRequest {

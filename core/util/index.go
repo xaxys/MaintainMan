@@ -128,6 +128,10 @@ func RemoveByRef[T any](slice []T, elems ...*T) []T {
 	return slice
 }
 
+func CopySlice[T any](slice []T) []T {
+	return append([]T(nil), slice...)
+}
+
 func TransSlice[T, U any](s []T, trans func(T) U) (us []U) {
 	for _, t := range s {
 		us = append(us, trans(t))

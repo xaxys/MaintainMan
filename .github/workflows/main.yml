@@ -34,7 +34,7 @@ jobs:
           go generate ./...
 
       - name: Run Unit tests.
-        run: make test
+        run: make test-ci
 
   build:
     name: Build Snapshot

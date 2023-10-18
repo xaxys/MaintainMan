@@ -502,7 +502,7 @@ func roleToJson(role *Role) *RoleJson {
 		DisplayName: role.DisplayName,
 		Default:     role.Default,
 		Guest:       role.Guest,
-		Inheritance: role.Inheritance,
+		Inheritance: util.CopySlice(role.Inheritance),
 		Permissions: util.TransSlice(role.Permissions, GetPermission),
 	}
 }
